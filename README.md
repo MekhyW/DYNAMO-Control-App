@@ -1,17 +1,13 @@
-# Telegram Mini Apps Next.js Template
+# DYNAMO Control App
 
-This template demonstrates how developers can implement a web application on the
-Telegram Mini Apps platform using the following technologies and libraries:
+Websocket-based control app for the DYNAMO project, which runs as a Telegram mini app and allows users to interact with the suit in real-time.
+
+## Technologies Used
 
 - [Next.js](https://nextjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
-- [TON Connect](https://docs.ton.org/develop/dapps/ton-connect/overview)
 - [@telegram-apps SDK](https://docs.telegram-mini-apps.com/packages/telegram-apps-sdk/2-x)
 - [Telegram UI](https://github.com/Telegram-Mini-Apps/TelegramUI)
-
-> The template was created using [pnpm](https://pnpm.io/). Therefore, it is
-> required to use it for this project as well. Using other package managers, you
-> will receive a corresponding error.
 
 ## Install Dependencies
 
