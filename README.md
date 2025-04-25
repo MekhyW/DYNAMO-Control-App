@@ -6,8 +6,8 @@ Websocket-based control app for the DYNAMO project, which runs as a Telegram min
 
 - [Next.js](https://nextjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](tailwindcss.com)
 - [@telegram-apps SDK](https://docs.telegram-mini-apps.com/packages/telegram-apps-sdk/2-x)
-- [Telegram UI](https://github.com/Telegram-Mini-Apps/TelegramUI)
 
 ## Install Dependencies
 
@@ -15,7 +15,7 @@ If you have just cloned this template, you should install the project
 dependencies using the command:
 
 ```Bash
-pnpm install
+npm install
 ```
 
 ## Scripts
@@ -23,19 +23,17 @@ pnpm install
 This project contains the following scripts:
 
 - `dev`. Runs the application in development mode.
-- `dev:https`. Runs the application in development mode using self-signed SSL
-  certificate.
 - `build`. Builds the application for production.
 - `start`. Starts the Next.js server in production mode.
 - `lint`. Runs [eslint](https://eslint.org/) to ensure the code quality meets
   the required
   standards.
 
-To run a script, use the `pnpm run` command:
+To run a script, use the `npm run` command:
 
 ```Bash
-pnpm run {script}
-# Example: pnpm run build
+npm run {script}
+# Example: npm run build
 ```
 
 ## Create Bot and Mini App
@@ -54,7 +52,7 @@ process.
 To run the application in the development mode, use the `dev` script:
 
 ```bash
-pnpm run dev
+npm run dev
 ```
 
 After this, you will see a similar message in your terminal:
@@ -70,10 +68,9 @@ After this, you will see a similar message in your terminal:
 To view the application, you need to open the `Local`
 link (`http://localhost:3000` in this example) in your browser.
 
-It is important to note that some libraries in this template, such as
-`@telegram-apps/sdk`, are not intended for use outside of Telegram.
+It is important to note that `@telegram-apps/sdk` is not intended for use outside of Telegram.
 
-Nevertheless, they appear to function properly. This is because the
+Nevertheless, it appears to function properly. This is because the
 `src/hooks/useTelegramMock.ts` file, which is imported in the application's
 `Root` component, employs the `mockTelegramEnv` function to simulate the
 Telegram environment. This trick convinces the application that it is
@@ -89,37 +86,6 @@ of its real-world functionality.
 To run the application inside Telegram, [@BotFather](https://t.me/botfather)
 requires an HTTPS link.
 
-This template already provides a solution.
-
-To retrieve a link with the HTTPS protocol, consider using the `dev:https`
-script:
-
-```bash
-$ pnpm run dev:https
-
-▲ Next.js 14.2.3
-- Local:        https://localhost:3000
-
-✓ Starting...
-✓ Ready in 2.4s
-```
-
-Visiting the `Local` link (`https://localhost:3000` in this example) in your
-browser, you will see the following warning:
-
-![SSL Warning](assets/ssl-warning.png)
-
-This browser warning is normal and can be safely ignored as long as the site is
-secure. Click the `Proceed to localhost (unsafe)` button to continue and view
-the application.
-
-Once the application is displayed correctly, submit the
-link `https://127.0.0.1:3000` (`https://localhost:3000` is considered as invalid
-by BotFather) as the Mini App link to [@BotFather](https://t.me/botfather).
-Then, navigate to [https://web.telegram.org/k/](https://web.telegram.org/k/),
-find your bot, and launch the Telegram Mini App. This approach provides the full
-development experience.
-
 ## Deploy
 
 The easiest way to deploy your Next.js app is to use
@@ -129,9 +95,3 @@ from the creators of Next.js.
 Check out
 the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for
 more details.
-
-## Useful Links
-
-- [Platform documentation](https://docs.telegram-mini-apps.com/)
-- [@telegram-apps/sdk-react documentation](https://docs.telegram-mini-apps.com/packages/telegram-apps-sdk-react)
-- [Telegram developers community chat](https://t.me/devs)
