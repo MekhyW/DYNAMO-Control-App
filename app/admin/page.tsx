@@ -63,7 +63,6 @@ export default function AdminPanel() {
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-4">System Administration</h1>
 
         {/* System Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

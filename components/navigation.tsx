@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Music2, Mic2, Laugh, Lightbulb, Bot, Settings } from 'lucide-react';
+import { PawPrint, Music2, Mic2, Laugh, Lightbulb, Cookie, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -9,9 +9,9 @@ const navigation = [
   { name: 'Sound', href: '/sound', icon: Music2 },
   { name: 'Voice', href: '/voice', icon: Mic2 },
   { name: 'Mood', href: '/expression', icon: Laugh },
-  { name: 'Main', href: '/', icon: Home },
+  { name: 'Main', href: '/', icon: PawPrint },
   { name: 'Light', href: '/light', icon: Lightbulb },
-  { name: 'Assist', href: '/ai', icon: Bot },
+  { name: 'Assist', href: '/ai', icon: Cookie },
   { name: 'Admin', href: '/admin', icon: Settings },
 ];
 

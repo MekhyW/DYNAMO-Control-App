@@ -31,7 +31,6 @@ export default function LightControl() {
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-4">Light Control</h1>
 
         {/* Master Control */}
         <Card className="mb-6">

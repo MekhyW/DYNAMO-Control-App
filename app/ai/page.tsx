@@ -60,7 +60,6 @@ export default function AIControl() {
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-4">AI Assistant</h1>
 
         {/* Main Controls */}
         <Card className="mb-6">
