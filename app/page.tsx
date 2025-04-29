@@ -16,17 +16,17 @@ export default function Home() {
   const [activePreset, setActivePreset] = useState(1);
 
   return (
-    <div className="container mx-auto px-4 pb-20 pt-6">
+    <div className="container mx-auto px-4 pb-safe pt-6">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold tracking-tighter mb-2">M.E.K.H.Y</h1>
-        <p className="text-muted-foreground">Advanced Electronic Suit Control System</p>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter mb-2">M.E.K.H.Y</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Mechanism Execution Kernel of Heinous Yapper</p>
       </div>
 
-      <div className="relative h-[400px] mb-8 flex items-center justify-center">
-        <div className="w-[240px] h-[400px] bg-muted rounded-lg relative">
+      <div className="relative h-[60vh] min-h-[300px] max-h-[500px] mb-8 flex items-center justify-center">
+        <div className="w-[100vw] max-w-[240px] min-w-[180px] h-full bg-muted rounded-lg relative">
           {/* Placeholder for interactive human figure */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-muted-foreground">Status Visualization</span>
+            <span className="text-sm sm:text-base text-muted-foreground">Status Visualization</span>
           </div>
         </div>
       </div>
@@ -35,11 +35,14 @@ export default function Home() {
         <SheetTrigger asChild>
           <Button className="w-full mb-4">Select Preset Mode</Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="h-[400px]">
+        <SheetContent 
+          side="bottom" 
+          className="h-[50vh] sm:h-[60vh] max-h-[600px] overflow-y-auto"
+        >
           <SheetHeader>
             <SheetTitle>System Presets</SheetTitle>
           </SheetHeader>
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pb-8 sm:pb-12">
             {presets.map((preset) => (
               <Card 
                 key={preset.id}
@@ -57,39 +60,6 @@ export default function Home() {
           </div>
         </SheetContent>
       </Sheet>
-
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="font-semibold mb-2">System Status</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Power</span>
-                <span className="text-green-500">92%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Temperature</span>
-                <span>27°C</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="font-semibold mb-2">Active Systems</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Shields</span>
-                <span className="text-green-500">Online</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Life Support</span>
-                <span className="text-green-500">Optimal</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
