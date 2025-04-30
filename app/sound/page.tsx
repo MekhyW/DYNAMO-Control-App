@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/sheet";
 
 const soundPresets = [
-  { id: 1, name: 'Startup Sequence', duration: '0:15' },
-  { id: 2, name: 'System Ready', duration: '0:05' },
-  { id: 3, name: 'Warning Alert', duration: '0:10' },
-  { id: 4, name: 'Power Down', duration: '0:08' },
-  { id: 5, name: 'Shield Active', duration: '0:03' },
-  { id: 6, name: 'Weapon Lock', duration: '0:02' },
+  {id: 1, name: 'Startup Sequence'},
+  {id: 2, name: 'System Ready'},
+  {id: 3, name: 'Warning Alert'},
+  {id: 4, name: 'Power Down'},
+  {id: 5, name: 'Shield Active'},
+  {id: 6, name: 'Weapon Lock' },
 ];
 
 export default function SoundControl() {
@@ -30,6 +30,7 @@ export default function SoundControl() {
 
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
+      
       <div className="mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -40,24 +41,6 @@ export default function SoundControl() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        {soundPresets.map((preset) => (
-          <Card key={preset.id} className="cursor-pointer hover:bg-accent">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-medium">{preset.name}</h3>
-                  <p className="text-sm text-muted-foreground">{preset.duration}</p>
-                </div>
-                <Button size="icon" variant="ghost">
-                  <Play className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
       <Card className="mb-6">
@@ -120,6 +103,23 @@ export default function SoundControl() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        {soundPresets.map((preset) => (
+          <Card key={preset.id} className="cursor-pointer hover:bg-accent">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-medium">{preset.name}</h3>
+                </div>
+                <Button size="icon" variant="ghost">
+                  <Play className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

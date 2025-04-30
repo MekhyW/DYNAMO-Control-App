@@ -17,19 +17,19 @@ import {
 import { cn } from '@/lib/utils';
 
 const expressionPresets = [
-  { id: 3, name: 'Neutral', description: '', preview: '😐' },
-  { id: 2, name: 'Happy', description: '', preview: '😊' },
-  { id: 4, name: 'Sad', description: '', preview: '😢' },
+  { id: 3, name: 'Neutral', preview: '😐' },
+  { id: 2, name: 'Happy', preview: '😊' },
+  { id: 4, name: 'Sad', preview: '😢' },
   { id: 0, name: 'Angry', description: ' ', preview: '😠' },
-  { id: 5, name: 'Surprised', description: '', preview: '😲' },  
-  { id: 1, name: 'Disgusted', description: '', preview: '😒' },
-  { id: 12, name: 'Mischievous', description: '', preview: '😏' },
-  { id: 6, name: 'Hypnotic', description: '', preview: '😵‍💫' },
-  { id: 7, name: 'Heart', description: '', preview: '❤️' },
-  { id: 8, name: 'Rainbow', description: '', preview: '🌈' },
-  { id: 9, name: 'Nightmare', description: '', preview: '😈' },
-  { id: 10, name: 'Gear Eyes', description: '', preview: '⚙️' },
-  { id: 11, name: 'SANS', description: '', preview: '💀' },
+  { id: 5, name: 'Surprised', preview: '😲' },  
+  { id: 1, name: 'Disgusted', preview: '😒' },
+  { id: 12, name: 'Mischievous', preview: '😏' },
+  { id: 6, name: 'Hypnotic', preview: '😵‍💫' },
+  { id: 7, name: 'Heart', preview: '❤️' },
+  { id: 8, name: 'Rainbow', preview: '🌈' },
+  { id: 9, name: 'Nightmare', preview: '😈' },
+  { id: 10, name: 'Gear Eyes', preview: '⚙️' },
+  { id: 11, name: 'SANS', preview: '💀' },
 ];
 
 export default function ExpressionControl() {
@@ -138,7 +138,6 @@ export default function ExpressionControl() {
                   <div className="flex flex-col items-center text-center gap-2">
                     <div className="text-4xl mb-2">{expression.preview}</div>
                     <h3 className="font-medium">{expression.name}</h3>
-                    <p className="text-sm text-muted-foreground">{expression.description}</p>
                   </div>
                 </CardContent>
               </Card>

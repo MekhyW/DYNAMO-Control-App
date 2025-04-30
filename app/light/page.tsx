@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { Sun, Moon, Lightbulb } from 'lucide-react';
+import { Sun, Moon, Lightbulb, LightbulbOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
@@ -9,12 +9,12 @@ import { cn } from '@/lib/utils';
 import { HexColorPicker } from 'react-colorful';
 
 const lightEffects = [
-  { id: 1, name: 'Solid', description: 'Single color light' },
-  { id: 2, name: 'Pulse', description: 'Smooth pulsing effect' },
-  { id: 3, name: 'Rainbow', description: 'Color cycling effect' },
-  { id: 4, name: 'Strobe', description: 'Quick flashing effect' },
-  { id: 5, name: 'Wave', description: 'Flowing wave pattern' },
-  { id: 6, name: 'Sparkle', description: 'Random twinkling effect' },
+  { id: 1, name: 'Solid Color', description: '' },
+  { id: 2, name: 'Fade', description: '' },
+  { id: 3, name: 'Wipe', description: '' },
+  { id: 4, name: 'Theater Chase', description: '' },
+  { id: 5, name: 'Rainbow', description: '' },
+  { id: 6, name: 'Strobe', description: '' },
 ];
 
 export default function LightControl() {
@@ -25,6 +25,7 @@ export default function LightControl() {
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
 
   const handleEffectSelect = (effectId: number) => {
+    if (!isOn) return;
     setActiveEffect(effectId === activeEffect ? null : effectId);
   };
 
@@ -40,7 +41,7 @@ export default function LightControl() {
                 {isOn ? (
                   <Lightbulb className="h-5 w-5 text-primary" />
                 ) : (
-                  <Lightbulb className="h-5 w-5 text-muted-foreground" />
+                  <LightbulbOff className="h-5 w-5 text-muted-foreground" />
                 )}
                 <span className="font-medium">Master Light Control</span>
               </div>
@@ -51,7 +52,7 @@ export default function LightControl() {
             </div>
 
             {/* Brightness Controls */}
-            <div className="space-y-6">
+            <div className={cn("space-y-6", !isOn && "opacity-50")}>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium">Main Brightness</label>
@@ -90,7 +91,7 @@ export default function LightControl() {
         </Card>
 
         {/* Color Wheel */}
-        <Card className="mb-6">
+        <Card className={cn("mb-6", !isOn && "opacity-50 pointer-events-none")}>
           <CardContent className="p-4">
             <h2 className="text-lg font-medium mb-4">Color Selection</h2>
             <div className="flex justify-center mb-4">
@@ -111,13 +112,17 @@ export default function LightControl() {
         </Card>
 
         {/* Light Effects Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className={cn(
+          "grid grid-cols-2 md:grid-cols-3 gap-4",
+          !isOn && "opacity-50 pointer-events-none"
+        )}>
           {lightEffects.map((effect) => (
             <Card 
               key={effect.id}
               className={cn(
                 "cursor-pointer transition-all",
-                activeEffect === effect.id && "border-primary bg-accent"
+                activeEffect === effect.id && "border-primary bg-accent",
+                !isOn && "cursor-not-allowed"
               )}
               onClick={() => handleEffectSelect(effect.id)}
             >

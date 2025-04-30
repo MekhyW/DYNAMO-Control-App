@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { Terminal, Settings, HardDrive, Cpu, MemoryStick, Volume2, RefreshCcw, Power } from 'lucide-react';
+import { Terminal, Settings, HardDrive, Cpu, MemoryStick, RefreshCcw, Power, LogOut } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,6 +38,7 @@ export default function AdminPanel() {
     temperature: 0,
   });
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
+  const [showPowerDialog, setShowPowerDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [selectedInputDevice, setSelectedInputDevice] = useState("");
   const [selectedOutputDevice, setSelectedOutputDevice] = useState("");
@@ -198,22 +199,61 @@ export default function AdminPanel() {
         {/* System Control Buttons */}
         <div className="flex gap-4">
           <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => window.location.reload()}
-          >
-            <RefreshCcw className="mr-2 h-4 w-4" />
-            Refresh System
-          </Button>
-          <Button
             variant="destructive"
             className="flex-1"
-            onClick={() => setShowResetDialog(true)}
+            onClick={() => setShowPowerDialog(true)}
           >
             <Power className="mr-2 h-4 w-4" />
-            Reset System
+            Power Options
           </Button>
         </div>
+
+        {/* Power Options Dialog */}
+        <AlertDialog open={showPowerDialog} onOpenChange={setShowPowerDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Power Options</AlertDialogTitle>
+              <AlertDialogDescription>
+                Please select a power option:
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="flex flex-col gap-2 py-4">
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  setShowPowerDialog(false);
+                  handleCommand('system:shutdown');
+                }}
+              >
+                <Power className="mr-2 h-4 w-4" />
+                Shutdown
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  setShowPowerDialog(false);
+                  handleCommand('system:reboot');
+                }}
+              >
+                <RefreshCcw className="mr-2 h-4 w-4" />
+                Reboot
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  setShowPowerDialog(false);
+                  handleCommand('system:kill');
+                }}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Kill Software
+              </Button>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Reset Confirmation Dialog */}
         <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
