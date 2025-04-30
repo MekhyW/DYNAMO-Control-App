@@ -80,3 +80,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+main {
+  transition: transform 0.3s ease-in-out;
+}
+
+.page-enter {
+  transform: translateX(100%);
+}
+
+.page-enter-active {
+  transform: translateX(0);
+}
+
+.page-exit {
+  transform: translateX(-100%);
+}
+
+.page-exit-active {
+  transform: translateX(0);
+}
