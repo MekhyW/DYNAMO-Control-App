@@ -1,9 +1,12 @@
 "use client"
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Terminal, Settings, HardDrive, Cpu, MemoryStick, RefreshCcw, Power, LogOut } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+
+type SpotifyConnectionStatus = 'loading' | 'connected' | 'disconnected' | 'error';
 import {
   Select,
   SelectContent,
@@ -42,6 +45,24 @@ export default function AdminPanel() {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [selectedInputDevice, setSelectedInputDevice] = useState("");
   const [selectedOutputDevice, setSelectedOutputDevice] = useState("");
+  const [password, setPassword] = useState<string>('');
+  const [status, setSpotifyStatus] = useState<string>('');
+  const [error, setSpotifyError] = useState<string>('');
+  const [SpotifyConnectionStatus, setSpotifyConnectionStatus] = useState<SpotifyConnectionStatus>('loading');
+  
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    console.log('Search Params:', searchParams);
+    if (searchParams.get('status') === 'success') {
+      setSpotifyStatus('Authentication successful!');
+    }
+    else if (searchParams.get('error')) {
+      setSpotifyError(`Error: ${searchParams.get('error')}`);
+    }
+    
+    checkSpotifyConnectionStatus();
+  }, [searchParams]);
 
   // Simulate metrics update
   useEffect(() => {
@@ -56,6 +77,48 @@ export default function AdminPanel() {
 
     return () => clearInterval(interval);
   }, []);
+
+  async function checkSpotifyConnectionStatus() {
+    try {
+      const response = await fetch('/api/spotify/status');
+      const data = await response.json();
+      
+      if (data.connected) {
+        setSpotifyConnectionStatus('connected');
+      } else {
+        setSpotifyConnectionStatus('disconnected');
+      }
+    } catch (error) {
+      setSpotifyConnectionStatus('error');
+      setSpotifyError(`Connection check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async function handleAuthenticate(e: React.FormEvent) {
+    e.preventDefault();
+    setSpotifyStatus('Authenticating...');
+    setSpotifyError('');
+    
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Authentication failed');
+      }
+      
+      const data = await response.json();
+      // Redirect to Spotify authorization page
+      window.location.href = data.url;
+    } catch (error) {
+      setSpotifyError(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setSpotifyStatus('');
+    }
+  }
 
   const handleCommand = (command: string) => {
     setTerminalOutput(prev => [...prev, `> ${command}`, 'Processing command...']);
@@ -131,6 +194,67 @@ export default function AdminPanel() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Spotify Authentication */}
+        <Card className="mb-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Spotify Connection</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Connection Status */}
+            <div>
+              {SpotifyConnectionStatus === 'loading' && (
+                <div className="text-muted-foreground">Checking connection...</div>
+              )}
+              {SpotifyConnectionStatus === 'connected' && (
+                <div className="text-green-600 dark:text-green-400 flex items-center gap-2">
+                  <span className="text-lg">✓</span> Connected to Spotify
+                </div>
+              )}
+              {SpotifyConnectionStatus === 'disconnected' && (
+                <div className="text-red-600 dark:text-red-400 flex items-center gap-2">
+                  <span className="text-lg">×</span> Not connected to Spotify
+                </div>
+              )}
+              {SpotifyConnectionStatus === 'error' && (
+                <div className="text-red-600 dark:text-red-400 flex items-center gap-2">
+                  <span className="text-lg">⚠</span> Error checking connection status
+                </div>
+              )}
+            </div>
+
+            {/* Authentication Form */}
+            <form onSubmit={handleAuthenticate} className="space-y-4">
+              {process.env.NEXT_PUBLIC_ADMIN_PASSWORD_REQUIRED === 'true' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Admin Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                    required
+                  />
+                </div>
+              )}
+              <Button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                disabled={SpotifyConnectionStatus === 'connected'}
+              >
+                {SpotifyConnectionStatus === 'connected' ? 'Connected' : 'Connect to Spotify'}
+              </Button>
+            </form>
+
+            {/* Status Messages */}
+            {status && (
+              <div className="text-green-600 dark:text-green-400">{status}</div>
+            )}
+            {error && (
+              <div className="text-red-600 dark:text-red-400">{error}</div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Audio Device Controls */}
         <Card className="mb-6">
