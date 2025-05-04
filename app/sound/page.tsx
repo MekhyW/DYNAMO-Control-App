@@ -39,6 +39,7 @@ export default function SoundControl() {
     playTrack,
     togglePlayback,
     addToQueue,
+    skipTrack,
   } = useSpotify();
 
   return (
@@ -123,7 +124,11 @@ export default function SoundControl() {
                   <Play className="h-4 w-4" />
                 )}
               </Button>
-              <Button size="icon" variant="ghost">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={skipTrack}
+              >
                 <SkipForward className="h-4 w-4" />
               </Button>
               <Sheet>

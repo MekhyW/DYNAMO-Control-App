@@ -87,6 +87,22 @@ export function useSpotify() {
     return () => clearInterval(interval);
   }, [fetchPlaybackState]);
 
+  const skipTrack = useCallback(async () => {
+    try {
+      if (queue.length > 0) {
+        const nextTrack = queue[0];
+        await playTrack(nextTrack.uri, true);
+      } else {
+        await fetch('/api/spotify/next', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    } catch (error) {
+      console.error('Error skipping track:', error);
+    }
+  }, [queue, playTrack]);
+
   return {
     searchResults,
     currentTrack,
@@ -96,5 +112,6 @@ export function useSpotify() {
     playTrack,
     togglePlayback,
     addToQueue,
+    skipTrack,
   };
 }
