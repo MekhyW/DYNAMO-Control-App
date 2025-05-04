@@ -1,5 +1,6 @@
 // lib/session.ts
-import { SessionOptions } from 'iron-session';
+import { SessionOptions, getIronSession } from 'iron-session';
+import { cookies } from 'next/headers';
 
 export const sessionOptions: SessionOptions = {
   password: process.env.SESSION_PASSWORD as string,
@@ -19,4 +20,8 @@ declare module 'iron-session' {
     };
     state?: string;
   }
+}
+
+export async function getSession() {
+  return getIronSession(cookies(), sessionOptions);
 }

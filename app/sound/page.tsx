@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Play, Pause, SkipForward, Volume2, ListMusic } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useSpotify } from '@/hooks/useSpotify';
+import { SpotifyTrack } from '@/types/spotify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -25,8 +27,19 @@ const soundPresets = [
 
 export default function SoundControl() {
   const [volume, setVolume] = useState(75);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  
+  const {
+    searchResults,
+    currentTrack,
+    isPlaying,
+    queue,
+    searchTracks,
+    playTrack,
+    togglePlayback,
+    addToQueue,
+  } = useSpotify();
 
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
@@ -38,8 +51,54 @@ export default function SoundControl() {
             className="pl-10"
             placeholder="Search music..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              searchTracks(e.target.value);
+              setShowSearchResults(true);
+            }}
           />
+          {showSearchResults && searchResults.length > 0 && (
+            <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto">
+              <CardContent className="p-2">
+                {searchResults.map((track) => (
+                  <div
+                    key={track.id}
+                    className="flex justify-between items-center p-2 hover:bg-accent cursor-pointer"
+                    onClick={() => {
+                      addToQueue(track);
+                      setShowSearchResults(false);
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      {track.album.images[0] && (
+                        <img
+                          src={track.album.images[0].url}
+                          alt={track.album.name}
+                          className="w-10 h-10 rounded"
+                        />
+                      )}
+                      <div>
+                        <p className="font-medium">{track.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {track.artists.map(a => a.name).join(', ')}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToQueue(track);
+                      }}
+                    >
+                      <ListMusic className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
@@ -48,13 +107,15 @@ export default function SoundControl() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-medium">Now Playing</h3>
-              <p className="text-sm text-muted-foreground">Never Be Alone</p>
+              <p className="text-sm text-muted-foreground">
+                {currentTrack ? `${currentTrack.name} - ${currentTrack.artists[0].name}` : 'No track playing'}
+              </p>
             </div>
             <div className="flex gap-2">
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={() => setIsPlaying(!isPlaying)}
+                onClick={togglePlayback}
               >
                 {isPlaying ? (
                   <Pause className="h-4 w-4" />
@@ -76,10 +137,28 @@ export default function SoundControl() {
                     <SheetTitle>Queue</SheetTitle>
                   </SheetHeader>
                   <div className="space-y-4 mt-4">
-                    {['Devil Swing', 'T.N.T', 'Illusion'].map((item, index) => (
-                      <div key={index} className="flex justify-between items-center py-2 border-b">
-                        <span>{item}</span>
-                        <Button size="sm" variant="ghost">
+                    {queue.map((track, index) => (
+                      <div key={track.id} className="flex justify-between items-center py-2 border-b">
+                        <div className="flex items-center gap-2">
+                          {track.album.images[0] && (
+                            <img
+                              src={track.album.images[0].url}
+                              alt={track.album.name}
+                              className="w-8 h-8 rounded"
+                            />
+                          )}
+                          <div>
+                            <p className="font-medium">{track.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {track.artists.map(a => a.name).join(', ')}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => playTrack(track.uri, true)}
+                        >
                           <Play className="h-3 w-3" />
                         </Button>
                       </div>
