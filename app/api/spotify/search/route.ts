@@ -4,6 +4,8 @@ import { getSession } from '@/lib/session';
 import { spotifyApi, setSpotifyCredentials, refreshAccessToken, isTokenExpired } from '@/lib/spotify';
 import type { SpotifyTokens } from '@/types/spotify';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getSession();
