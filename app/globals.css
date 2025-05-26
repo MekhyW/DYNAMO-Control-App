@@ -80,7 +80,7 @@
     @apply bg-background text-foreground;
   }
   .container {
-    padding-top: env(safe-area-inset-top, 1rem);
+    margin-top: 2rem;
   }
 }
 
