@@ -70,13 +70,6 @@ link (`http://localhost:3000` in this example) in your browser.
 
 It is important to note that `@telegram-apps/sdk` is not intended for use outside of Telegram.
 
-Nevertheless, it appears to function properly. This is because the
-`src/hooks/useTelegramMock.ts` file, which is imported in the application's
-`Root` component, employs the `mockTelegramEnv` function to simulate the
-Telegram environment. This trick convinces the application that it is
-running in a Telegram-based environment. Therefore, be cautious not to use this
-function in production mode unless you fully understand its implications.
-
 ### Run Inside Telegram
 
 Although it is possible to run the application outside of Telegram, it is
