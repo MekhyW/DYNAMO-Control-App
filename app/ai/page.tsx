@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { useTelegramBot } from '@/hooks/useTelegramBot';
 
 interface Message {
   id: string;
@@ -22,6 +23,12 @@ export default function AIControl() {
   const [messages] = useState<Message[]>([]);
   const [speechText, setSpeechText] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  
+  const {
+    toggleHotwordDetection,
+    triggerHotword,
+    textToSpeech,
+  } = useTelegramBot();
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -32,7 +39,16 @@ export default function AIControl() {
 
   const handleSpeak = () => {
     if (!speechText.trim()) return;
-    // Add your text-to-speech logic here
+    textToSpeech(speechText);
+  };
+  
+  const handleToggleHotword = (enabled: boolean) => {
+    setHotwordEnabled(enabled);
+    toggleHotwordDetection(enabled);
+  };
+  
+  const handleTriggerAssistant = () => {
+    triggerHotword();
   };
 
   return (
@@ -48,15 +64,13 @@ export default function AIControl() {
               </div>
               <Switch
                 checked={hotwordEnabled}
-                onCheckedChange={setHotwordEnabled}
+                onCheckedChange={handleToggleHotword}
               />
             </div>
             <Button
               variant="outline"
               className="w-full text-sm"
-              onClick={() => {
-                // logic for triggering the assistant
-              }}
+              onClick={handleTriggerAssistant}
             >
               Trigger Now
             </Button>

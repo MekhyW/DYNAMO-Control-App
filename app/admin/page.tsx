@@ -6,6 +6,7 @@ import { Terminal, RefreshCcw, Power, LogOut, Lock, Unlock, Copy, CheckCheck } f
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { useTelegramBot } from '@/hooks/useTelegramBot';
 
 type SpotifyConnectionStatus = 'loading' | 'connected' | 'disconnected' | 'error';
 import {
@@ -97,21 +98,43 @@ function AdminPanelContent() {
     }
   }
 
+  const {
+    requestAudioDeviceList,
+    toggleExternalCommands,
+    requestAnydeskKey,
+    shutdown,
+    reboot,
+    killSoftware,
+  } = useTelegramBot();
+
   const handleCommand = (command: string) => {
     if (isExternalCommandsLocked && (command.includes('system:') || command.includes('external:'))) {
       setTerminalOutput(prev => [...prev, `> ${command}`, 'Error: External commands are locked. Please unlock to execute system commands.']);
     } else {
       setTerminalOutput(prev => [...prev, `> ${command}`, 'Processing command...']);
+      
+      // Send command to Telegram bot based on command type
+      if (command === 'system:shutdown') {
+        shutdown();
+      } else if (command === 'system:reboot') {
+        reboot();
+      } else if (command === 'system:kill') {
+        killSoftware();
+      }
     }
   };
 
   const handleToggleLock = () => {
-    setIsExternalCommandsLocked(!isExternalCommandsLocked);
+    const newLockState = !isExternalCommandsLocked;
+    setIsExternalCommandsLocked(newLockState);
     setTerminalOutput(prev => [...prev, 
       isExternalCommandsLocked 
         ? 'External commands have been UNLOCKED' 
         : 'External commands have been LOCKED'
     ]);
+    
+    // Send lock/unlock command to Telegram bot
+    toggleExternalCommands(newLockState);
   };
 
   const handleCopyAnydeskKey = async () => {
@@ -119,9 +142,17 @@ function AdminPanelContent() {
       await navigator.clipboard.writeText(anydeskKey);
       setKeyCopied(true);
       setTimeout(() => setKeyCopied(false), 2000);
+      
+      // Request AnyDesk key from bot (for verification or updates)
+      requestAnydeskKey();
     } catch (err) {
       console.error('Failed to copy AnyDesk key:', err);
     }
+  };
+  
+  const handleRequestAudioDevices = () => {
+    requestAudioDeviceList();
+    setTerminalOutput(prev => [...prev, 'Requesting audio device list from system...']);
   };
 
   return (
@@ -285,6 +316,17 @@ function AdminPanelContent() {
 
           {/* Audio Device Controls */}
           <Card className="mb-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Audio Device Controls</CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRequestAudioDevices}
+                className="text-xs"
+              >
+                Refresh Devices
+              </Button>
+            </CardHeader>
             <CardContent className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
