@@ -32,10 +32,10 @@ class MQTTService {
   private client: MqttClient | null = null;
   private config: MQTTConfig;
   private isConnected = false;
+  private isConnecting = false;
   private subscribers: Map<string, (data: any) => void> = new Map();
 
   constructor() {
-    // Load configuration from environment variables
     this.config = {
       host: process.env.NEXT_PUBLIC_MQTT_HOST || '',
       port: parseInt(process.env.NEXT_PUBLIC_MQTT_PORT || '8884'),
@@ -46,12 +46,18 @@ class MQTTService {
   }
 
   async connect(): Promise<boolean> {
-    // Check if all required environment variables are set
+    if (this.isConnected || this.isConnecting) {
+      console.log('MQTT already connected or connecting');
+      return this.isConnected;
+    }
+
     if (!this.config.host || !this.config.username || !this.config.password) {
       console.error('MQTT configuration incomplete. Please set NEXT_PUBLIC_MQTT_HOST, NEXT_PUBLIC_MQTT_USERNAME, and NEXT_PUBLIC_MQTT_PASSWORD environment variables.');
       return false;
     }
 
+    this.isConnecting = true;
+    
     try {
       const connectUrl = `wss://${this.config.host}:${this.config.port}/mqtt`;
       
@@ -61,7 +67,9 @@ class MQTTService {
         password: this.config.password,
         clean: true,
         connectTimeout: 4000,
-        reconnectPeriod: 1000,
+        reconnectPeriod: 5000,
+        keepalive: 60,
+        protocolVersion: 4,
       });
 
       return new Promise((resolve, reject) => {
@@ -70,17 +78,28 @@ class MQTTService {
           return;
         }
 
+        let isInitialConnection = true;
+        
         this.client.on('connect', () => {
-          console.log('Connected to HiveMQ Cloud');
+          if (isInitialConnection) {
+            console.log('Connected to HiveMQ Cloud');
+            isInitialConnection = false;
+            this.isConnecting = false;
+            resolve(true);
+          } else {
+            console.log('MQTT reconnected successfully');
+          }
           this.isConnected = true;
           this.subscribeToDataTopics();
-          resolve(true);
         });
 
         this.client.on('error', (error) => {
           console.error('MQTT connection error:', error);
           this.isConnected = false;
-          reject(error);
+          if (isInitialConnection) {
+            this.isConnecting = false;
+            reject(error);
+          }
         });
 
         this.client.on('message', (topic, message) => {
@@ -91,9 +110,20 @@ class MQTTService {
           console.log('MQTT connection closed');
           this.isConnected = false;
         });
+
+        this.client.on('reconnect', () => {
+          console.log('MQTT reconnecting...');
+          this.isConnected = false;
+        });
+
+        this.client.on('offline', () => {
+          console.log('MQTT client offline');
+          this.isConnected = false;
+        });
       });
     } catch (error) {
       console.error('Failed to connect to MQTT:', error);
+      this.isConnecting = false;
       return false;
     }
   }
@@ -101,13 +131,12 @@ class MQTTService {
   private subscribeToDataTopics() {
     if (!this.client || !this.isConnected) return;
 
-    // Subscribe to data topics based on commands.txt SUBSCRIBE section
     const dataTopics = [
-      'dynamo/data/sound-effects',
-      'dynamo/data/voice-effects', 
+      'dynamo/data/sound_effects',
+      'dynamo/data/voice_effects', 
       'dynamo/data/bitmap',
-      'dynamo/data/anydesk-id',
-      'dynamo/data/sound-devices'
+      'dynamo/data/anydesk_id',
+      'dynamo/data/sound_devices'
     ];
 
     dataTopics.forEach(topic => {
@@ -190,6 +219,22 @@ class MQTTService {
     await this.publish('dynamo/commands/text-to-speech', { text });
   }
 
+  async setExpression(expression: string): Promise<void> {
+    await this.publish('dynamo/commands/set-expression', { expression });
+  }
+
+  async toggleFaceExpressionTracking(enabled: boolean): Promise<void> {
+    await this.publish('dynamo/commands/face-expression-tracking-toggle', { enabled });
+  }
+
+  async toggleEyeTracking(enabled: boolean): Promise<void> {
+    await this.publish('dynamo/commands/eye-tracking-toggle', { enabled });
+  }
+
+  async toggleEyebrows(enabled: boolean): Promise<void> {
+    await this.publish('dynamo/commands/eyebrows-toggle', { enabled });
+  }
+
   async toggleExternalCommands(locked: boolean): Promise<void> {
     await this.publish('dynamo/commands/external-commands-lock', { locked });
   }
@@ -207,17 +252,23 @@ class MQTTService {
   }
 
   private async publish(topic: string, payload: any): Promise<void> {
-    if (!this.client || !this.isConnected) {
+    if (!this.client) {
+      console.error('MQTT client not initialized');
+      throw new Error('MQTT client not initialized');
+    }
+    
+    if (!this.client.connected) {
+      console.error('MQTT client not connected');
       throw new Error('MQTT client not connected');
     }
 
     return new Promise((resolve, reject) => {
-      this.client!.publish(topic, JSON.stringify(payload), (err) => {
+      this.client!.publish(topic, JSON.stringify(payload), { qos: 1 }, (err) => {
         if (err) {
           console.error(`Failed to publish to ${topic}:`, err);
           reject(err);
         } else {
-          console.log(`Published to ${topic}:`, payload);
+          console.log(`Successfully published to ${topic}:`, payload);
           resolve();
         }
       });
@@ -228,11 +279,12 @@ class MQTTService {
     if (this.client) {
       this.client.end();
       this.isConnected = false;
+      this.isConnecting = false;
     }
   }
 
   getConnectionStatus(): boolean {
-    return this.isConnected;
+    return this.client?.connected || false;
   }
 }
 

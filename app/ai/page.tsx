@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { useMQTT } from '@/hooks/useMQTT';
 
 interface Message {
   id: string;
@@ -18,6 +19,7 @@ interface Message {
 }
 
 export default function AIControl() {
+  const mqtt = useMQTT();
   const [hotwordEnabled, setHotwordEnabled] = useState(true);
   const [messages] = useState<Message[]>([]);
   const [speechText, setSpeechText] = useState('');
@@ -30,9 +32,31 @@ export default function AIControl() {
     }
   }, [messages]);
 
-  const handleSpeak = () => {
+  const handleHotwordToggle = async (enabled: boolean) => {
+    setHotwordEnabled(enabled);
+    try {
+      await mqtt.toggleHotwordDetection(enabled);
+    } catch (error) {
+      console.error('Failed to toggle hotword detection:', error);
+    }
+  };
+
+  const handleTriggerHotword = async () => {
+    try {
+      await mqtt.triggerHotword();
+    } catch (error) {
+      console.error('Failed to trigger hotword:', error);
+    }
+  };
+
+  const handleSpeak = async () => {
     if (!speechText.trim()) return;
-    // Add your text-to-speech logic here
+    try {
+      await mqtt.textToSpeech(speechText);
+      setSpeechText(''); // Clear the text after speaking
+    } catch (error) {
+      console.error('Failed to trigger text-to-speech:', error);
+    }
   };
 
   return (
@@ -48,15 +72,13 @@ export default function AIControl() {
               </div>
               <Switch
                 checked={hotwordEnabled}
-                onCheckedChange={setHotwordEnabled}
+                onCheckedChange={handleHotwordToggle}
               />
             </div>
             <Button
               variant="outline"
               className="w-full text-sm"
-              onClick={() => {
-                // logic for triggering the assistant
-              }}
+              onClick={handleTriggerHotword}
             >
               Trigger Now
             </Button>

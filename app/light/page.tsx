@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { HexColorPicker } from 'react-colorful';
+import { useMQTT } from '@/hooks/useMQTT';
 
 const lightEffects = [
   { id: 1, name: 'Solid Color', description: '' },
@@ -18,14 +19,45 @@ const lightEffects = [
 ];
 
 export default function LightControl() {
+  const mqtt = useMQTT();
   const [isOn, setIsOn] = useState(true);
   const [color, setColor] = useState("#ff0000");
   const [mainBrightness, setMainBrightness] = useState(75);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
 
-  const handleEffectSelect = (effectId: number) => {
+  const handleToggleLeds = async (enabled: boolean) => {
+    setIsOn(enabled);
+    try {
+      await mqtt.toggleLeds(enabled);
+    } catch (error) {
+      console.error('Failed to toggle LEDs:', error);
+    }
+  };
+
+  const handleColorChange = async (newColor: string) => {
+    setColor(newColor);
+    if (isOn) {
+      try {
+        await mqtt.setLedsColor(newColor);
+      } catch (error) {
+        console.error('Failed to set LED color:', error);
+      }
+    }
+  };
+
+  const handleEffectSelect = async (effectId: number) => {
     if (!isOn) return;
-    setActiveEffect(effectId === activeEffect ? null : effectId);
+    const newActiveEffect = effectId === activeEffect ? null : effectId;
+    setActiveEffect(newActiveEffect);
+    
+    if (newActiveEffect !== null) {
+      const effectName = lightEffects.find(e => e.id === effectId)?.name || 'unknown';
+      try {
+        await mqtt.setLedsEffect(effectName.toLowerCase().replace(' ', '_'));
+      } catch (error) {
+        console.error('Failed to set LED effect:', error);
+      }
+    }
   };
 
   return (
@@ -46,7 +78,7 @@ export default function LightControl() {
               </div>
               <Switch
                 checked={isOn}
-                onCheckedChange={setIsOn}
+                onCheckedChange={handleToggleLeds}
               />
             </div>
 
@@ -79,7 +111,7 @@ export default function LightControl() {
             <div className="flex justify-center mb-4">
               <HexColorPicker
                 color={color}
-                onChange={setColor}
+                onChange={handleColorChange}
                 style={{ width: '100%', maxWidth: '300px' }}
               />
             </div>

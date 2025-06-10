@@ -150,12 +150,6 @@ export default function VoiceControl() {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="font-medium">{effect.name}</h3>
-                    {isConnected && (
-                      <p className="text-xs text-green-500 flex items-center gap-1">
-                        <Wifi className="h-3 w-3" />
-                        Live
-                      </p>
-                    )}
                   </div>
                   {activeEffect === effect.id && (
                     <AudioWaveform className="h-4 w-4 text-primary" />
@@ -180,7 +174,6 @@ export default function VoiceControl() {
                 className={cn(isMuted && "opacity-50")}
               />
               <span className="min-w-[3ch] text-sm">{volume}%</span>
-              {isConnected && <Wifi className="h-4 w-4 text-green-500" />}
             </div>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">

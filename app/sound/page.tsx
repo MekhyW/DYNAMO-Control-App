@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect } from 'react';
-import { Search, Play, Pause, SkipForward, Volume2, ListMusic, Wifi, WifiOff } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Play, Pause, SkipForward, Volume2, ListMusic, WifiOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useSpotify } from '@/hooks/useSpotify';
 import { useMQTT } from '@/hooks/useMQTT';
-import { SpotifyTrack } from '@/types/spotify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -231,7 +230,6 @@ export default function SoundControl() {
                 step={1}
               />
               <span className="min-w-[3ch] text-sm">{volume}%</span>
-              {isConnected && <Wifi className="h-4 w-4 text-green-500" />}
             </div>
           </div>
         </CardContent>
@@ -244,12 +242,6 @@ export default function SoundControl() {
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="font-medium">{preset.name}</h3>
-                  {isConnected && (
-                    <p className="text-xs text-green-500 flex items-center gap-1">
-                      <Wifi className="h-3 w-3" />
-                      Live
-                    </p>
-                  )}
                 </div>
                 <Button 
                   size="icon" 

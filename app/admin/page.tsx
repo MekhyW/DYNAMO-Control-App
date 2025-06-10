@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { MQTTStatus } from '@/components/MQTTStatus';
+import { useMQTT } from '@/hooks/useMQTT';
 
 type SpotifyConnectionStatus = 'loading' | 'connected' | 'disconnected' | 'error';
 import {
@@ -29,6 +30,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 function AdminPanelContent() {
+  const mqtt = useMQTT();
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
   const [showPowerDialog, setShowPowerDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
@@ -106,13 +108,20 @@ function AdminPanelContent() {
     }
   };
 
-  const handleToggleLock = () => {
-    setIsExternalCommandsLocked(!isExternalCommandsLocked);
+  const handleToggleLock = async () => {
+    const newLockedState = !isExternalCommandsLocked;
+    setIsExternalCommandsLocked(newLockedState);
     setTerminalOutput(prev => [...prev, 
-      isExternalCommandsLocked 
+      !newLockedState 
         ? 'External commands have been UNLOCKED' 
         : 'External commands have been LOCKED'
     ]);
+    
+    try {
+      await mqtt.toggleExternalCommands(newLockedState);
+    } catch (error) {
+      console.error('Failed to toggle external commands:', error);
+    }
   };
 
   const handleCopyAnydeskKey = async () => {
@@ -386,9 +395,15 @@ function AdminPanelContent() {
               <div className="flex flex-col gap-2 py-4">
                 <Button
                   variant="destructive"
-                  onClick={() => {
+                  onClick={async () => {
                     setShowPowerDialog(false);
-                    handleCommand('system:shutdown');
+                    try {
+                      await mqtt.shutdown();
+                      setTerminalOutput(prev => [...prev, '> system:shutdown', 'Shutdown command sent via MQTT']);
+                    } catch (error) {
+                      console.error('Failed to send shutdown command:', error);
+                      setTerminalOutput(prev => [...prev, '> system:shutdown', 'Error: Failed to send shutdown command']);
+                    }
                   }}
                 >
                   <Power className="mr-2 h-4 w-4" />
@@ -396,9 +411,15 @@ function AdminPanelContent() {
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={() => {
+                  onClick={async () => {
                     setShowPowerDialog(false);
-                    handleCommand('system:reboot');
+                    try {
+                      await mqtt.reboot();
+                      setTerminalOutput(prev => [...prev, '> system:reboot', 'Reboot command sent via MQTT']);
+                    } catch (error) {
+                      console.error('Failed to send reboot command:', error);
+                      setTerminalOutput(prev => [...prev, '> system:reboot', 'Error: Failed to send reboot command']);
+                    }
                   }}
                 >
                   <RefreshCcw className="mr-2 h-4 w-4" />
@@ -406,9 +427,15 @@ function AdminPanelContent() {
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={() => {
+                  onClick={async () => {
                     setShowPowerDialog(false);
-                    handleCommand('system:kill');
+                    try {
+                      await mqtt.killSoftware();
+                      setTerminalOutput(prev => [...prev, '> system:kill', 'Kill software command sent via MQTT']);
+                    } catch (error) {
+                      console.error('Failed to send kill software command:', error);
+                      setTerminalOutput(prev => [...prev, '> system:kill', 'Error: Failed to send kill software command']);
+                    }
                   }}
                 >
                   <LogOut className="mr-2 h-4 w-4" />

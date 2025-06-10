@@ -25,6 +25,10 @@ interface MQTTActions {
   toggleHotwordDetection: (enabled: boolean) => Promise<void>;
   triggerHotword: () => Promise<void>;
   textToSpeech: (text: string) => Promise<void>;
+  setExpression: (expression: string) => Promise<void>;
+  toggleFaceExpressionTracking: (enabled: boolean) => Promise<void>;
+  toggleEyeTracking: (enabled: boolean) => Promise<void>;
+  toggleEyebrows: (enabled: boolean) => Promise<void>;
   toggleExternalCommands: (locked: boolean) => Promise<void>;
   shutdown: () => Promise<void>;
   reboot: () => Promise<void>;
@@ -40,41 +44,73 @@ export function useMQTT(): MQTTState & MQTTActions {
     anydeskId: null,
     bitmap: null,
   });
+  
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const connect = useCallback(async (): Promise<boolean> => {
+    if (isConnecting) {
+      console.log('Connection attempt already in progress');
+      return false;
+    }
+    
     try {
       const service = createMQTTService();
       
-      // Set up data subscriptions
-      service.subscribe('dynamo/data/sound_effects', (data: SoundEffect[]) => {
-        setState(prev => ({ ...prev, soundEffects: data }));
-      });
+      if (service.getConnectionStatus()) {
+        console.log('MQTT already connected');
+        setState(prev => ({ ...prev, isConnected: true }));
+        return true;
+      }
+      
+      setIsConnecting(true);
+      console.log('Attempting MQTT connection...');
+      const success = await service.connect();
+      
+      if (success) {
+        console.log('MQTT connection successful, setting up subscriptions...');
+        
+        // Set up data subscriptions after successful connection
+        service.subscribe('dynamo/data/sound_effects', (data: SoundEffect[]) => {
+          console.log('Received sound effects data:', data);
+          setState(prev => ({ ...prev, soundEffects: data }));
+        });
 
-      service.subscribe('dynamo/data/voice_effects', (data: VoiceEffect[]) => {
-        setState(prev => ({ ...prev, voiceEffects: data }));
-      });
+        service.subscribe('dynamo/data/voice_effects', (data: VoiceEffect[]) => {
+          console.log('Received voice effects data:', data);
+          setState(prev => ({ ...prev, voiceEffects: data }));
+        });
 
-      service.subscribe('dynamo/data/sound_devices', (data: string[]) => {
-        setState(prev => ({ ...prev, soundDevices: data }));
-      });
+        service.subscribe('dynamo/data/sound_devices', (data: string[]) => {
+          console.log('Received sound devices data:', data);
+          setState(prev => ({ ...prev, soundDevices: data }));
+        });
 
-      service.subscribe('dynamo/data/anydesk_id', (data: { id: string }) => {
-        setState(prev => ({ ...prev, anydeskId: data.id }));
-      });
+        service.subscribe('dynamo/data/anydesk_id', (data: { id: string }) => {
+          console.log('Received anydesk ID data:', data);
+          setState(prev => ({ ...prev, anydeskId: data.id }));
+        });
 
-      service.subscribe('dynamo/data/bitmap', (data: { bitmap: string }) => {
-        setState(prev => ({ ...prev, bitmap: data.bitmap }));
-      });
-
-      const connected = await service.connect();
-      setState(prev => ({ ...prev, isConnected: connected }));
-      return connected;
-    } catch (error) {
-      console.error('Failed to connect to MQTT:', error);
-      setState(prev => ({ ...prev, isConnected: false }));
-      return false;
-    }
-  }, []);
+        service.subscribe('dynamo/data/bitmap', (data: { bitmap: string }) => {
+          console.log('Received bitmap data:', data);
+          setState(prev => ({ ...prev, bitmap: data.bitmap }));
+        });
+        
+        setState(prev => ({ ...prev, isConnected: true }));
+         setIsConnecting(false);
+         return true;
+       } else {
+         console.log('MQTT connection failed');
+         setState(prev => ({ ...prev, isConnected: false }));
+         setIsConnecting(false);
+         return false;
+       }
+     } catch (error) {
+       console.error('Failed to connect to MQTT:', error);
+       setState(prev => ({ ...prev, isConnected: false }));
+       setIsConnecting(false);
+       return false;
+     }
+   }, [isConnecting]);
 
   const disconnect = useCallback(() => {
     const service = getMQTTService();
@@ -168,6 +204,34 @@ export function useMQTT(): MQTTState & MQTTActions {
     }
   }, []);
 
+  const setExpression = useCallback(async (expression: string) => {
+    const service = getMQTTService();
+    if (service) {
+      await service.setExpression(expression);
+    }
+  }, []);
+
+  const toggleFaceExpressionTracking = useCallback(async (enabled: boolean) => {
+    const service = getMQTTService();
+    if (service) {
+      await service.toggleFaceExpressionTracking(enabled);
+    }
+  }, []);
+
+  const toggleEyeTracking = useCallback(async (enabled: boolean) => {
+    const service = getMQTTService();
+    if (service) {
+      await service.toggleEyeTracking(enabled);
+    }
+  }, []);
+
+  const toggleEyebrows = useCallback(async (enabled: boolean) => {
+    const service = getMQTTService();
+    if (service) {
+      await service.toggleEyebrows(enabled);
+    }
+  }, []);
+
   const toggleExternalCommands = useCallback(async (locked: boolean) => {
     const service = getMQTTService();
     if (service) {
@@ -196,24 +260,48 @@ export function useMQTT(): MQTTState & MQTTActions {
     }
   }, []);
 
-  // Auto-connect on mount
-  useEffect(() => { connect(); }, [connect]);
-
-  // Monitor connection status
+  // Auto-connect on mount (only once)
   useEffect(() => {
-    const interval = setInterval(() => {
+    let mounted = true;
+    
+    const attemptConnection = async () => {
+      if (mounted && !isConnecting) {
+        await connect();
+      }
+    };
+    
+    attemptConnection();
+    
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Monitor connection status with debouncing
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let lastStatus: boolean | null = null;
+    
+    const checkConnection = () => {
       const service = getMQTTService();
       if (service) {
         const connected = service.getConnectionStatus();
-        setState(prev => {
-          if (prev.isConnected !== connected) {
-            return { ...prev, isConnected: connected };
-          }
-          return prev;
-        });
+        if (lastStatus !== connected) {
+          console.log('MQTT connection status changed:', lastStatus, '->', connected);
+          lastStatus = connected;
+          setState(prev => ({ ...prev, isConnected: connected }));
+        }
       }
-    }, 1000);
-    return () => clearInterval(interval);
+      timeoutId = setTimeout(checkConnection, 5000); // Check every 5 seconds
+    };
+
+    timeoutId = setTimeout(checkConnection, 1000);
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, []);
 
   return {
@@ -232,6 +320,10 @@ export function useMQTT(): MQTTState & MQTTActions {
     toggleHotwordDetection,
     triggerHotword,
     textToSpeech,
+    setExpression,
+    toggleFaceExpressionTracking,
+    toggleEyeTracking,
+    toggleEyebrows,
     toggleExternalCommands,
     shutdown,
     reboot,

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Eye, EyeOff, AlertTriangle, ScanFace } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { useMQTT } from '@/hooks/useMQTT';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,35 +34,68 @@ const expressionPresets = [
 ];
 
 export default function ExpressionControl() {
+  const mqtt = useMQTT();
   const [isExprTracking, setIsExprTracking] = useState(true);
   const [isEyeTracking, setIsEyeTracking] = useState(true);
   const [activeExpression, setActiveExpression] = useState<number | null>(null);
   const [showMotorDialog, setShowMotorDialog] = useState(false);
   const [motorEnabled, setMotorEnabled] = useState(true);
 
-  const toggleExprTracking = () => {
-    setIsExprTracking(!isExprTracking);
-    if (!isExprTracking) {
+  const toggleExprTracking = async () => {
+    const newState = !isExprTracking;
+    setIsExprTracking(newState);
+    if (!newState) {
       setActiveExpression(null);
     }
+    try {
+      await mqtt.toggleFaceExpressionTracking(newState);
+    } catch (error) {
+      console.error('Failed to toggle face expression tracking:', error);
+    }
   };
 
-  const toggleEyeTracking = () => {
-    setIsEyeTracking(!isEyeTracking);
+  const toggleEyeTracking = async () => {
+    const newState = !isEyeTracking;
+    setIsEyeTracking(newState);
+    try {
+      await mqtt.toggleEyeTracking(newState);
+    } catch (error) {
+      console.error('Failed to toggle eye tracking:', error);
+    }
   };
 
-  const handleExpressionSelect = (expressionId: number) => {
+  const handleExpressionSelect = async (expressionId: number) => {
     if (expressionId !== activeExpression) {
       setIsExprTracking(false);
+      try {
+        await mqtt.toggleFaceExpressionTracking(false);
+      } catch (error) {
+        console.error('Failed to disable face expression tracking:', error);
+      }
     }
-    setActiveExpression(expressionId === activeExpression ? null : expressionId);
+    
+    const newActiveExpression = expressionId === activeExpression ? null : expressionId;
+    setActiveExpression(newActiveExpression);
+    
+    if (newActiveExpression !== null) {
+      try {
+        await mqtt.setExpression(expressionId.toString());
+      } catch (error) {
+        console.error('Failed to set expression:', error);
+      }
+    }
   };
 
-  const handleMotorToggle = () => {
+  const handleMotorToggle = async () => {
     if (!motorEnabled) {
       setShowMotorDialog(true);
     } else {
       setMotorEnabled(false);
+      try {
+        await mqtt.toggleEyebrows(false);
+      } catch (error) {
+        console.error('Failed to toggle eyebrows:', error);
+      }
     }
   };
 
@@ -159,9 +193,14 @@ export default function ExpressionControl() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
+              onClick={async () => {
                 setMotorEnabled(true);
                 setShowMotorDialog(false);
+                try {
+                  await mqtt.toggleEyebrows(true);
+                } catch (error) {
+                  console.error('Failed to enable eyebrows:', error);
+                }
               }}
             >
               Enable Motors
