@@ -2,9 +2,10 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Terminal, Settings, HardDrive, Cpu, MemoryStick, RefreshCcw, Power, LogOut } from 'lucide-react';
+import { Terminal, RefreshCcw, Power, LogOut, Lock, Unlock, Copy, CheckCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 
 type SpotifyConnectionStatus = 'loading' | 'connected' | 'disconnected' | 'error';
 import {
@@ -26,20 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-interface SystemMetrics {
-  cpuUsage: number;
-  memoryUsage: number;
-  diskSpace: number;
-  temperature: number;
-}
-
 function AdminPanelContent() {
-  const [metrics, setMetrics] = useState<SystemMetrics>({
-    cpuUsage: 0,
-    memoryUsage: 0,
-    diskSpace: 0,
-    temperature: 0,
-  });
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
   const [showPowerDialog, setShowPowerDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
@@ -49,6 +37,9 @@ function AdminPanelContent() {
   const [status, setSpotifyStatus] = useState<string>('');
   const [error, setSpotifyError] = useState<string>('');
   const [SpotifyConnectionStatus, setSpotifyConnectionStatus] = useState<SpotifyConnectionStatus>('loading');
+  const [isExternalCommandsLocked, setIsExternalCommandsLocked] = useState(true);
+  const [anydeskKey] = useState('591283563');
+  const [keyCopied, setKeyCopied] = useState(false);
   
   const searchParams = useSearchParams();
 
@@ -63,20 +54,6 @@ function AdminPanelContent() {
     
     checkSpotifyConnectionStatus();
   }, [searchParams]);
-
-  // Simulate metrics update
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMetrics({
-        cpuUsage: Math.random() * 100,
-        memoryUsage: Math.random() * 100,
-        diskSpace: Math.random() * 100,
-        temperature: 40 + Math.random() * 20,
-      });
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   async function checkSpotifyConnectionStatus() {
     try {
@@ -121,82 +98,130 @@ function AdminPanelContent() {
   }
 
   const handleCommand = (command: string) => {
-    setTerminalOutput(prev => [...prev, `> ${command}`, 'Processing command...']);
+    if (isExternalCommandsLocked && (command.includes('system:') || command.includes('external:'))) {
+      setTerminalOutput(prev => [...prev, `> ${command}`, 'Error: External commands are locked. Please unlock to execute system commands.']);
+    } else {
+      setTerminalOutput(prev => [...prev, `> ${command}`, 'Processing command...']);
+    }
+  };
+
+  const handleToggleLock = () => {
+    setIsExternalCommandsLocked(!isExternalCommandsLocked);
+    setTerminalOutput(prev => [...prev, 
+      isExternalCommandsLocked 
+        ? 'External commands have been UNLOCKED' 
+        : 'External commands have been LOCKED'
+    ]);
+  };
+
+  const handleCopyAnydeskKey = async () => {
+    try {
+      await navigator.clipboard.writeText(anydeskKey);
+      setKeyCopied(true);
+      setTimeout(() => setKeyCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy AnyDesk key:', err);
+    }
   };
 
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
-      {
-        <div className="container mx-auto px-4 pb-20 pt-6">
+      <div className="container mx-auto px-4 pb-20 pt-6">
         <div className="mb-6">
-  
-          {/* System Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">CPU Usage</CardTitle>
-                <Cpu className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metrics.cpuUsage.toFixed(1)}%</div>
-                <div className="w-full bg-secondary mt-2 rounded-full h-2">
-                  <div
-                    className="bg-primary h-2 rounded-full transition-all"
-                    style={{ width: `${metrics.cpuUsage}%` }}
+
+          {/* AnyDesk Number */}
+          <Card className="mb-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">AnyDesk Remote Access</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">AnyDesk ID</label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 p-3 bg-muted rounded-md font-mono text-lg font-semibold tracking-wider">
+                    {anydeskKey}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyAnydeskKey}
+                    className="flex items-center gap-2"
+                  >
+                    {keyCopied ? (
+                      <>
+                        <CheckCheck className="h-4 w-4" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Use this ID to connect remotely via AnyDesk
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Lock and Unlock External Commands */}
+          <Card className="mb-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Security Controls</CardTitle>
+              {isExternalCommandsLocked ? (
+                <Lock className="h-4 w-4 text-red-500" />
+              ) : (
+                <Unlock className="h-4 w-4 text-green-500" />
+              )}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">External Commands</label>
+                  <p className="text-xs text-muted-foreground">
+                    {isExternalCommandsLocked 
+                      ? 'System commands are currently locked for security' 
+                      : 'System commands are unlocked and can be executed'
+                    }
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {isExternalCommandsLocked ? 'Locked' : 'Unlocked'}
+                  </span>
+                  <Switch
+                    checked={!isExternalCommandsLocked}
+                    onCheckedChange={handleToggleLock}
                   />
                 </div>
-              </CardContent>
-            </Card>
-  
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Memory Usage</CardTitle>
-                <MemoryStick className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metrics.memoryUsage.toFixed(1)}%</div>
-                <div className="w-full bg-secondary mt-2 rounded-full h-2">
-                  <div
-                    className="bg-primary h-2 rounded-full transition-all"
-                    style={{ width: `${metrics.memoryUsage}%` }}
-                  />
+              </div>
+              <div className={`p-3 rounded-md text-sm ${
+                isExternalCommandsLocked 
+                  ? 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800' 
+                  : 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+              }`}>
+                <div className="flex items-center gap-2">
+                  {isExternalCommandsLocked ? (
+                    <>
+                      <Lock className="h-4 w-4" />
+                      <span className="font-medium">Security Active:</span>
+                      External system commands are blocked
+                    </>
+                  ) : (
+                    <>
+                      <Unlock className="h-4 w-4" />
+                      <span className="font-medium">Security Disabled:</span>
+                      External system commands are allowed
+                    </>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-  
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Disk Space</CardTitle>
-                <HardDrive className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metrics.diskSpace.toFixed(1)}%</div>
-                <div className="w-full bg-secondary mt-2 rounded-full h-2">
-                  <div
-                    className="bg-primary h-2 rounded-full transition-all"
-                    style={{ width: `${metrics.diskSpace}%` }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-  
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Temperature</CardTitle>
-                <Settings className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metrics.temperature.toFixed(1)}°C</div>
-                <div className="w-full bg-secondary mt-2 rounded-full h-2">
-                  <div
-                    className="bg-primary h-2 rounded-full transition-all"
-                    style={{ width: `${(metrics.temperature - 40) * 5}%` }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-  
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Spotify Authentication */}
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -224,7 +249,7 @@ function AdminPanelContent() {
                   </div>
                 )}
               </div>
-  
+
               {/* Authentication Form */}
               <form onSubmit={handleAuthenticate} className="space-y-4">
                 {process.env.NEXT_PUBLIC_ADMIN_PASSWORD_REQUIRED === 'true' && (
@@ -247,7 +272,7 @@ function AdminPanelContent() {
                   {SpotifyConnectionStatus === 'connected' ? 'Connected' : 'Connect to Spotify'}
                 </Button>
               </form>
-  
+
               {/* Status Messages */}
               {status && (
                 <div className="text-green-600 dark:text-green-400">{status}</div>
@@ -257,7 +282,7 @@ function AdminPanelContent() {
               )}
             </CardContent>
           </Card>
-  
+
           {/* Audio Device Controls */}
           <Card className="mb-6">
             <CardContent className="p-4">
@@ -291,7 +316,7 @@ function AdminPanelContent() {
               </div>
             </CardContent>
           </Card>
-  
+
           {/* Command Terminal */}
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -321,7 +346,7 @@ function AdminPanelContent() {
               </div>
             </CardContent>
           </Card>
-  
+
           {/* System Control Buttons */}
           <div className="flex gap-4">
             <Button
@@ -331,9 +356,10 @@ function AdminPanelContent() {
             >
               <Power className="mr-2 h-4 w-4" />
               Power Options
+              {isExternalCommandsLocked && <Lock className="ml-2 h-3 w-3" />}
             </Button>
           </div>
-  
+
           {/* Power Options Dialog */}
           <AlertDialog open={showPowerDialog} onOpenChange={setShowPowerDialog}>
             <AlertDialogContent>
@@ -380,7 +406,7 @@ function AdminPanelContent() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-  
+
           {/* Reset Confirmation Dialog */}
           <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
             <AlertDialogContent>
@@ -406,7 +432,6 @@ function AdminPanelContent() {
           </AlertDialog>
         </div>
       </div>
-      }
     </div>
   );
 }
