@@ -1,26 +1,29 @@
 "use client"
 
 import { useState } from 'react';
-import { Mic, MicOff, Volume2, AudioWaveform, AudioLines } from 'lucide-react';
+import { Mic, MicOff, Volume2, AudioWaveform, AudioLines, Wifi, WifiOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useMQTT } from '@/hooks/useMQTT';
 
-const voiceEffectsModulation = [
-  {id: 1, name: 'Mekhy'},
-  {id: 2, name: 'Robot'},
-  {id: 3, name: 'Ghostface'},
-  {id: 4, name: 'Autotune'},
-  {id: 5, name: 'Alastor'},
-  {id: 6, name: 'Minion'},
+// Fallback mock data when MQTT is not connected
+const fallbackVoiceEffectsModulation = [
+  {id: 1, name: 'Mekhy', type: 'modulation'},
+  {id: 2, name: 'Robot', type: 'modulation'},
+  {id: 3, name: 'Ghostface', type: 'modulation'},
+  {id: 4, name: 'Autotune', type: 'modulation'},
+  {id: 5, name: 'Alastor', type: 'modulation'},
+  {id: 6, name: 'Minion', type: 'modulation'},
 ];
 
-const voiceEffectsGibberish = [
-  {id: 7, name: 'Isabelle'},
-  {id: 8, name: 'Canine'},
-  {id: 9, name: 'Alphys'},
-  {id: 10, name: 'Censored'},
+const fallbackVoiceEffectsGibberish = [
+  {id: 7, name: 'Isabelle', type: 'gibberish'},
+  {id: 8, name: 'Canine', type: 'gibberish'},
+  {id: 9, name: 'Alphys', type: 'gibberish'},
+  {id: 10, name: 'Censored', type: 'gibberish'},
 ];
 
 export default function VoiceControl() {
@@ -30,12 +33,88 @@ export default function VoiceControl() {
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'modulation' | 'gibberish'>('modulation');
 
-  const toggleEffect = (effectId: number) => {
-    setActiveEffect(prev => prev === effectId ? null : effectId);
+  const {
+    isConnected,
+    voiceEffects,
+    setVoiceEffect,
+    setMicrophoneVolume,
+    toggleMicrophone,
+    toggleVoiceChanger,
+  } = useMQTT();
+
+  // Use MQTT voice effects if connected, otherwise fallback to mock data
+  const voiceEffectsModulation = isConnected && voiceEffects.length > 0 
+    ? voiceEffects.filter(effect => effect.type === 'modulation')
+    : fallbackVoiceEffectsModulation;
+    
+  const voiceEffectsGibberish = isConnected && voiceEffects.length > 0
+    ? voiceEffects.filter(effect => effect.type === 'gibberish')
+    : fallbackVoiceEffectsGibberish;
+
+  const toggleEffect = async (effectId: number) => {
+    const newActiveEffect = activeEffect === effectId ? null : effectId;
+    setActiveEffect(newActiveEffect);
+    
+    if (isConnected && newActiveEffect !== null) {
+      try {
+        await setVoiceEffect(newActiveEffect);
+      } catch (error) {
+        console.error('Failed to set voice effect via MQTT:', error);
+      }
+    }
+  };
+
+  const handleMicrophoneToggle = async () => {
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    
+    if (isConnected) {
+      try {
+        await toggleMicrophone(!newMutedState);
+      } catch (error) {
+        console.error('Failed to toggle microphone via MQTT:', error);
+      }
+    }
+  };
+
+  const handleVolumeChange = async (newVolume: number) => {
+    setVolume(newVolume);
+    
+    if (isConnected) {
+      try {
+        await setMicrophoneVolume(newVolume);
+      } catch (error) {
+        console.error('Failed to set microphone volume via MQTT:', error);
+      }
+    }
+  };
+
+  const handleVoiceChangerToggle = async () => {
+    const newState = !voiceChangerEnabled;
+    setVoiceChangerEnabled(newState);
+    
+    if (isConnected) {
+      try {
+        await toggleVoiceChanger(newState);
+      } catch (error) {
+        console.error('Failed to toggle voice changer via MQTT:', error);
+      }
+    }
   };
 
   return (
     <div className="container mx-auto px-4 pb-32 pt-6">
+      
+      {/* MQTT Connection Status */}
+      {!isConnected && (
+        <Alert className="mb-4">
+          <WifiOff className="h-4 w-4" />
+          <AlertDescription>
+            MQTT not connected. Using mock data. Configure MQTT connection in the header to enable real-time voice control.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="mb-6">
         {/* Tab Buttons */}
         <div className="flex gap-4 mb-6">
@@ -71,7 +150,16 @@ export default function VoiceControl() {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="font-medium">{effect.name}</h3>
+                    {isConnected && (
+                      <p className="text-xs text-green-500 flex items-center gap-1">
+                        <Wifi className="h-3 w-3" />
+                        Live
+                      </p>
+                    )}
                   </div>
+                  {activeEffect === effect.id && (
+                    <AudioWaveform className="h-4 w-4 text-primary" />
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -85,13 +173,14 @@ export default function VoiceControl() {
               <Volume2 className="h-4 w-4 text-muted-foreground" />
               <Slider
                 value={[volume]}
-                onValueChange={(value) => setVolume(value[0])}
+                onValueChange={(value) => handleVolumeChange(value[0])}
                 max={100}
                 step={1}
                 disabled={isMuted}
                 className={cn(isMuted && "opacity-50")}
               />
               <span className="min-w-[3ch] text-sm">{volume}%</span>
+              {isConnected && <Wifi className="h-4 w-4 text-green-500" />}
             </div>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
@@ -99,7 +188,7 @@ export default function VoiceControl() {
                 size="lg"
                 variant={isMuted ? "outline" : "default"}
                 className="w-full sm:w-48 flex items-center justify-center gap-2"
-                onClick={() => setIsMuted(!isMuted)}
+                onClick={handleMicrophoneToggle}
               >
                 {isMuted ? (
                   <><MicOff className="h-5 w-5" /> Microphone OFF</>
@@ -112,7 +201,7 @@ export default function VoiceControl() {
                 size="lg"
                 variant={voiceChangerEnabled ? "default" : "outline"}
                 className="w-full sm:w-48 flex items-center justify-center gap-2"
-                onClick={() => setVoiceChangerEnabled(!voiceChangerEnabled)}
+                onClick={handleVoiceChangerToggle}
                 disabled={isMuted}
               >
                 {voiceChangerEnabled ? (

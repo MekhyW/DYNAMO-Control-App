@@ -6,6 +6,7 @@ import { Terminal, RefreshCcw, Power, LogOut, Lock, Unlock, Copy, CheckCheck } f
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { MQTTStatus } from '@/components/MQTTStatus';
 
 type SpotifyConnectionStatus = 'loading' | 'connected' | 'disconnected' | 'error';
 import {
@@ -164,6 +165,19 @@ function AdminPanelContent() {
                   Use this ID to connect remotely via AnyDesk
                 </p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* MQTT Connection Status */}
+          <Card className="mb-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">MQTT Connection</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <MQTTStatus showLabel={true} />
+              <p className="text-xs text-muted-foreground mt-2">
+                MQTT connection status for real-time device communication
+              </p>
             </CardContent>
           </Card>
 

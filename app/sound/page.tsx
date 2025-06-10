@@ -1,13 +1,15 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { Search, Play, Pause, SkipForward, Volume2, ListMusic } from 'lucide-react';
+import { Search, Play, Pause, SkipForward, Volume2, ListMusic, Wifi, WifiOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useSpotify } from '@/hooks/useSpotify';
+import { useMQTT } from '@/hooks/useMQTT';
 import { SpotifyTrack } from '@/types/spotify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Sheet,
   SheetContent,
@@ -16,7 +18,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-const soundPresets = [
+// Fallback mock data when MQTT is not connected
+const fallbackSoundPresets = [
   {id: 1, name: 'Startup Sequence'},
   {id: 2, name: 'System Ready'},
   {id: 3, name: 'Warning Alert'},
@@ -42,8 +45,53 @@ export default function SoundControl() {
     skipTrack,
   } = useSpotify();
 
+  const {
+    isConnected,
+    soundEffects,
+    playSoundEffect,
+    setOutputVolume,
+  } = useMQTT();
+
+  // Use MQTT sound effects if connected, otherwise fallback to mock data
+  const soundPresets = isConnected && soundEffects.length > 0 ? soundEffects : fallbackSoundPresets;
+
+  // Handle volume changes with MQTT
+  const handleVolumeChange = async (newVolume: number) => {
+    setVolume(newVolume);
+    if (isConnected) {
+      try {
+        await setOutputVolume(newVolume);
+      } catch (error) {
+        console.error('Failed to set volume via MQTT:', error);
+      }
+    }
+  };
+
+  // Handle sound effect playback
+  const handlePlaySoundEffect = async (effectId: number) => {
+    if (isConnected) {
+      try {
+        await playSoundEffect(effectId);
+      } catch (error) {
+        console.error('Failed to play sound effect via MQTT:', error);
+      }
+    } else {
+      console.log('Playing sound effect (mock):', effectId);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
+      
+      {/* MQTT Connection Status */}
+      {!isConnected && (
+        <Alert className="mb-4">
+          <WifiOff className="h-4 w-4" />
+          <AlertDescription>
+            MQTT not connected. Using mock data. Configure MQTT connection in the header to enable real-time control.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="mb-6">
         <div className="relative">
@@ -178,11 +226,12 @@ export default function SoundControl() {
               <Volume2 className="h-4 w-4 text-muted-foreground" />
               <Slider
                 value={[volume]}
-                onValueChange={(value) => setVolume(value[0])}
+                onValueChange={(value) => handleVolumeChange(value[0])}
                 max={100}
                 step={1}
               />
               <span className="min-w-[3ch] text-sm">{volume}%</span>
+              {isConnected && <Wifi className="h-4 w-4 text-green-500" />}
             </div>
           </div>
         </CardContent>
@@ -195,8 +244,18 @@ export default function SoundControl() {
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="font-medium">{preset.name}</h3>
+                  {isConnected && (
+                    <p className="text-xs text-green-500 flex items-center gap-1">
+                      <Wifi className="h-3 w-3" />
+                      Live
+                    </p>
+                  )}
                 </div>
-                <Button size="icon" variant="ghost">
+                <Button 
+                  size="icon" 
+                  variant="ghost"
+                  onClick={() => handlePlaySoundEffect(preset.id)}
+                >
                   <Play className="h-4 w-4" />
                 </Button>
               </div>
