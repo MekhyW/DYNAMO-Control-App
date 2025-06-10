@@ -1,14 +1,20 @@
 "use client"
 
-import { useState } from 'react';
-import { Search, Play, Pause, SkipForward, Volume2, ListMusic, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Play, Pause, SkipForward, Volume2, ListMusic } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useSpotify } from '@/hooks/useSpotify';
+import { SpotifyTrack } from '@/types/spotify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { useTelegramBot } from '@/hooks/useTelegramBot';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const soundPresets = [
   {id: 1, name: 'Startup Sequence'},
@@ -25,12 +31,6 @@ export default function SoundControl() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   
   const {
-    requestSoundEffectsList,
-    playSoundEffect,
-    setOutputVolume,
-  } = useTelegramBot();
-  
-  const {
     searchResults,
     currentTrack,
     isPlaying,
@@ -41,20 +41,6 @@ export default function SoundControl() {
     addToQueue,
     skipTrack,
   } = useSpotify();
-  
-  const handleVolumeChange = (newVolume: number[]) => {
-    const volumeValue = newVolume[0];
-    setVolume(volumeValue);
-    setOutputVolume(volumeValue);
-  };
-  
-  const handlePlaySoundEffect = (effectId: number) => {
-    playSoundEffect(effectId);
-  };
-  
-  const handleRequestSoundEffects = () => {
-    requestSoundEffectsList();
-  };
 
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
@@ -192,7 +178,7 @@ export default function SoundControl() {
               <Volume2 className="h-4 w-4 text-muted-foreground" />
               <Slider
                 value={[volume]}
-                onValueChange={handleVolumeChange}
+                onValueChange={(value) => setVolume(value[0])}
                 max={100}
                 step={1}
               />
@@ -202,41 +188,22 @@ export default function SoundControl() {
         </CardContent>
       </Card>
 
-      <Card className="mb-6">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-medium">Sound Effects</h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRequestSoundEffects}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Refresh Effects
-            </Button>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {soundPresets.map((preset) => (
-              <Card key={preset.id} className="cursor-pointer hover:bg-accent" onClick={() => handlePlaySoundEffect(preset.id)}>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium">{preset.name}</h3>
-                    </div>
-                    <Button size="icon" variant="ghost" onClick={(e) => {
-                      e.stopPropagation();
-                      handlePlaySoundEffect(preset.id);
-                    }}>
-                      <Play className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        {soundPresets.map((preset) => (
+          <Card key={preset.id} className="cursor-pointer hover:bg-accent">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-medium">{preset.name}</h3>
+                </div>
+                <Button size="icon" variant="ghost">
+                  <Play className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

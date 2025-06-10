@@ -1,13 +1,12 @@
 "use client"
 
 import { useState } from 'react';
-import { Sun, Lightbulb, LightbulbOff } from 'lucide-react';
+import { Sun, Moon, Lightbulb, LightbulbOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { HexColorPicker } from 'react-colorful';
-import { useTelegramBot } from '@/hooks/useTelegramBot';
 
 const lightEffects = [
   { id: 1, name: 'Solid Color', description: '' },
@@ -22,39 +21,12 @@ export default function LightControl() {
   const [isOn, setIsOn] = useState(true);
   const [color, setColor] = useState("#ff0000");
   const [mainBrightness, setMainBrightness] = useState(75);
+  const [accentBrightness, setAccentBrightness] = useState(50);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
-  
-  const {
-    toggleLeds,
-    setLedsBrightness,
-    setLedsColor,
-    setLedsEffect,
-  } = useTelegramBot();
 
   const handleEffectSelect = (effectId: number) => {
     if (!isOn) return;
-    const newActiveEffect = effectId === activeEffect ? null : effectId;
-    setActiveEffect(newActiveEffect);
-    
-    if (newActiveEffect !== null) {
-      setLedsEffect(effectId);
-    }
-  };
-  
-  const handleToggleLeds = (enabled: boolean) => {
-    setIsOn(enabled);
-    toggleLeds(enabled);
-  };
-  
-  const handleMainBrightnessChange = (value: number[]) => {
-    const brightness = value[0];
-    setMainBrightness(brightness);
-    setLedsBrightness(brightness);
-  };
-  
-  const handleColorChange = (newColor: string) => {
-    setColor(newColor);
-    setLedsColor(newColor);
+    setActiveEffect(effectId === activeEffect ? null : effectId);
   };
 
   return (
@@ -75,11 +47,11 @@ export default function LightControl() {
               </div>
               <Switch
                 checked={isOn}
-                onCheckedChange={handleToggleLeds}
+                onCheckedChange={setIsOn}
               />
             </div>
 
-            {/* Brightness Control */}
+            {/* Brightness Controls */}
             <div className={cn("space-y-6", !isOn && "opacity-50")}>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -90,7 +62,24 @@ export default function LightControl() {
                   <Sun className="h-4 w-4 text-muted-foreground" />
                   <Slider
                     value={[mainBrightness]}
-                    onValueChange={handleMainBrightnessChange}
+                    onValueChange={(value) => setMainBrightness(value[0])}
+                    max={100}
+                    step={1}
+                    disabled={!isOn}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">Accent Brightness</label>
+                  <span className="text-sm text-muted-foreground">{accentBrightness}%</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Moon className="h-4 w-4 text-muted-foreground" />
+                  <Slider
+                    value={[accentBrightness]}
+                    onValueChange={(value) => setAccentBrightness(value[0])}
                     max={100}
                     step={1}
                     disabled={!isOn}
@@ -108,7 +97,7 @@ export default function LightControl() {
             <div className="flex justify-center mb-4">
               <HexColorPicker
                 color={color}
-                onChange={handleColorChange}
+                onChange={setColor}
                 style={{ width: '100%', maxWidth: '300px' }}
               />
             </div>

@@ -1,12 +1,11 @@
 "use client"
 
 import { useState } from 'react';
-import { Mic, MicOff, Volume2, AudioWaveform, AudioLines, RefreshCw } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Mic, MicOff, Volume2, AudioWaveform, AudioLines } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useTelegramBot } from '@/hooks/useTelegramBot';
 
 const voiceEffectsModulation = [
   {id: 1, name: 'Mekhy'},
@@ -30,65 +29,14 @@ export default function VoiceControl() {
   const [voiceChangerEnabled, setVoiceChangerEnabled] = useState(true);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'modulation' | 'gibberish'>('modulation');
-  
-  const {
-    setVoiceEffect,
-    toggleMicrophone,
-    requestVoiceEffectsList,
-    toggleVoiceChanger,
-    setMicrophoneVolume,
-  } = useTelegramBot();
 
   const toggleEffect = (effectId: number) => {
-    const newActiveEffect = activeEffect === effectId ? null : effectId;
-    setActiveEffect(newActiveEffect);
-    
-    if (newActiveEffect !== null) {
-      setVoiceEffect(effectId);
-    }
-  };
-  
-  const handleMicrophoneToggle = () => {
-    const newMutedState = !isMuted;
-    setIsMuted(newMutedState);
-    toggleMicrophone(!newMutedState);
-  };
-  
-  const handleVoiceChangerToggle = () => {
-    const newVoiceChangerState = !voiceChangerEnabled;
-    setVoiceChangerEnabled(newVoiceChangerState);
-    toggleVoiceChanger(newVoiceChangerState);
-  };
-  
-  const handleVolumeChange = (newVolume: number[]) => {
-    const volumeValue = newVolume[0];
-    setVolume(volumeValue);
-    setMicrophoneVolume(volumeValue);
-  };
-  
-  const handleRequestVoiceEffects = () => {
-    requestVoiceEffectsList();
+    setActiveEffect(prev => prev === effectId ? null : effectId);
   };
 
   return (
     <div className="container mx-auto px-4 pb-32 pt-6">
       <div className="mb-6">
-        {/* Voice Effects Header */}
-        <Card className="mb-6">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Voice Effects</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRequestVoiceEffects}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Refresh Effects
-            </Button>
-          </CardHeader>
-        </Card>
-        
         {/* Tab Buttons */}
         <div className="flex gap-4 mb-6">
           <Button
@@ -137,7 +85,7 @@ export default function VoiceControl() {
               <Volume2 className="h-4 w-4 text-muted-foreground" />
               <Slider
                 value={[volume]}
-                onValueChange={handleVolumeChange}
+                onValueChange={(value) => setVolume(value[0])}
                 max={100}
                 step={1}
                 disabled={isMuted}
@@ -151,7 +99,7 @@ export default function VoiceControl() {
                 size="lg"
                 variant={isMuted ? "outline" : "default"}
                 className="w-full sm:w-48 flex items-center justify-center gap-2"
-                onClick={handleMicrophoneToggle}
+                onClick={() => setIsMuted(!isMuted)}
               >
                 {isMuted ? (
                   <><MicOff className="h-5 w-5" /> Microphone OFF</>
@@ -164,7 +112,7 @@ export default function VoiceControl() {
                 size="lg"
                 variant={voiceChangerEnabled ? "default" : "outline"}
                 className="w-full sm:w-48 flex items-center justify-center gap-2"
-                onClick={handleVoiceChangerToggle}
+                onClick={() => setVoiceChangerEnabled(!voiceChangerEnabled)}
                 disabled={isMuted}
               >
                 {voiceChangerEnabled ? (

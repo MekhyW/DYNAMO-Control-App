@@ -4,8 +4,16 @@ import { useState } from 'react';
 import { Eye, EyeOff, AlertTriangle, ScanFace } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { useTelegramBot } from '@/hooks/useTelegramBot';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
 
 const expressionPresets = [
@@ -30,60 +38,31 @@ export default function ExpressionControl() {
   const [activeExpression, setActiveExpression] = useState<number | null>(null);
   const [showMotorDialog, setShowMotorDialog] = useState(false);
   const [motorEnabled, setMotorEnabled] = useState(true);
-  
-  const {
-    toggleFaceExpressionTracking,
-    toggleEyeTracking,
-    toggleEyebrows,
-    setExpression,
-  } = useTelegramBot();
 
-  const handleToggleExprTracking = () => {
-    const newTrackingState = !isExprTracking;
-    setIsExprTracking(newTrackingState);
-    toggleFaceExpressionTracking(newTrackingState);
-    
-    if (!newTrackingState) {
+  const toggleExprTracking = () => {
+    setIsExprTracking(!isExprTracking);
+    if (!isExprTracking) {
       setActiveExpression(null);
     }
   };
 
-  const handleToggleEyeTracking = () => {
-    const newEyeTrackingState = !isEyeTracking;
-    setIsEyeTracking(newEyeTrackingState);
-    toggleEyeTracking(newEyeTrackingState);
+  const toggleEyeTracking = () => {
+    setIsEyeTracking(!isEyeTracking);
   };
 
   const handleExpressionSelect = (expressionId: number) => {
-    const newActiveExpression = expressionId === activeExpression ? null : expressionId;
-    
     if (expressionId !== activeExpression) {
       setIsExprTracking(false);
-      toggleFaceExpressionTracking(false);
     }
-    
-    setActiveExpression(newActiveExpression);
-    
-    if (newActiveExpression !== null) {
-      setExpression(expressionId);
-    }
+    setActiveExpression(expressionId === activeExpression ? null : expressionId);
   };
 
   const handleMotorToggle = () => {
     if (!motorEnabled) {
       setShowMotorDialog(true);
     } else {
-      const newMotorState = false;
-      setMotorEnabled(newMotorState);
-      toggleEyebrows(newMotorState);
+      setMotorEnabled(false);
     }
-  };
-  
-  const handleEnableMotors = () => {
-    const newMotorState = true;
-    setMotorEnabled(newMotorState);
-    toggleEyebrows(newMotorState);
-    setShowMotorDialog(false);
   };
 
   return (
@@ -106,7 +85,7 @@ export default function ExpressionControl() {
                 </div>
                 <Switch
                   checked={isExprTracking}
-                  onCheckedChange={handleToggleExprTracking}
+                  onCheckedChange={toggleExprTracking}
                 />
               </div>
 
@@ -121,7 +100,7 @@ export default function ExpressionControl() {
                 </div>
                 <Switch
                   checked={isEyeTracking}
-                  onCheckedChange={handleToggleEyeTracking}
+                  onCheckedChange={toggleEyeTracking}
                 />
               </div>
 
@@ -180,7 +159,10 @@ export default function ExpressionControl() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleEnableMotors}
+              onClick={() => {
+                setMotorEnabled(true);
+                setShowMotorDialog(false);
+              }}
             >
               Enable Motors
             </AlertDialogAction>
