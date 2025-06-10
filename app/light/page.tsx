@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { Sun, Moon, Lightbulb, LightbulbOff } from 'lucide-react';
+import { Sun, Lightbulb, LightbulbOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
@@ -21,7 +21,6 @@ export default function LightControl() {
   const [isOn, setIsOn] = useState(true);
   const [color, setColor] = useState("#ff0000");
   const [mainBrightness, setMainBrightness] = useState(75);
-  const [accentBrightness, setAccentBrightness] = useState(50);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
 
   const handleEffectSelect = (effectId: number) => {
@@ -63,23 +62,6 @@ export default function LightControl() {
                   <Slider
                     value={[mainBrightness]}
                     onValueChange={(value) => setMainBrightness(value[0])}
-                    max={100}
-                    step={1}
-                    disabled={!isOn}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Accent Brightness</label>
-                  <span className="text-sm text-muted-foreground">{accentBrightness}%</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Moon className="h-4 w-4 text-muted-foreground" />
-                  <Slider
-                    value={[accentBrightness]}
-                    onValueChange={(value) => setAccentBrightness(value[0])}
                     max={100}
                     step={1}
                     disabled={!isOn}
