@@ -30,14 +30,20 @@ interface TelegramProviderProps {
 export function TelegramProvider({ children }: TelegramProviderProps) {
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [isOwner, setIsOwner] = useState(false);
-  const [isAppLocked, setIsAppLocked] = useState(true);
+  const [isAppLocked, setIsAppLocked] = useState(false); // Default to unlocked
   const [isLoading, setIsLoading] = useState(true);
   const [initDataRaw, setInitDataRaw] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const initializeTelegram = async () => {
       try {
         if (typeof window !== 'undefined') {
+          const savedLockState = localStorage.getItem('appLockState');
+          if (savedLockState !== null) {
+            setIsAppLocked(savedLockState === 'true');
+          }
+          
           const launchParams = retrieveLaunchParams();
           const { initDataRaw: rawData } = launchParams;
           setInitDataRaw(rawData as string | null);
@@ -45,10 +51,9 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
           if (initData?.user) {
             const telegramUser = initData.user;
             setUser(telegramUser);
-            console.log(process.env.NEXT_PUBLIC_FURSUIT_OWNER_ID);
-            const isUserOwner = process.env.NEXT_PUBLIC_FURSUIT_OWNER_ID && telegramUser.id.toString() == process.env.NEXT_PUBLIC_FURSUIT_OWNER_ID;
+            const isUserOwner = process.env.NEXT_PUBLIC_FURSUIT_OWNER_ID && 
+              telegramUser.id.toString() === process.env.NEXT_PUBLIC_FURSUIT_OWNER_ID;
             setIsOwner(!!isUserOwner);
-            if (isUserOwner) { setIsAppLocked(false); }
           }
         }
       } catch (error) {
@@ -57,14 +62,20 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
         if (isDev) {
           const devOwner = process.env.NEXT_PUBLIC_DEV_AS_OWNER === 'true';
           setIsOwner(devOwner);
-          if (devOwner) { setIsAppLocked(false); }
         }
       } finally {
         setIsLoading(false);
+        setIsInitialized(true);
       }
     };
     initializeTelegram();
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isInitialized) {
+      localStorage.setItem('appLockState', isAppLocked.toString());
+    }
+  }, [isAppLocked, isInitialized]);
 
   const contextValue: TelegramContextType = {
     user,

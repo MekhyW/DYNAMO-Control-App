@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -104,13 +103,13 @@ function AdminPanelContent() {
     }
   }
 
-  const handleToggleLock = async () => {
+  const handleToggleLock = async (checked: boolean) => {
     if (!isOwner) {
       console.error('Only the owner can toggle the app lock');
       return;
     }
     
-    const newLockedState = !isAppLocked;
+    const newLockedState = !checked;
     setIsAppLocked(newLockedState);
     try {
       await mqtt.toggleExternalCommands(newLockedState);

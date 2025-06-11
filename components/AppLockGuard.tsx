@@ -70,5 +70,40 @@ export function AppLockGuard({ children }: AppLockGuardProps) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="container mx-auto px-4 pb-20 pt-6 flex items-center justify-center min-h-screen">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <User className="h-16 w-16 text-yellow-500" />
+          </div>
+          <CardTitle className="text-xl font-bold text-yellow-600 dark:text-yellow-400">
+            Unauthorized Access
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-center space-y-4">
+          <p className="text-muted-foreground">
+            You are not authorized to access the M.E.K.H.Y Control System.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Only the system owner can access this application.
+          </p>
+          {user && (
+            <div className="mt-6 p-4 bg-muted rounded-lg">
+              <div className="flex items-center justify-center space-x-2 text-sm">
+                <User className="h-4 w-4" />
+                <span>
+                  Logged in as: {user.first_name} {user.last_name || ''}
+                  {user.username && ` (@${user.username})`}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                User ID: {user.id}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
