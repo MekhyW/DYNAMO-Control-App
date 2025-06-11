@@ -74,6 +74,12 @@ function AdminPanelContent() {
 
   async function handleAuthenticate(e: React.FormEvent) {
     e.preventDefault();
+    
+    if (!isOwner) {
+      setSpotifyError('Only the owner can authenticate with Spotify');
+      return;
+    }
+    
     setSpotifyStatus('Authenticating...');
     setSpotifyError('');
     
@@ -116,6 +122,11 @@ function AdminPanelContent() {
   };
 
   const handleCopyAnydeskKey = async () => {
+    if (!isOwner) {
+      console.error('Only the owner can copy the AnyDesk key');
+      return;
+    }
+    
     try {
       await navigator.clipboard.writeText(anydeskKey);
       setKeyCopied(true);
@@ -134,37 +145,49 @@ function AdminPanelContent() {
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">AnyDesk Remote Access</CardTitle>
+              {!isOwner && <Lock className="h-4 w-4 text-red-500" />}
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">AnyDesk ID</label>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 p-3 bg-muted rounded-md font-mono text-lg font-semibold tracking-wider">
-                    {anydeskKey}
+              {!isOwner && (
+                <div className="p-3 rounded-md bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    <span className="font-medium">Owner Access Required:</span>
+                    Only the owner can access remote connection details
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCopyAnydeskKey}
-                    className="flex items-center gap-2"
-                  >
-                    {keyCopied ? (
-                      <>
-                        <CheckCheck className="h-4 w-4" />
-                        Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-4 w-4" />
-                        Copy
-                      </>
-                    )}
-                  </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Use this ID to connect remotely via AnyDesk
-                </p>
-              </div>
+              )}
+              {isOwner && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">AnyDesk ID</label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 p-3 bg-muted rounded-md font-mono text-lg font-semibold tracking-wider">
+                      {anydeskKey}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCopyAnydeskKey}
+                      className="flex items-center gap-2"
+                    >
+                      {keyCopied ? (
+                        <>
+                          <CheckCheck className="h-4 w-4" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4" />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Use this ID to connect remotely via AnyDesk
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -270,8 +293,19 @@ function AdminPanelContent() {
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Spotify Connection</CardTitle>
+              {!isOwner && <Lock className="h-4 w-4 text-red-500" />}
             </CardHeader>
             <CardContent className="space-y-4">
+              {!isOwner && (
+                <div className="p-3 rounded-md bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    <span className="font-medium">Owner Access Required:</span>
+                    Only the owner can manage Spotify connection
+                  </div>
+                </div>
+              )}
+              
               {/* Connection Status */}
               <div>
                 {SpotifyConnectionStatus === 'loading' && (
@@ -305,15 +339,17 @@ function AdminPanelContent() {
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full rounded-md border bg-background px-3 py-2 text-sm"
                       required
+                      disabled={!isOwner}
                     />
                   </div>
                 )}
                 <Button
                   type="submit"
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  disabled={SpotifyConnectionStatus === 'connected'}
+                  disabled={SpotifyConnectionStatus === 'connected' || !isOwner}
                 >
                   {SpotifyConnectionStatus === 'connected' ? 'Connected' : 'Connect to Spotify'}
+                  {!isOwner && <Lock className="ml-2 h-3 w-3" />}
                 </Button>
               </form>
 
@@ -329,11 +365,24 @@ function AdminPanelContent() {
 
           {/* Audio Device Controls */}
           <Card className="mb-6">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Audio Device Controls</CardTitle>
+              {!isOwner && <Lock className="h-4 w-4 text-red-500" />}
+            </CardHeader>
             <CardContent className="p-4">
+              {!isOwner && (
+                <div className="p-3 rounded-md bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 text-sm mb-4">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    <span className="font-medium">Owner Access Required:</span>
+                    Only the owner can modify audio device settings
+                  </div>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Input Device</label>
-                  <Select value={selectedInputDevice} onValueChange={setSelectedInputDevice}>
+                  <Select value={selectedInputDevice} onValueChange={isOwner ? setSelectedInputDevice : undefined} disabled={!isOwner}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select input device" />
                     </SelectTrigger>
@@ -346,7 +395,7 @@ function AdminPanelContent() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Output Device</label>
-                  <Select value={selectedOutputDevice} onValueChange={setSelectedOutputDevice}>
+                  <Select value={selectedOutputDevice} onValueChange={isOwner ? setSelectedOutputDevice : undefined} disabled={!isOwner}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select output device" />
                     </SelectTrigger>
