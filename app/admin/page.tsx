@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Terminal, RefreshCcw, Power, LogOut, Lock, Unlock, Copy, CheckCheck } from 'lucide-react';
+import { RefreshCcw, Power, LogOut, Lock, Unlock, Copy, CheckCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -27,11 +27,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 function AdminPanelContent() {
   const mqtt = useMQTT();
-  const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
   const [showPowerDialog, setShowPowerDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [selectedInputDevice, setSelectedInputDevice] = useState("");
@@ -100,23 +98,9 @@ function AdminPanelContent() {
     }
   }
 
-  const handleCommand = (command: string) => {
-    if (isExternalCommandsLocked && (command.includes('system:') || command.includes('external:'))) {
-      setTerminalOutput(prev => [...prev, `> ${command}`, 'Error: External commands are locked. Please unlock to execute system commands.']);
-    } else {
-      setTerminalOutput(prev => [...prev, `> ${command}`, 'Processing command...']);
-    }
-  };
-
   const handleToggleLock = async () => {
     const newLockedState = !isExternalCommandsLocked;
     setIsExternalCommandsLocked(newLockedState);
-    setTerminalOutput(prev => [...prev, 
-      !newLockedState 
-        ? 'External commands have been UNLOCKED' 
-        : 'External commands have been LOCKED'
-    ]);
-    
     try {
       await mqtt.toggleExternalCommands(newLockedState);
     } catch (error) {
@@ -340,36 +324,6 @@ function AdminPanelContent() {
             </CardContent>
           </Card>
 
-          {/* Command Terminal */}
-          <Card className="mb-6">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">System Terminal</CardTitle>
-              <Terminal className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[200px] w-full rounded-md border bg-black p-4">
-                <div className="font-mono text-sm text-green-400">
-                  {terminalOutput.map((line, index) => (
-                    <div key={index}>{line}</div>
-                  ))}
-                </div>
-              </ScrollArea>
-              <div className="mt-2 flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter command..."
-                  className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCommand(e.currentTarget.value);
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
           {/* System Control Buttons */}
           <div className="flex gap-4">
             <Button
@@ -399,10 +353,8 @@ function AdminPanelContent() {
                     setShowPowerDialog(false);
                     try {
                       await mqtt.shutdown();
-                      setTerminalOutput(prev => [...prev, '> system:shutdown', 'Shutdown command sent via MQTT']);
                     } catch (error) {
                       console.error('Failed to send shutdown command:', error);
-                      setTerminalOutput(prev => [...prev, '> system:shutdown', 'Error: Failed to send shutdown command']);
                     }
                   }}
                 >
@@ -415,10 +367,8 @@ function AdminPanelContent() {
                     setShowPowerDialog(false);
                     try {
                       await mqtt.reboot();
-                      setTerminalOutput(prev => [...prev, '> system:reboot', 'Reboot command sent via MQTT']);
                     } catch (error) {
                       console.error('Failed to send reboot command:', error);
-                      setTerminalOutput(prev => [...prev, '> system:reboot', 'Error: Failed to send reboot command']);
                     }
                   }}
                 >
@@ -431,10 +381,8 @@ function AdminPanelContent() {
                     setShowPowerDialog(false);
                     try {
                       await mqtt.killSoftware();
-                      setTerminalOutput(prev => [...prev, '> system:kill', 'Kill software command sent via MQTT']);
                     } catch (error) {
                       console.error('Failed to send kill software command:', error);
-                      setTerminalOutput(prev => [...prev, '> system:kill', 'Error: Failed to send kill software command']);
                     }
                   }}
                 >
@@ -444,30 +392,6 @@ function AdminPanelContent() {
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          {/* Reset Confirmation Dialog */}
-          <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Reset System?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action will reset all system settings to their default values.
-                  This cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    setShowResetDialog(false);
-                    handleCommand('system:reset');
-                  }}
-                >
-                  Reset
-                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
