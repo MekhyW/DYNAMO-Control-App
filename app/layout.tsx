@@ -5,6 +5,8 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import Navigation from '@/components/navigation';
+import { TelegramProvider } from '@/contexts/TelegramContext';
+import { AppLockGuard } from '@/components/AppLockGuard';
 import { useSwipeable } from 'react-swipeable';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
@@ -71,13 +73,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <main className="min-h-screen bg-background" {...handlers}>
-            {children}
-          </main>
-          <Navigation />
-          <Toaster />
-        </ThemeProvider>
+        <TelegramProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <AppLockGuard>
+              <main className="min-h-screen bg-background" {...handlers}>
+                {children}
+              </main>
+              <Navigation />
+            </AppLockGuard>
+            <Toaster />
+          </ThemeProvider>
+        </TelegramProvider>
       </body>
     </html>
   );

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { MQTTStatus } from '@/components/MQTTStatus';
 import { useMQTT } from '@/hooks/useMQTT';
+import { useTelegram } from '@/contexts/TelegramContext';
 
 type SpotifyConnectionStatus = 'loading' | 'connected' | 'disconnected' | 'error';
 import {
@@ -30,15 +31,14 @@ import {
 
 function AdminPanelContent() {
   const mqtt = useMQTT();
+  const { isOwner, isAppLocked, setIsAppLocked, user } = useTelegram();
   const [showPowerDialog, setShowPowerDialog] = useState(false);
-  const [showResetDialog, setShowResetDialog] = useState(false);
   const [selectedInputDevice, setSelectedInputDevice] = useState("");
   const [selectedOutputDevice, setSelectedOutputDevice] = useState("");
   const [password, setPassword] = useState<string>('');
   const [status, setSpotifyStatus] = useState<string>('');
   const [error, setSpotifyError] = useState<string>('');
   const [SpotifyConnectionStatus, setSpotifyConnectionStatus] = useState<SpotifyConnectionStatus>('loading');
-  const [isExternalCommandsLocked, setIsExternalCommandsLocked] = useState(true);
   const [anydeskKey] = useState('591283563');
   const [keyCopied, setKeyCopied] = useState(false);
   
@@ -99,12 +99,19 @@ function AdminPanelContent() {
   }
 
   const handleToggleLock = async () => {
-    const newLockedState = !isExternalCommandsLocked;
-    setIsExternalCommandsLocked(newLockedState);
+    if (!isOwner) {
+      console.error('Only the owner can toggle the app lock');
+      return;
+    }
+    
+    const newLockedState = !isAppLocked;
+    setIsAppLocked(newLockedState);
     try {
       await mqtt.toggleExternalCommands(newLockedState);
     } catch (error) {
       console.error('Failed to toggle external commands:', error);
+      // Revert the state if MQTT command fails
+      setIsAppLocked(!newLockedState);
     }
   };
 
@@ -174,60 +181,90 @@ function AdminPanelContent() {
             </CardContent>
           </Card>
 
-          {/* Lock and Unlock External Commands */}
-          <Card className="mb-6">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Security Controls</CardTitle>
-              {isExternalCommandsLocked ? (
-                <Lock className="h-4 w-4 text-red-500" />
-              ) : (
-                <Unlock className="h-4 w-4 text-green-500" />
-              )}
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">External Commands</label>
-                  <p className="text-xs text-muted-foreground">
-                    {isExternalCommandsLocked 
-                      ? 'System commands are currently locked for security' 
-                      : 'System commands are unlocked and can be executed'
-                    }
-                  </p>
+          {/* User Information */}
+          {user && (
+            <Card className="mb-6">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">User Information</CardTitle>
+                {isOwner && <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">Owner</span>}
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="text-sm">
+                  <span className="font-medium">Name:</span> {user.first_name} {user.last_name || ''}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    {isExternalCommandsLocked ? 'Locked' : 'Unlocked'}
-                  </span>
-                  <Switch
-                    checked={!isExternalCommandsLocked}
-                    onCheckedChange={handleToggleLock}
-                  />
+                {user.username && (
+                  <div className="text-sm">
+                    <span className="font-medium">Username:</span> @{user.username}
+                  </div>
+                )}
+                <div className="text-sm">
+                  <span className="font-medium">User ID:</span> {user.id}
                 </div>
-              </div>
-              <div className={`p-3 rounded-md text-sm ${
-                isExternalCommandsLocked 
-                  ? 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800' 
-                  : 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-              }`}>
-                <div className="flex items-center gap-2">
-                  {isExternalCommandsLocked ? (
-                    <>
-                      <Lock className="h-4 w-4" />
-                      <span className="font-medium">Security Active:</span>
-                      External system commands are blocked
-                    </>
-                  ) : (
-                    <>
-                      <Unlock className="h-4 w-4" />
-                      <span className="font-medium">Security Disabled:</span>
-                      External system commands are allowed
-                    </>
-                  )}
+                {user.is_premium && (
+                  <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded inline-block">
+                    Telegram Premium
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Global App Lock Controls - Only for Owner */}
+          {isOwner && (
+            <Card className="mb-6">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Global App Security</CardTitle>
+                {isAppLocked ? (
+                  <Lock className="h-4 w-4 text-red-500" />
+                ) : (
+                  <Unlock className="h-4 w-4 text-green-500" />
+                )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium">App Access Control</label>
+                    <p className="text-xs text-muted-foreground">
+                      {isAppLocked 
+                        ? 'App is locked - only you can access all features' 
+                        : 'App is unlocked - all users can access features'
+                      }
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {isAppLocked ? 'Locked' : 'Unlocked'}
+                    </span>
+                    <Switch
+                      checked={!isAppLocked}
+                      onCheckedChange={handleToggleLock}
+                    />
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+                <div className={`p-3 rounded-md text-sm ${
+                  isAppLocked 
+                    ? 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800' 
+                    : 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    {isAppLocked ? (
+                      <>
+                        <Lock className="h-4 w-4" />
+                        <span className="font-medium">Global Lock Active:</span>
+                        All app features are restricted to owner only
+                      </>
+                    ) : (
+                      <>
+                        <Unlock className="h-4 w-4" />
+                        <span className="font-medium">Global Lock Disabled:</span>
+                        All users can access app features
+                      </>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Spotify Authentication */}
           <Card className="mb-6">
@@ -333,7 +370,7 @@ function AdminPanelContent() {
             >
               <Power className="mr-2 h-4 w-4" />
               Power Options
-              {isExternalCommandsLocked && <Lock className="ml-2 h-3 w-3" />}
+              {!isOwner && <Lock className="ml-2 h-3 w-3" />}
             </Button>
           </div>
 
@@ -349,7 +386,9 @@ function AdminPanelContent() {
               <div className="flex flex-col gap-2 py-4">
                 <Button
                   variant="destructive"
+                  disabled={!isOwner}
                   onClick={async () => {
+                    if (!isOwner) return;
                     setShowPowerDialog(false);
                     try {
                       await mqtt.shutdown();
@@ -360,10 +399,13 @@ function AdminPanelContent() {
                 >
                   <Power className="mr-2 h-4 w-4" />
                   Shutdown
+                  {!isOwner && <Lock className="ml-2 h-3 w-3" />}
                 </Button>
                 <Button
                   variant="destructive"
+                  disabled={!isOwner}
                   onClick={async () => {
+                    if (!isOwner) return;
                     setShowPowerDialog(false);
                     try {
                       await mqtt.reboot();
@@ -374,10 +416,13 @@ function AdminPanelContent() {
                 >
                   <RefreshCcw className="mr-2 h-4 w-4" />
                   Reboot
+                  {!isOwner && <Lock className="ml-2 h-3 w-3" />}
                 </Button>
                 <Button
                   variant="destructive"
+                  disabled={!isOwner}
                   onClick={async () => {
+                    if (!isOwner) return;
                     setShowPowerDialog(false);
                     try {
                       await mqtt.killSoftware();
@@ -388,6 +433,7 @@ function AdminPanelContent() {
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Kill Software
+                  {!isOwner && <Lock className="ml-2 h-3 w-3" />}
                 </Button>
               </div>
               <AlertDialogFooter>
