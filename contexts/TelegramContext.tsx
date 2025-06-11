@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { retrieveLaunchParams } from '@telegram-apps/sdk';
+import { useMQTT } from '@/hooks/useMQTT';
 
 interface TelegramUser {
   id: number;
@@ -34,6 +35,7 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [initDataRaw, setInitDataRaw] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const { isConnected } = useMQTT();
 
   useEffect(() => {
     const initializeTelegram = async () => {
@@ -71,17 +73,49 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
     initializeTelegram();
   }, []);
 
+  // MQTT subscription for app lock state
+  useEffect(() => {
+    if (isConnected && isInitialized) {
+      const mqttService = require('@/lib/mqtt').getMQTTService();
+      if (mqttService) {
+        mqttService.subscribe('mekhy/app/lock', (data: { locked: boolean }) => {
+          console.log('Received app lock state via MQTT:', data.locked);
+          setIsAppLocked(data.locked);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('appLockState', data.locked.toString());
+          }
+        });
+      }
+    }
+  }, [isConnected, isInitialized]);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && isInitialized) {
       localStorage.setItem('appLockState', isAppLocked.toString());
     }
   }, [isAppLocked, isInitialized]);
 
+  const handleSetIsAppLocked = (locked: boolean) => {
+    setIsAppLocked(locked);
+    if (isOwner && isConnected && isInitialized) {
+      const mqttService = require('@/lib/mqtt').getMQTTService();
+      if (mqttService) {
+        mqttService.publish('mekhy/app/lock', JSON.stringify({ locked }), { qos: 0, retain: true })
+          .then(() => {
+            console.log('Published app lock state to MQTT:', locked);
+          })
+          .catch((error: any) => {
+            console.error('Failed to publish app lock state:', error);
+          });
+      }
+    }
+  };
+
   const contextValue: TelegramContextType = {
     user,
     isOwner,
     isAppLocked,
-    setIsAppLocked,
+    setIsAppLocked: handleSetIsAppLocked,
     isLoading,
     initDataRaw,
   };

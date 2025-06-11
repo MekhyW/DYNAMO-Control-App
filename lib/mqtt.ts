@@ -136,7 +136,8 @@ class MQTTService {
       'dynamo/data/voice_effects', 
       'dynamo/data/bitmap',
       'dynamo/data/anydesk_id',
-      'dynamo/data/sound_devices'
+      'dynamo/data/sound_devices',
+      'mekhy/app/lock'
     ];
 
     dataTopics.forEach(topic => {
@@ -251,7 +252,7 @@ class MQTTService {
     await this.publish('dynamo/commands/kill-software', {});
   }
 
-  private async publish(topic: string, payload: any): Promise<void> {
+  async publish(topic: string, payload: any, options: { qos?: number, retain?: boolean } = {}): Promise<void> {
     if (!this.client) {
       console.error('MQTT client not initialized');
       throw new Error('MQTT client not initialized');
@@ -262,13 +263,19 @@ class MQTTService {
       throw new Error('MQTT client not connected');
     }
 
+    const publishOptions = {
+      qos: options.qos !== undefined ? options.qos : 1,
+      retain: options.retain !== undefined ? options.retain : false
+    };
+
     return new Promise((resolve, reject) => {
-      this.client!.publish(topic, JSON.stringify(payload), { qos: 1 }, (err) => {
+      const payloadStr = typeof payload === 'string' ? payload : JSON.stringify(payload);
+      this.client!.publish(topic, payloadStr, { qos: publishOptions.qos as 0 | 1 | 2, retain: publishOptions.retain }, (err) => {
         if (err) {
           console.error(`Failed to publish to ${topic}:`, err);
           reject(err);
         } else {
-          console.log(`Successfully published to ${topic}:`, payload);
+          console.log(`Successfully published to ${topic}:`, payload, 'with options:', publishOptions);
           resolve();
         }
       });
