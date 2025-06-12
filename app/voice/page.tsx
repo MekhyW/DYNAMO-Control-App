@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { Mic, MicOff, Volume2, AudioWaveform, AudioLines, Wifi, WifiOff } from 'lucide-react';
+import { Mic, MicOff, Volume2, AudioWaveform, AudioLines, WifiOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -28,7 +28,6 @@ const fallbackVoiceEffectsGibberish = [
 
 export default function VoiceControl() {
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(75);
   const [voiceChangerEnabled, setVoiceChangerEnabled] = useState(true);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'modulation' | 'gibberish'>('modulation');
@@ -37,7 +36,6 @@ export default function VoiceControl() {
     isConnected,
     voiceEffects,
     setVoiceEffect,
-    setMicrophoneVolume,
     toggleMicrophone,
     toggleVoiceChanger,
   } = useMQTT();
@@ -73,18 +71,6 @@ export default function VoiceControl() {
         await toggleMicrophone(!newMutedState);
       } catch (error) {
         console.error('Failed to toggle microphone via MQTT:', error);
-      }
-    }
-  };
-
-  const handleVolumeChange = async (newVolume: number) => {
-    setVolume(newVolume);
-    
-    if (isConnected) {
-      try {
-        await setMicrophoneVolume(newVolume);
-      } catch (error) {
-        console.error('Failed to set microphone volume via MQTT:', error);
       }
     }
   };
@@ -163,19 +149,6 @@ export default function VoiceControl() {
         {/* Main Controls */}
         <Card className="fixed bottom-4 left-4 right-4 p-4 bg-background border-t max-w-screen-lg mx-auto mb-8">
           <CardContent className="flex flex-col gap-6">
-            <div className="flex items-center gap-4">
-              <Volume2 className="h-4 w-4 text-muted-foreground" />
-              <Slider
-                value={[volume]}
-                onValueChange={(value) => handleVolumeChange(value[0])}
-                max={100}
-                step={1}
-                disabled={isMuted}
-                className={cn(isMuted && "opacity-50")}
-              />
-              <span className="min-w-[3ch] text-sm">{volume}%</span>
-            </div>
-            
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
               <Button
                 size="lg"

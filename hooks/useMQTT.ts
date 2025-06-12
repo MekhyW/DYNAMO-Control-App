@@ -19,7 +19,6 @@ interface MQTTActions {
   playSoundEffect: (effectId: number) => Promise<void>;
   setVoiceEffect: (effectId: number) => Promise<void>;
   setOutputVolume: (volume: number) => Promise<void>;
-  setMicrophoneVolume: (volume: number) => Promise<void>;
   toggleMicrophone: (enabled: boolean) => Promise<void>;
   toggleVoiceChanger: (enabled: boolean) => Promise<void>;
   toggleLeds: (enabled: boolean) => Promise<void>;
@@ -155,13 +154,6 @@ export function useMQTT(): MQTTState & MQTTActions {
     const service = getMQTTService();
     if (service) {
       await service.setOutputVolume(volume);
-    }
-  }, []);
-
-  const setMicrophoneVolume = useCallback(async (volume: number) => {
-    const service = getMQTTService();
-    if (service) {
-      await service.setMicrophoneVolume(volume);
     }
   }, []);
 
@@ -328,7 +320,6 @@ export function useMQTT(): MQTTState & MQTTActions {
     playSoundEffect,
     setVoiceEffect,
     setOutputVolume,
-    setMicrophoneVolume,
     toggleMicrophone,
     toggleVoiceChanger,
     toggleLeds,

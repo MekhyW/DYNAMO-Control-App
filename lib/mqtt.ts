@@ -215,11 +215,6 @@ class MQTTService {
     await this.publish('dynamo/commands/set-output-volume', payload);
   }
 
-  async setMicrophoneVolume(volume: number): Promise<void> {
-    const payload = this.addUserDataToPayload({ volume });
-    await this.publish('dynamo/commands/set-microphone-volume', payload);
-  }
-
   async toggleMicrophone(enabled: boolean): Promise<void> {
     const payload = this.addUserDataToPayload({ enabled });
     await this.publish('dynamo/commands/microphone-toggle', payload);
