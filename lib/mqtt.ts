@@ -28,12 +28,20 @@ interface DeviceInfo {
   soundDevices: string[];
 }
 
+interface TelegramUser {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+}
+
 class MQTTService {
   private client: MqttClient | null = null;
   private config: MQTTConfig;
   private isConnected = false;
   private isConnecting = false;
   private subscribers: Map<string, (data: any) => void> = new Map();
+  private authenticatedUser: TelegramUser | null = null;
 
   constructor() {
     this.config = {
@@ -171,85 +179,125 @@ class MQTTService {
     this.subscribers.delete(topic);
   }
 
-  // PUBLISH methods based on commands.txt PUBLISH section
+  setAuthenticatedUser(user: TelegramUser | null) {
+    this.authenticatedUser = user;
+  }
+
+  getAuthenticatedUser(): TelegramUser | null {
+    return this.authenticatedUser;
+  }
+
+  private addUserDataToPayload(payload: any): any {
+    if (!this.authenticatedUser) {
+      throw new Error('User not authenticated via Telegram');
+    }
+    return {
+      ...payload,
+      user: {
+        id: this.authenticatedUser.id,
+        first_name: this.authenticatedUser.first_name
+      }
+    };
+  }
+
   async playSoundEffect(effectId: number): Promise<void> {
-    await this.publish('dynamo/commands/play-sound-effect', { effectId });
+    const payload = this.addUserDataToPayload({ effectId });
+    await this.publish('dynamo/commands/play-sound-effect', payload);
   }
 
   async setVoiceEffect(effectId: number): Promise<void> {
-    await this.publish('dynamo/commands/set-voice-effect', { effectId });
+    const payload = this.addUserDataToPayload({ effectId });
+    await this.publish('dynamo/commands/set-voice-effect', payload);
   }
 
   async setOutputVolume(volume: number): Promise<void> {
-    await this.publish('dynamo/commands/set-output-volume', { volume });
+    const payload = this.addUserDataToPayload({ volume });
+    await this.publish('dynamo/commands/set-output-volume', payload);
   }
 
   async setMicrophoneVolume(volume: number): Promise<void> {
-    await this.publish('dynamo/commands/set-microphone-volume', { volume });
+    const payload = this.addUserDataToPayload({ volume });
+    await this.publish('dynamo/commands/set-microphone-volume', payload);
   }
 
   async toggleMicrophone(enabled: boolean): Promise<void> {
-    await this.publish('dynamo/commands/microphone-toggle', { enabled });
+    const payload = this.addUserDataToPayload({ enabled });
+    await this.publish('dynamo/commands/microphone-toggle', payload);
   }
 
   async toggleVoiceChanger(enabled: boolean): Promise<void> {
-    await this.publish('dynamo/commands/voice-changer-toggle', { enabled });
+    const payload = this.addUserDataToPayload({ enabled });
+    await this.publish('dynamo/commands/voice-changer-toggle', payload);
   }
 
   async toggleLeds(enabled: boolean): Promise<void> {
-    await this.publish('dynamo/commands/leds-toggle', { enabled });
+    const payload = this.addUserDataToPayload({ enabled });
+    await this.publish('dynamo/commands/leds-toggle', payload);
   }
 
   async setLedsColor(color: string): Promise<void> {
-    await this.publish('dynamo/commands/leds-color', { color });
+    const payload = this.addUserDataToPayload({ color });
+    await this.publish('dynamo/commands/leds-color', payload);
   }
 
   async setLedsEffect(effect: string): Promise<void> {
-    await this.publish('dynamo/commands/leds-effect', { effect });
+    const payload = this.addUserDataToPayload({ effect });
+    await this.publish('dynamo/commands/leds-effect', payload);
   }
 
   async toggleHotwordDetection(enabled: boolean): Promise<void> {
-    await this.publish('dynamo/commands/hotword-detection-toggle', { enabled });
+    const payload = this.addUserDataToPayload({ enabled });
+    await this.publish('dynamo/commands/hotword-detection-toggle', payload);
   }
 
   async triggerHotword(): Promise<void> {
-    await this.publish('dynamo/commands/hotword-trigger', {});
+    const payload = this.addUserDataToPayload({});
+    await this.publish('dynamo/commands/hotword-trigger', payload);
   }
 
   async textToSpeech(text: string): Promise<void> {
-    await this.publish('dynamo/commands/text-to-speech', { text });
+    const payload = this.addUserDataToPayload({ text });
+    await this.publish('dynamo/commands/text-to-speech', payload);
   }
 
   async setExpression(expression: string): Promise<void> {
-    await this.publish('dynamo/commands/set-expression', { expression });
+    const payload = this.addUserDataToPayload({ expression });
+    await this.publish('dynamo/commands/set-expression', payload);
   }
 
   async toggleFaceExpressionTracking(enabled: boolean): Promise<void> {
-    await this.publish('dynamo/commands/face-expression-tracking-toggle', { enabled });
+    const payload = this.addUserDataToPayload({ enabled });
+    await this.publish('dynamo/commands/face-expression-tracking-toggle', payload);
   }
 
   async toggleEyeTracking(enabled: boolean): Promise<void> {
-    await this.publish('dynamo/commands/eye-tracking-toggle', { enabled });
+    const payload = this.addUserDataToPayload({ enabled });
+    await this.publish('dynamo/commands/eye-tracking-toggle', payload);
   }
 
   async toggleEyebrows(enabled: boolean): Promise<void> {
-    await this.publish('dynamo/commands/eyebrows-toggle', { enabled });
+    const payload = this.addUserDataToPayload({ enabled });
+    await this.publish('dynamo/commands/eyebrows-toggle', payload);
   }
 
   async toggleExternalCommands(locked: boolean): Promise<void> {
-    await this.publish('dynamo/commands/external-commands-lock', { locked });
+    const payload = this.addUserDataToPayload({ locked });
+    await this.publish('dynamo/commands/external-commands-lock', payload);
   }
 
   async shutdown(): Promise<void> {
-    await this.publish('dynamo/commands/shutdown', {});
+    const payload = this.addUserDataToPayload({});
+    await this.publish('dynamo/commands/shutdown', payload);
   }
 
   async reboot(): Promise<void> {
-    await this.publish('dynamo/commands/reboot', {});
+    const payload = this.addUserDataToPayload({});
+    await this.publish('dynamo/commands/reboot', payload);
   }
 
   async killSoftware(): Promise<void> {
-    await this.publish('dynamo/commands/kill-software', {});
+    const payload = this.addUserDataToPayload({});
+    await this.publish('dynamo/commands/kill-software', payload);
   }
 
   async publish(topic: string, payload: any, options: { qos?: number, retain?: boolean } = {}): Promise<void> {
@@ -295,7 +343,6 @@ class MQTTService {
   }
 }
 
-// Singleton instance
 let mqttService: MQTTService | null = null;
 
 export function createMQTTService(): MQTTService {

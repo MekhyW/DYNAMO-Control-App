@@ -1,5 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { createMQTTService, getMQTTService, MQTTConfig, SoundEffect, VoiceEffect, DeviceInfo } from '@/lib/mqtt';
+"use client"
+
+import { useState, useCallback, useEffect } from 'react';
+import { createMQTTService, getMQTTService, MQTTConfig, SoundEffect, VoiceEffect } from '@/lib/mqtt';
+import { useTelegram } from '@/contexts/TelegramContext';
 
 interface MQTTState {
   isConnected: boolean;
@@ -36,6 +39,13 @@ interface MQTTActions {
 }
 
 export function useMQTT(): MQTTState & MQTTActions {
+  let user = null;
+  try {
+    const telegramContext = useTelegram();
+    user = telegramContext.user;
+  } catch (error) {
+    console.log('TelegramProvider not available yet, proceeding without user context');
+  }
   const [state, setState] = useState<MQTTState>({
     isConnected: false,
     soundEffects: [],
@@ -46,6 +56,13 @@ export function useMQTT(): MQTTState & MQTTActions {
   });
   
   const [isConnecting, setIsConnecting] = useState(false);
+
+  useEffect(() => {
+    const service = getMQTTService();
+    if (service) {
+      service.setAuthenticatedUser(user);
+    }
+  }, [user]);
 
   const connect = useCallback(async (): Promise<boolean> => {
     if (isConnecting) {
