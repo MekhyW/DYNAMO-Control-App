@@ -145,6 +145,7 @@ class MQTTService {
       'dynamo/data/bitmap',
       'dynamo/data/anydesk_id',
       'dynamo/data/sound_devices',
+      'dynamo/data/chat_logs',
       'mekhy/app/lock'
     ];
 

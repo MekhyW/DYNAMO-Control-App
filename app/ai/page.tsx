@@ -10,18 +10,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useMQTT } from '@/hooks/useMQTT';
 
-interface Message {
-  id: string;
-  content: string;
-  isUser: boolean;
-  timestamp: Date;
-  type: 'prompt' | 'response';
-}
-
 export default function AIControl() {
   const mqtt = useMQTT();
   const [hotwordEnabled, setHotwordEnabled] = useState(true);
-  const [messages] = useState<Message[]>([]);
   const [speechText, setSpeechText] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -30,7 +21,7 @@ export default function AIControl() {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [mqtt.chatLogs]);
 
   const handleHotwordToggle = async (enabled: boolean) => {
     setHotwordEnabled(enabled);
@@ -90,18 +81,18 @@ export default function AIControl() {
           <CardContent className="p-4">
             <ScrollArea className="h-[300px] pr-4" ref={scrollAreaRef}>
               <div className="space-y-4">
-                {messages.map((message) => (
+                {mqtt.chatLogs.map((message) => (
                   <div
                     key={message.id}
                     className={cn(
                       "flex",
-                      message.isUser ? "justify-end" : "justify-start"
+                      message.type === 'prompt' ? "justify-end" : "justify-start"
                     )}
                   >
                     <div
                       className={cn(
                         "rounded-lg px-4 py-2 max-w-[80%]",
-                        message.isUser
+                        message.type === 'prompt'
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted"
                       )}
@@ -111,7 +102,7 @@ export default function AIControl() {
                       </span>
                       <p>{message.content}</p>
                       <span className="text-xs opacity-70">
-                        {message.timestamp.toLocaleTimeString()}
+                        {new Date(message.timestamp).toLocaleTimeString()}
                       </span>
                     </div>
                   </div>

@@ -4,6 +4,13 @@ import { useState, useCallback, useEffect } from 'react';
 import { createMQTTService, getMQTTService, MQTTConfig, SoundEffect, VoiceEffect } from '@/lib/mqtt';
 import { useTelegram, TelegramUser } from '@/contexts/TelegramContext';
 
+interface ChatLogMessage {
+  id: string;
+  content: string;
+  type: 'prompt' | 'response';
+  timestamp: string;
+}
+
 interface MQTTState {
   isConnected: boolean;
   soundEffects: SoundEffect[];
@@ -11,6 +18,7 @@ interface MQTTState {
   soundDevices: string[];
   anydeskId: string | null;
   bitmap: string | null;
+  chatLogs: ChatLogMessage[];
 }
 
 interface MQTTActions {
@@ -54,6 +62,7 @@ export function useMQTT(): MQTTState & MQTTActions {
     soundDevices: [],
     anydeskId: null,
     bitmap: null,
+    chatLogs: [],
   });
   
   const [isConnecting, setIsConnecting] = useState(false);
@@ -111,6 +120,14 @@ export function useMQTT(): MQTTState & MQTTActions {
         service.subscribe('dynamo/data/bitmap', (data: { bitmap: string }) => {
           console.log('Received bitmap data:', data);
           setState(prev => ({ ...prev, bitmap: data.bitmap }));
+        });
+
+        service.subscribe('dynamo/data/chat_logs', (data: ChatLogMessage) => {
+          console.log('Received chat log data:', data);
+          setState(prev => ({ 
+            ...prev, 
+            chatLogs: [...prev.chatLogs, data]
+          }));
         });
         
         setState(prev => ({ ...prev, isConnected: true }));
