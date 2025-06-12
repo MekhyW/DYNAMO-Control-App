@@ -43,6 +43,14 @@ function AdminPanelContent() {
   
   const searchParams = useSearchParams();
 
+  const inputDevices = mqtt.soundDevices
+    .filter(device => device.startsWith('INPUT: '))
+    .map(device => device.replace('INPUT: ', ''));
+  
+  const outputDevices = mqtt.soundDevices
+    .filter(device => device.startsWith('OUTPUT: '))
+    .map(device => device.replace('OUTPUT: ', ''));
+
   useEffect(() => {
     console.log('Search Params:', searchParams);
     if (searchParams.get('status') === 'success') {
@@ -386,9 +394,11 @@ function AdminPanelContent() {
                       <SelectValue placeholder="Select input device" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="mic1">Microphone (Built-in)</SelectItem>
-                      <SelectItem value="mic2">Microphone (USB)</SelectItem>
-                      <SelectItem value="mic3">Virtual Input</SelectItem>
+                      {inputDevices.map((device, index) => (
+                        <SelectItem key={`input-${index}`} value={device}>
+                          {device}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -399,9 +409,11 @@ function AdminPanelContent() {
                       <SelectValue placeholder="Select output device" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="spk1">Speakers (Built-in)</SelectItem>
-                      <SelectItem value="spk2">Headphones (USB)</SelectItem>
-                      <SelectItem value="spk3">Virtual Output</SelectItem>
+                      {outputDevices.map((device, index) => (
+                        <SelectItem key={`output-${index}`} value={device}>
+                          {device}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
