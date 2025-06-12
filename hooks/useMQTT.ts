@@ -22,6 +22,8 @@ interface MQTTActions {
   toggleMicrophone: (enabled: boolean) => Promise<void>;
   toggleVoiceChanger: (enabled: boolean) => Promise<void>;
   toggleLeds: (enabled: boolean) => Promise<void>;
+  setLedsBrightness: (brightness: number) => Promise<void>;
+  setEyesBrightness: (brightness: number) => Promise<void>;
   setLedsColor: (color: string) => Promise<void>;
   setLedsEffect: (effect: string) => Promise<void>;
   toggleHotwordDetection: (enabled: boolean) => Promise<void>;
@@ -178,6 +180,20 @@ export function useMQTT(): MQTTState & MQTTActions {
     }
   }, []);
 
+  const setLedsBrightness = useCallback(async (brightness: number) => {
+    const service = getMQTTService();
+    if (service) {
+      await service.setLedsBrightness(brightness);
+    }
+  }, []);
+
+  const setEyesBrightness = useCallback(async (brightness: number) => {
+    const service = getMQTTService();
+    if (service) {
+      await service.setEyesBrightness(brightness);
+    }
+  }, []);
+
   const setLedsColor = useCallback(async (color: string) => {
     const service = getMQTTService();
     if (service) {
@@ -272,15 +288,12 @@ export function useMQTT(): MQTTState & MQTTActions {
   // Auto-connect on mount (only once)
   useEffect(() => {
     let mounted = true;
-    
     const attemptConnection = async () => {
       if (mounted && !isConnecting) {
         await connect();
       }
     };
-    
     attemptConnection();
-    
     return () => {
       mounted = false;
     };
@@ -323,6 +336,8 @@ export function useMQTT(): MQTTState & MQTTActions {
     toggleMicrophone,
     toggleVoiceChanger,
     toggleLeds,
+    setLedsBrightness,
+    setEyesBrightness,
     setLedsColor,
     setLedsEffect,
     toggleHotwordDetection,

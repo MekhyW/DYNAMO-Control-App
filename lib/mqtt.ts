@@ -230,6 +230,16 @@ class MQTTService {
     await this.publish('dynamo/commands/leds-toggle', payload);
   }
 
+  async setLedsBrightness(brightness: number): Promise<void> {
+    const payload = this.addUserDataToPayload({ brightness });
+    await this.publish('dynamo/commands/leds-brightness', payload);
+  }
+
+  async setEyesBrightness(brightness: number): Promise<void> {
+    const payload = this.addUserDataToPayload({ brightness });
+    await this.publish('dynamo/commands/eyes-brightness', payload);
+  }
+
   async setLedsColor(color: string): Promise<void> {
     const payload = this.addUserDataToPayload({ color });
     await this.publish('dynamo/commands/leds-color', payload);

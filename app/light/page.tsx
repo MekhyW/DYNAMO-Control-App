@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { Sun, Lightbulb, LightbulbOff } from 'lucide-react';
+import { Sun, Monitor, Lightbulb, LightbulbOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
@@ -23,6 +23,7 @@ export default function LightControl() {
   const [isOn, setIsOn] = useState(true);
   const [color, setColor] = useState("#ff0000");
   const [mainBrightness, setMainBrightness] = useState(75);
+  const [eyesBrightness, setEyesBrightness] = useState(100);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
 
   const handleToggleLeds = async (enabled: boolean) => {
@@ -49,7 +50,6 @@ export default function LightControl() {
     if (!isOn) return;
     const newActiveEffect = effectId === activeEffect ? null : effectId;
     setActiveEffect(newActiveEffect);
-    
     if (newActiveEffect !== null) {
       const effectName = lightEffects.find(e => e.id === effectId)?.name || 'unknown';
       try {
@@ -59,6 +59,24 @@ export default function LightControl() {
       }
     }
   };
+
+  const handleLEDsBrightnessChange = async (newBrightness: number) => {
+    setMainBrightness(newBrightness);
+    try {
+      await mqtt.setLedsBrightness(newBrightness);
+    } catch (error) {
+      console.error('Failed to set LED brightness:', error);
+    }
+  }
+
+  const handleEyesBrightnessChange = async (newBrightness: number) => {
+    setEyesBrightness(newBrightness);
+    try {
+      await mqtt.setEyesBrightness(newBrightness);
+    } catch (error) {
+      console.error('Failed to set eyes brightness:', error);
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
@@ -86,14 +104,30 @@ export default function LightControl() {
             <div className={cn("space-y-6", !isOn && "opacity-50")}>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Main Brightness</label>
+                  <label className="text-sm font-medium">LEDs Brightness</label>
                   <span className="text-sm text-muted-foreground">{mainBrightness}%</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <Sun className="h-4 w-4 text-muted-foreground" />
                   <Slider
                     value={[mainBrightness]}
-                    onValueChange={(value) => setMainBrightness(value[0])}
+                    onValueChange={(value) => handleLEDsBrightnessChange(value[0])}
+                    max={100}
+                    step={1}
+                    disabled={!isOn}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">Eyes Brightness</label>
+                  <span className="text-sm text-muted-foreground">{eyesBrightness}%</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Monitor className="h-4 w-4 text-muted-foreground" />
+                  <Slider
+                    value={[eyesBrightness]}
+                    onValueChange={(value) => handleEyesBrightnessChange(value[0])}
                     max={100}
                     step={1}
                     disabled={!isOn}
