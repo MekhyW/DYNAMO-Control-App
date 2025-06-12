@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Search, Play, Pause, SkipForward, Volume2, ListMusic, WifiOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useSpotify } from '@/hooks/useSpotify';
@@ -31,7 +31,8 @@ export default function SoundControl() {
   const [volume, setVolume] = useState(75);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
-  
+  const volumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isVolumeSliderActive, setIsVolumeSliderActive] = useState(false);
   const {
     searchResults,
     currentTrack,
@@ -50,23 +51,38 @@ export default function SoundControl() {
     playSoundEffect,
     setOutputVolume,
   } = useMQTT();
-
-  // Use MQTT sound effects if connected, otherwise fallback to mock data
   const soundPresets = isConnected && soundEffects.length > 0 ? soundEffects : fallbackSoundPresets;
-
-  // Handle volume changes with MQTT
-  const handleVolumeChange = async (newVolume: number) => {
+  const handleVolumeChange = useCallback((newVolume: number) => {
     setVolume(newVolume);
+    if (volumeTimeoutRef.current) {
+      clearTimeout(volumeTimeoutRef.current);
+    }
+    if (!isVolumeSliderActive && isConnected) {
+      volumeTimeoutRef.current = setTimeout(async () => {
+        try {
+          await setOutputVolume(newVolume);
+        } catch (error) {
+          console.error('Failed to set volume via MQTT:', error);
+        }
+      }, 100);
+    }
+  }, [isConnected, setOutputVolume, isVolumeSliderActive]);
+
+  const handleVolumeSliderStart = useCallback(() => {
+    setIsVolumeSliderActive(true);
+  }, []);
+
+  const handleVolumeSliderEnd = useCallback(async () => {
+    setIsVolumeSliderActive(false);
     if (isConnected) {
       try {
-        await setOutputVolume(newVolume);
+        await setOutputVolume(volume);
       } catch (error) {
         console.error('Failed to set volume via MQTT:', error);
       }
     }
-  };
+  }, [isConnected, setOutputVolume, volume]);
 
-  // Handle sound effect playback
   const handlePlaySoundEffect = async (effectId: number) => {
     if (isConnected) {
       try {
@@ -223,12 +239,20 @@ export default function SoundControl() {
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <Volume2 className="h-4 w-4 text-muted-foreground" />
-              <Slider
-                value={[volume]}
-                onValueChange={(value) => handleVolumeChange(value[0])}
-                max={100}
-                step={1}
-              />
+              <div 
+                onMouseDown={handleVolumeSliderStart}
+                onMouseUp={handleVolumeSliderEnd}
+                onTouchStart={handleVolumeSliderStart}
+                onTouchEnd={handleVolumeSliderEnd}
+                className="flex-1"
+              >
+                <Slider
+                  value={[volume]}
+                  onValueChange={(value) => handleVolumeChange(value[0])}
+                  max={100}
+                  step={1}
+                />
+              </div>
               <span className="min-w-[3ch] text-sm">{volume}%</span>
             </div>
           </div>

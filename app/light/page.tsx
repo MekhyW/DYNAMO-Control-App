@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Sun, Monitor, Lightbulb, LightbulbOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -25,6 +25,11 @@ export default function LightControl() {
   const [mainBrightness, setMainBrightness] = useState(75);
   const [eyesBrightness, setEyesBrightness] = useState(100);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
+  const colorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const brightnessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const eyesBrightnessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isBrightnessSliderActive, setIsBrightnessSliderActive] = useState(false);
+  const [isEyesBrightnessSliderActive, setIsEyesBrightnessSliderActive] = useState(false);
 
   const handleToggleLeds = async (enabled: boolean) => {
     setIsOn(enabled);
@@ -35,16 +40,21 @@ export default function LightControl() {
     }
   };
 
-  const handleColorChange = async (newColor: string) => {
+  const handleColorChange = useCallback((newColor: string) => {
     setColor(newColor);
-    if (isOn) {
-      try {
-        await mqtt.setLedsColor(newColor);
-      } catch (error) {
-        console.error('Failed to set LED color:', error);
-      }
+    if (colorTimeoutRef.current) {
+      clearTimeout(colorTimeoutRef.current);
     }
-  };
+    colorTimeoutRef.current = setTimeout(async () => {
+      if (isOn) {
+        try {
+          await mqtt.setLedsColor(newColor);
+        } catch (error) {
+          console.error('Failed to set LED color:', error);
+        }
+      }
+    }, 300);
+  }, [isOn, mqtt]);
 
   const handleEffectSelect = async (effectId: number) => {
     if (!isOn) return;
@@ -60,28 +70,67 @@ export default function LightControl() {
     }
   };
 
-  const handleLEDsBrightnessChange = async (newBrightness: number) => {
+  const handleLEDsBrightnessChange = useCallback((newBrightness: number) => {
     setMainBrightness(newBrightness);
+    if (brightnessTimeoutRef.current) {
+      clearTimeout(brightnessTimeoutRef.current);
+    }
+    if (!isBrightnessSliderActive) {
+      brightnessTimeoutRef.current = setTimeout(async () => {
+        try {
+          await mqtt.setLedsBrightness(newBrightness);
+        } catch (error) {
+          console.error('Failed to set LED brightness:', error);
+        }
+      }, 100);
+    }
+  }, [mqtt, isBrightnessSliderActive]);
+
+  const handleEyesBrightnessChange = useCallback((newBrightness: number) => {
+    setEyesBrightness(newBrightness);
+    if (eyesBrightnessTimeoutRef.current) {
+      clearTimeout(eyesBrightnessTimeoutRef.current);
+    }
+    if (!isEyesBrightnessSliderActive) {
+      eyesBrightnessTimeoutRef.current = setTimeout(async () => {
+        try {
+          await mqtt.setEyesBrightness(newBrightness);
+        } catch (error) {
+          console.error('Failed to set eyes brightness:', error);
+        }
+      }, 100);
+    }
+  }, [mqtt, isEyesBrightnessSliderActive]);
+
+  const handleBrightnessSliderStart = useCallback(() => {
+    setIsBrightnessSliderActive(true);
+  }, []);
+
+  const handleBrightnessSliderEnd = useCallback(async () => {
+    setIsBrightnessSliderActive(false);
     try {
-      await mqtt.setLedsBrightness(newBrightness);
+      await mqtt.setLedsBrightness(mainBrightness);
     } catch (error) {
       console.error('Failed to set LED brightness:', error);
     }
-  }
+  }, [mqtt, mainBrightness]);
 
-  const handleEyesBrightnessChange = async (newBrightness: number) => {
-    setEyesBrightness(newBrightness);
+  const handleEyesBrightnessSliderStart = useCallback(() => {
+    setIsEyesBrightnessSliderActive(true);
+  }, []);
+
+  const handleEyesBrightnessSliderEnd = useCallback(async () => {
+    setIsEyesBrightnessSliderActive(false);
     try {
-      await mqtt.setEyesBrightness(newBrightness);
+      await mqtt.setEyesBrightness(eyesBrightness);
     } catch (error) {
       console.error('Failed to set eyes brightness:', error);
     }
-  }
+  }, [mqtt, eyesBrightness]);
 
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
       <div className="mb-6">
-
         {/* Master Control */}
         <Card className="mb-6">
           <CardContent className="p-4">
@@ -109,13 +158,21 @@ export default function LightControl() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Sun className="h-4 w-4 text-muted-foreground" />
-                  <Slider
-                    value={[mainBrightness]}
-                    onValueChange={(value) => handleLEDsBrightnessChange(value[0])}
-                    max={100}
-                    step={1}
-                    disabled={!isOn}
-                  />
+                  <div 
+                    onMouseDown={handleBrightnessSliderStart}
+                    onMouseUp={handleBrightnessSliderEnd}
+                    onTouchStart={handleBrightnessSliderStart}
+                    onTouchEnd={handleBrightnessSliderEnd}
+                    className="flex-1"
+                  >
+                    <Slider
+                      value={[mainBrightness]}
+                      onValueChange={(value) => handleLEDsBrightnessChange(value[0])}
+                      max={100}
+                      step={1}
+                      disabled={!isOn}
+                    />
+                  </div>
                 </div>
               </div>
               <div className="space-y-2">
@@ -125,13 +182,21 @@ export default function LightControl() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Monitor className="h-4 w-4 text-muted-foreground" />
-                  <Slider
-                    value={[eyesBrightness]}
-                    onValueChange={(value) => handleEyesBrightnessChange(value[0])}
-                    max={100}
-                    step={1}
-                    disabled={!isOn}
-                  />
+                  <div 
+                    onMouseDown={handleEyesBrightnessSliderStart}
+                    onMouseUp={handleEyesBrightnessSliderEnd}
+                    onTouchStart={handleEyesBrightnessSliderStart}
+                    onTouchEnd={handleEyesBrightnessSliderEnd}
+                    className="flex-1"
+                  >
+                    <Slider
+                      value={[eyesBrightness]}
+                      onValueChange={(value) => handleEyesBrightnessChange(value[0])}
+                      max={100}
+                      step={1}
+                      disabled={!isOn}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
