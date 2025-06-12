@@ -30,6 +30,8 @@ import {
 
 function AdminPanelContent() {
   const mqtt = useMQTT();
+  console.log('MQTT hook returned:', mqtt);
+  console.log('Sound devices from hook:', mqtt.soundDevices);
   const { isOwner, isAppLocked, setIsAppLocked, user } = useTelegram();
   const [showPowerDialog, setShowPowerDialog] = useState(false);
   const [selectedInputDevice, setSelectedInputDevice] = useState("");
@@ -40,6 +42,7 @@ function AdminPanelContent() {
   const [SpotifyConnectionStatus, setSpotifyConnectionStatus] = useState<SpotifyConnectionStatus>('loading');
   const [anydeskKey] = useState('591283563');
   const [keyCopied, setKeyCopied] = useState(false);
+  const isDevicesLoaded = mqtt.isConnected && mqtt.soundDevices.length > 0;
   
   const searchParams = useSearchParams();
 
@@ -52,6 +55,12 @@ function AdminPanelContent() {
     .map(device => device.replace('OUTPUT: ', ''));
 
   useEffect(() => {
+    console.log('MQTT Connection Status:', mqtt.isConnected);
+    console.log('Raw MQTT soundDevices length:', mqtt.soundDevices.length);
+    console.log('Raw MQTT soundDevices:', mqtt.soundDevices);
+  }, [mqtt.isConnected, mqtt.soundDevices]);
+
+  useEffect(() => {
     console.log('Search Params:', searchParams);
     if (searchParams.get('status') === 'success') {
       setSpotifyStatus('Authentication successful!');
@@ -59,7 +68,6 @@ function AdminPanelContent() {
     else if (searchParams.get('error')) {
       setSpotifyError(`Error: ${searchParams.get('error')}`);
     }
-    
     checkSpotifyConnectionStatus();
   }, [searchParams]);
 
@@ -389,31 +397,51 @@ function AdminPanelContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Input Device</label>
-                  <Select value={selectedInputDevice} onValueChange={isOwner ? setSelectedInputDevice : undefined} disabled={!isOwner}>
+                  <Select 
+                    value={selectedInputDevice} 
+                    onValueChange={isOwner ? setSelectedInputDevice : undefined} 
+                    disabled={!isOwner || !isDevicesLoaded}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select input device" />
+                      <SelectValue placeholder={isDevicesLoaded ? "Select input device" : "Loading devices..."} />
                     </SelectTrigger>
                     <SelectContent>
-                      {inputDevices.map((device, index) => (
-                        <SelectItem key={`input-${index}`} value={device}>
-                          {device}
+                      {isDevicesLoaded ? (
+                        inputDevices.map((device, index) => (
+                          <SelectItem key={`input-${index}`} value={device}>
+                            {device}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="loading" disabled>
+                          Loading devices...
                         </SelectItem>
-                      ))}
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Output Device</label>
-                  <Select value={selectedOutputDevice} onValueChange={isOwner ? setSelectedOutputDevice : undefined} disabled={!isOwner}>
+                  <Select 
+                    value={selectedOutputDevice} 
+                    onValueChange={isOwner ? setSelectedOutputDevice : undefined} 
+                    disabled={!isOwner || !isDevicesLoaded}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select output device" />
+                      <SelectValue placeholder={isDevicesLoaded ? "Select output device" : "Loading devices..."} />
                     </SelectTrigger>
                     <SelectContent>
-                      {outputDevices.map((device, index) => (
-                        <SelectItem key={`output-${index}`} value={device}>
-                          {device}
+                      {isDevicesLoaded ? (
+                        outputDevices.map((device, index) => (
+                          <SelectItem key={`output-${index}`} value={device}>
+                            {device}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="loading" disabled>
+                          Loading devices...
                         </SelectItem>
-                      ))}
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
