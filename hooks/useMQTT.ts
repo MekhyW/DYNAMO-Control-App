@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { createMQTTService, getMQTTService, MQTTConfig, SoundEffect, VoiceEffect } from '@/lib/mqtt';
-import { useTelegram } from '@/contexts/TelegramContext';
+import { useTelegram, TelegramUser } from '@/contexts/TelegramContext';
 
 interface MQTTState {
   isConnected: boolean;
@@ -39,7 +39,7 @@ interface MQTTActions {
 }
 
 export function useMQTT(): MQTTState & MQTTActions {
-  let user = null;
+  let user: TelegramUser | null = null;
   try {
     const telegramContext = useTelegram();
     user = telegramContext.user;

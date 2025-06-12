@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { retrieveLaunchParams } from '@telegram-apps/sdk';
 import { useMQTT } from '@/hooks/useMQTT';
 
-interface TelegramUser {
+export interface TelegramUser {
   id: number;
   first_name: string;
   last_name?: string;
