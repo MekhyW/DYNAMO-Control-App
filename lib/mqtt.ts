@@ -35,6 +35,13 @@ interface TelegramUser {
   username?: string;
 }
 
+interface ChatLogMessage {
+  id: string;
+  content: string;
+  type: 'prompt' | 'response';
+  timestamp: string;
+}
+
 class MQTTService {
   private client: MqttClient | null = null;
   private config: MQTTConfig;
@@ -42,6 +49,22 @@ class MQTTService {
   private isConnecting = false;
   private subscribers: Map<string, (data: any) => void> = new Map();
   private authenticatedUser: TelegramUser | null = null;
+  
+  private persistentData: {
+    soundEffects: SoundEffect[];
+    voiceEffects: VoiceEffect[];
+    soundDevices: string[];
+    anydeskId: string | null;
+    bitmap: string | null;
+    chatLogs: ChatLogMessage[];
+  } = {
+    soundEffects: [],
+    voiceEffects: [],
+    soundDevices: [],
+    anydeskId: null,
+    bitmap: null,
+    chatLogs: [],
+  };
 
   constructor() {
     this.config = {
@@ -163,6 +186,26 @@ class MQTTService {
   private handleMessage(topic: string, message: Buffer) {
     try {
       const data = JSON.parse(message.toString());
+      switch (topic) {
+        case 'dynamo/data/sound_effects':
+          this.persistentData.soundEffects = data;
+          break;
+        case 'dynamo/data/voice_effects':
+          this.persistentData.voiceEffects = data;
+          break;
+        case 'dynamo/data/sound_devices':
+          this.persistentData.soundDevices = data;
+          break;
+        case 'dynamo/data/anydesk_id':
+          this.persistentData.anydeskId = data.id;
+          break;
+        case 'dynamo/data/bitmap':
+          this.persistentData.bitmap = data.bitmap;
+          break;
+        case 'dynamo/data/chat_logs':
+          this.persistentData.chatLogs.push(data);
+          break;
+      }
       const callback = this.subscribers.get(topic);
       if (callback) {
         callback(data);
@@ -170,6 +213,10 @@ class MQTTService {
     } catch (error) {
       console.error(`Error parsing message from ${topic}:`, error);
     }
+  }
+
+  getCurrentData() {
+    return { ...this.persistentData, isConnected: this.isConnected };
   }
 
   subscribe(topic: string, callback: (data: any) => void) {
@@ -362,4 +409,4 @@ export function getMQTTService(): MQTTService | null {
   return mqttService;
 }
 
-export type { MQTTConfig, SoundEffect, VoiceEffect, DeviceInfo };
+export type { MQTTConfig, SoundEffect, VoiceEffect, DeviceInfo, ChatLogMessage };

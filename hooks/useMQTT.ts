@@ -55,14 +55,30 @@ export function useMQTT(): MQTTState & MQTTActions {
   } catch (error) {
     console.log('TelegramProvider not available yet, proceeding without user context');
   }
-  const [state, setState] = useState<MQTTState>({
-    isConnected: false,
-    soundEffects: [],
-    voiceEffects: [],
-    soundDevices: [],
-    anydeskId: null,
-    bitmap: null,
-    chatLogs: [],
+
+  const [state, setState] = useState<MQTTState>(() => {
+    const service = getMQTTService();
+    if (service) {
+      const currentData = service.getCurrentData();
+      return {
+        isConnected: currentData.isConnected,
+        soundEffects: currentData.soundEffects,
+        voiceEffects: currentData.voiceEffects,
+        soundDevices: currentData.soundDevices,
+        anydeskId: currentData.anydeskId,
+        bitmap: currentData.bitmap,
+        chatLogs: currentData.chatLogs,
+      };
+    }
+    return {
+      isConnected: false,
+      soundEffects: [],
+      voiceEffects: [],
+      soundDevices: [],
+      anydeskId: null,
+      bitmap: null,
+      chatLogs: [],
+    };
   });
   
   const [isConnecting, setIsConnecting] = useState(false);
@@ -85,7 +101,11 @@ export function useMQTT(): MQTTState & MQTTActions {
       
       if (service.getConnectionStatus()) {
         console.log('MQTT already connected');
-        setState(prev => ({ ...prev, isConnected: true }));
+        const currentData = service.getCurrentData();
+        setState(prev => ({ 
+          ...prev, 
+          ...currentData
+        }));
         return true;
       }
 
@@ -128,7 +148,11 @@ export function useMQTT(): MQTTState & MQTTActions {
       
       if (success) {
         console.log('MQTT connection successful');
-        setState(prev => ({ ...prev, isConnected: true }));
+        const currentData = service.getCurrentData();
+        setState(prev => ({ 
+          ...prev, 
+          ...currentData
+        }));
         setIsConnecting(false);
         return true;
       } else {
