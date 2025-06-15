@@ -88,64 +88,62 @@ export function useMQTT(): MQTTState & MQTTActions {
         setState(prev => ({ ...prev, isConnected: true }));
         return true;
       }
+
+      service.subscribe('dynamo/data/sound_effects', (data: SoundEffect[]) => {
+        console.log('Received sound effects data:', data);
+        setState(prev => ({ ...prev, soundEffects: data }));
+      });
+
+      service.subscribe('dynamo/data/voice_effects', (data: VoiceEffect[]) => {
+        console.log('Received voice effects data:', data);
+        setState(prev => ({ ...prev, voiceEffects: data }));
+      });
+
+      service.subscribe('dynamo/data/sound_devices', (data: string[]) => {
+        console.log('Received sound devices data:', data);
+        setState(prev => ({ ...prev, soundDevices: data }));
+      });
+
+      service.subscribe('dynamo/data/anydesk_id', (data: { id: string }) => {
+        console.log('Received anydesk ID data:', data);
+        setState(prev => ({ ...prev, anydeskId: data.id }));
+      });
+
+      service.subscribe('dynamo/data/bitmap', (data: { bitmap: string }) => {
+        console.log('Received bitmap data:', data);
+        setState(prev => ({ ...prev, bitmap: data.bitmap }));
+      });
+
+      service.subscribe('dynamo/data/chat_logs', (data: ChatLogMessage) => {
+        console.log('Received chat log data:', data);
+        setState(prev => ({ 
+          ...prev, 
+          chatLogs: [...prev.chatLogs, data]
+        }));
+      });
       
       setIsConnecting(true);
       console.log('Attempting MQTT connection...');
       const success = await service.connect();
       
       if (success) {
-        console.log('MQTT connection successful, setting up subscriptions...');
-        
-        // Set up data subscriptions after successful connection
-        service.subscribe('dynamo/data/sound_effects', (data: SoundEffect[]) => {
-          console.log('Received sound effects data:', data);
-          setState(prev => ({ ...prev, soundEffects: data }));
-        });
-
-        service.subscribe('dynamo/data/voice_effects', (data: VoiceEffect[]) => {
-          console.log('Received voice effects data:', data);
-          setState(prev => ({ ...prev, voiceEffects: data }));
-        });
-
-        service.subscribe('dynamo/data/sound_devices', (data: string[]) => {
-          console.log('Received sound devices data:', data);
-          setState(prev => ({ ...prev, soundDevices: data }));
-        });
-
-        service.subscribe('dynamo/data/anydesk_id', (data: { id: string }) => {
-          console.log('Received anydesk ID data:', data);
-          setState(prev => ({ ...prev, anydeskId: data.id }));
-        });
-
-        service.subscribe('dynamo/data/bitmap', (data: { bitmap: string }) => {
-          console.log('Received bitmap data:', data);
-          setState(prev => ({ ...prev, bitmap: data.bitmap }));
-        });
-
-        service.subscribe('dynamo/data/chat_logs', (data: ChatLogMessage) => {
-          console.log('Received chat log data:', data);
-          setState(prev => ({ 
-            ...prev, 
-            chatLogs: [...prev.chatLogs, data]
-          }));
-        });
-        
+        console.log('MQTT connection successful');
         setState(prev => ({ ...prev, isConnected: true }));
-         setIsConnecting(false);
-         return true;
-       } else {
-         console.log('MQTT connection failed');
-         setState(prev => ({ ...prev, isConnected: false }));
-         setIsConnecting(false);
-         return false;
-       }
-     } catch (error) {
-       console.error('Failed to connect to MQTT:', error);
-       setState(prev => ({ ...prev, isConnected: false }));
-       setIsConnecting(false);
-       return false;
-     }
-   }, [isConnecting]);
+        setIsConnecting(false);
+        return true;
+      } else {
+        console.log('MQTT connection failed');
+        setState(prev => ({ ...prev, isConnected: false }));
+        setIsConnecting(false);
+        return false;
+      }
+    } catch (error) {
+      console.error('Failed to connect to MQTT:', error);
+      setState(prev => ({ ...prev, isConnected: false }));
+      setIsConnecting(false);
+      return false;
+    }
+  }, [isConnecting]);
 
   const disconnect = useCallback(() => {
     const service = getMQTTService();
@@ -314,7 +312,7 @@ export function useMQTT(): MQTTState & MQTTActions {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [connect, isConnecting]);
 
   // Monitor connection status with debouncing
   useEffect(() => {
@@ -339,6 +337,21 @@ export function useMQTT(): MQTTState & MQTTActions {
     return () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup subscriptions on unmount
+      const service = getMQTTService();
+      if (service) {
+        service.unsubscribe('dynamo/data/sound_effects');
+        service.unsubscribe('dynamo/data/voice_effects');
+        service.unsubscribe('dynamo/data/sound_devices');
+        service.unsubscribe('dynamo/data/anydesk_id');
+        service.unsubscribe('dynamo/data/bitmap');
+        service.unsubscribe('dynamo/data/chat_logs');
       }
     };
   }, []);

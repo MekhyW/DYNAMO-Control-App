@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from 'react';
-import { Mic, MicOff, Volume2, AudioWaveform, AudioLines, WifiOff } from 'lucide-react';
+import { Mic, MicOff, AudioWaveform, AudioLines, WifiOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';

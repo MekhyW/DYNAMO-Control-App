@@ -30,8 +30,6 @@ import {
 
 function AdminPanelContent() {
   const mqtt = useMQTT();
-  console.log('MQTT hook returned:', mqtt);
-  console.log('Sound devices from hook:', mqtt.soundDevices);
   const { isOwner, isAppLocked, setIsAppLocked, user } = useTelegram();
   const [showPowerDialog, setShowPowerDialog] = useState(false);
   const [selectedInputDevice, setSelectedInputDevice] = useState("");
