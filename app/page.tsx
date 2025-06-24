@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,21 @@ const presets = [
 
 export default function Home() {
   const [activePreset, setActivePreset] = useState(1);
+  const [macroSequence, setMacroSequence] = useState<number[]>([]);
+
+  const handleKeypadPress = (digit: number) => {
+    setMacroSequence(prev => [...prev, digit]);
+  };
+
+  const clearSequence = () => {
+    setMacroSequence([]);
+  };
+
+  const processSequence = () => {
+    setMacroSequence([]);
+    console.log('Processing macro sequence:', macroSequence);
+    // Add your macro processing logic here
+  };
 
   return (
     <div className="container mx-auto px-4 pb-safe pt-6">
@@ -23,10 +38,39 @@ export default function Home() {
       </div>
 
       <div className="relative h-[60vh] min-h-[300px] max-h-[500px] mb-8 flex items-center justify-center">
-        <div className="w-[100vw] max-w-[240px] min-w-[180px] h-full bg-muted rounded-lg relative">
-          {/* Placeholder for interactive human figure */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm sm:text-base text-muted-foreground">Status Visualization</span>
+        <div className="w-[100vw] max-w-[240px] min-w-[180px] h-full bg-muted rounded-lg relative p-4">
+          {/* Macro Input Display */}
+          <div className="mb-4">
+            <div className="text-center mb-2">
+              <span className="text-xs text-muted-foreground">Macro Sequence</span>
+            </div>
+            <div className="bg-background rounded p-2 min-h-[40px] border">
+              <span className="text-sm font-mono">
+                {macroSequence.length > 0 ? macroSequence.join('') : 'Enter sequence...'}
+              </span>
+            </div>
+          </div>
+
+          {/* Numerical Keypad */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
+              <Button key={digit} variant="outline" size="sm" className="aspect-square text-sm" onClick={() => handleKeypadPress(digit)}>
+                {digit}
+              </Button>
+            ))}
+          </div>
+
+          {/* Zero and Action Buttons */}
+          <div className="grid grid-cols-3 gap-2">
+            <Button variant="outline" size="sm" className="text-xs" onClick={clearSequence}>
+              Clear
+            </Button>
+            <Button variant="outline" size="sm" className="aspect-square text-sm" onClick={() => handleKeypadPress(0)}>
+              0
+            </Button>
+            <Button variant="default" size="sm" className="text-xs" onClick={processSequence} disabled={macroSequence.length === 0}>
+              Run
+            </Button>
           </div>
         </div>
       </div>
