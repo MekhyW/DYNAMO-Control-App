@@ -59,12 +59,12 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="relative h-[60vh] min-h-[300px] max-h-[500px] mb-8 flex items-center justify-center">
-        <div className="w-[100vw] max-w-[240px] min-w-[180px] h-full bg-muted rounded-lg relative p-4">
+      <div className="relative h-[60vh] min-h-[400px] max-h-[600px] mb-8 flex items-center justify-center">
+        <div className="w-full max-w-[320px] h-full bg-muted rounded-lg relative p-6 flex flex-col">
           {/* Macro Input Display */}
-          <div className="mb-4">
-            <div className="text-center mb-2">
-              <span className="text-xs text-muted-foreground">
+          <div className="mb-6 flex-shrink-0">
+            <div className="text-center mb-3">
+              <span className="text-sm text-muted-foreground">
                 <DecryptedText 
                   text="Macro Sequence"
                   animateOn="view"
@@ -76,8 +76,8 @@ export default function Home() {
                 />
               </span>
             </div>
-            <div className="bg-background rounded p-2 min-h-[40px] border">
-              <span className="text-sm font-mono">
+            <div className="bg-background rounded p-3 min-h-[48px] border flex items-center justify-center">
+              <span className="text-base font-mono">
                 {macroSequence.length > 0 ? macroSequence.join('') : (
                   <DecryptedText 
                     text="Enter sequence..."
@@ -94,23 +94,23 @@ export default function Home() {
           </div>
 
           {/* Numerical Keypad */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="grid grid-cols-3 gap-3 mb-4 flex-1">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
-              <Button key={digit} variant="outline" size="sm" className="aspect-square text-sm" onClick={() => handleKeypadPress(digit)}>
+              <Button key={digit} variant="outline" className="aspect-square text-lg font-semibold h-full min-h-[60px]" onClick={() => handleKeypadPress(digit)}>
                 {digit}
               </Button>
             ))}
           </div>
 
           {/* Zero and Action Buttons */}
-          <div className="grid grid-cols-3 gap-2">
-            <Button variant="outline" size="sm" className="text-xs" onClick={clearSequence}>
+          <div className="grid grid-cols-3 gap-3 flex-shrink-0">
+            <Button variant="outline" className="text-sm h-[60px]" onClick={clearSequence}>
               Clear
             </Button>
-            <Button variant="outline" size="sm" className="aspect-square text-sm" onClick={() => handleKeypadPress(0)}>
+            <Button variant="outline" className="aspect-square text-lg font-semibold h-[60px]" onClick={() => handleKeypadPress(0)}>
               0
             </Button>
-            <Button variant="default" size="sm" className="text-xs" onClick={processSequence} disabled={macroSequence.length === 0}>
+            <Button variant="default" className="text-sm h-[60px]" onClick={processSequence} disabled={macroSequence.length === 0}>
               Run
             </Button>
           </div>
