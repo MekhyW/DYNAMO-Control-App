@@ -117,7 +117,7 @@ export default function RootLayout({
                       speed={0.5} 
                       squareSize={40}
                       direction='right'
-                      borderColor='#6c039d'
+                      borderColor='#9504d9'
                       hoverFillColor='#222'
                       />
                   )}
