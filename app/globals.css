@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=VT323&family=Audiowide&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -77,15 +79,84 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-rajdhani;
   }
   .container {
     margin-top: 3rem;
+  }
+  
+  /* Typography System */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-orbitron font-semibold;
+  }
+  
+  /* Branding elements */
+  .brand, .logo {
+    @apply font-orbitron font-bold;
+  }
+  
+  /* Buttons and UI Text */
+  button, .btn, .ui-text {
+    @apply font-rajdhani font-medium;
+  }
+  
+  /* Alternative terminal style for specific UI elements */
+  .terminal-text {
+    @apply font-vt323;
+  }
+  
+  /* Voice Mod Effects */
+  .voice-mod, .effect-name, .modulator {
+    @apply font-audiowide;
   }
 }
 
 main {
   transition: transform 0.3s ease-in-out;
+}
+
+/* Additional Typography Utilities */
+@layer utilities {
+  .text-heading {
+    @apply font-orbitron font-semibold;
+  }
+  
+  .text-brand {
+    @apply font-orbitron font-bold;
+  }
+  
+  .text-ui {
+    @apply font-rajdhani font-medium;
+  }
+  
+  .text-terminal {
+    @apply font-vt323;
+  }
+  
+  .text-voice-mod {
+    @apply font-audiowide;
+  }
+  
+  /* Font weight variations */
+  .text-orbitron-light {
+    @apply font-orbitron font-normal;
+  }
+  
+  .text-orbitron-bold {
+    @apply font-orbitron font-bold;
+  }
+  
+  .text-orbitron-black {
+    @apply font-orbitron font-black;
+  }
+  
+  .text-rajdhani-light {
+    @apply font-rajdhani font-light;
+  }
+  
+  .text-rajdhani-bold {
+    @apply font-rajdhani font-bold;
+  }
 }
 
 .page-enter {
