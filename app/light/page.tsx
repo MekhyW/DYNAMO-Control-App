@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Sun, Monitor, Lightbulb, LightbulbOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -32,6 +32,15 @@ export default function LightControl() {
   const [isBrightnessSliderActive, setIsBrightnessSliderActive] = useState(false);
   const [isEyesBrightnessSliderActive, setIsEyesBrightnessSliderActive] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('lightColorChange', {
+        detail: { color }
+      });
+      window.dispatchEvent(event);
+    }
+  }, []);
+
   const handleToggleLeds = async (enabled: boolean) => {
     setIsOn(enabled);
     try {
@@ -43,6 +52,14 @@ export default function LightControl() {
 
   const handleColorChange = useCallback((newColor: string) => {
     setColor(newColor);
+
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('lightColorChange', {
+        detail: { color: newColor }
+      });
+      window.dispatchEvent(event);
+    }
+    
     if (colorTimeoutRef.current) {
       clearTimeout(colorTimeoutRef.current);
     }
