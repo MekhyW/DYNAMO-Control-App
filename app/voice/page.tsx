@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useMQTT } from '@/hooks/useMQTT';
 import { DecryptedText } from '@/components/ui/decrypted-text';
+import { useSoundPlayer } from '@/components/SoundPlayer';
 
 // Fallback mock data when MQTT is not connected
 const fallbackVoiceEffectsModulation = [
@@ -27,6 +28,7 @@ const fallbackVoiceEffectsGibberish = [
 ];
 
 export default function VoiceControl() {
+  const { playSound } = useSoundPlayer();
   const [isMuted, setIsMuted] = useState(false);
   const [voiceChangerEnabled, setVoiceChangerEnabled] = useState(true);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
@@ -50,6 +52,7 @@ export default function VoiceControl() {
     : fallbackVoiceEffectsGibberish;
 
   const toggleEffect = async (effectId: number) => {
+    playSound('major');
     const newActiveEffect = activeEffect === effectId ? null : effectId;
     setActiveEffect(newActiveEffect);
     
@@ -63,6 +66,7 @@ export default function VoiceControl() {
   };
 
   const handleMicrophoneToggle = async () => {
+    playSound('major');
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
     
@@ -76,6 +80,7 @@ export default function VoiceControl() {
   };
 
   const handleVoiceChangerToggle = async () => {
+    playSound('major');
     const newState = !voiceChangerEnabled;
     setVoiceChangerEnabled(newState);
     
@@ -106,7 +111,10 @@ export default function VoiceControl() {
         <div className="flex gap-4 mb-6">
           <Button
             variant={activeTab === 'modulation' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('modulation')}
+            onClick={() => {
+              playSound('minor');
+              setActiveTab('modulation');
+            }}
             className="flex-1"
           >
             <DecryptedText 
@@ -121,7 +129,10 @@ export default function VoiceControl() {
           </Button>
           <Button
             variant={activeTab === 'gibberish' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('gibberish')}
+            onClick={() => {
+              playSound('minor');
+              setActiveTab('gibberish');
+            }}
             className="flex-1"
           >
             <DecryptedText 

@@ -10,6 +10,7 @@ import { MQTTStatus } from '@/components/MQTTStatus';
 import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useMQTT } from '@/hooks/useMQTT';
 import { useTelegram } from '@/contexts/TelegramContext';
+import { useSoundPlayer } from '@/components/SoundPlayer';
 
 type SpotifyConnectionStatus = 'loading' | 'connected' | 'disconnected' | 'error';
 import {
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 function AdminPanelContent() {
+  const { playSound } = useSoundPlayer();
   const mqtt = useMQTT();
   const { isOwner, isAppLocked, setIsAppLocked, user } = useTelegram();
   const [showPowerDialog, setShowPowerDialog] = useState(false);
@@ -94,6 +96,7 @@ function AdminPanelContent() {
       return;
     }
     
+    playSound('major');
     setSpotifyStatus('Authenticating...');
     setSpotifyError('');
     
@@ -124,6 +127,7 @@ function AdminPanelContent() {
       return;
     }
     
+    playSound('major');
     const newLockedState = !checked;
     setIsAppLocked(newLockedState);
     try {
@@ -141,6 +145,7 @@ function AdminPanelContent() {
       return;
     }
     
+    playSound('major');
     try {
       await navigator.clipboard.writeText(anydeskKey);
       setKeyCopied(true);
@@ -541,7 +546,10 @@ function AdminPanelContent() {
             <Button
               variant="destructive"
               className="flex-1"
-              onClick={() => setShowPowerDialog(true)}
+              onClick={() => {
+                playSound('major');
+                setShowPowerDialog(true);
+              }}
             >
               <Power className="mr-2 h-4 w-4" />
               <DecryptedText 
@@ -576,6 +584,7 @@ function AdminPanelContent() {
                   disabled={!isOwner}
                   onClick={async () => {
                     if (!isOwner) return;
+                    playSound('major');
                     setShowPowerDialog(false);
                     try {
                       await mqtt.shutdown();
@@ -598,6 +607,7 @@ function AdminPanelContent() {
                   disabled={!isOwner}
                   onClick={async () => {
                     if (!isOwner) return;
+                    playSound('major');
                     setShowPowerDialog(false);
                     try {
                       await mqtt.reboot();
@@ -620,6 +630,7 @@ function AdminPanelContent() {
                   disabled={!isOwner}
                   onClick={async () => {
                     if (!isOwner) return;
+                    playSound('major');
                     setShowPowerDialog(false);
                     try {
                       await mqtt.killSoftware();

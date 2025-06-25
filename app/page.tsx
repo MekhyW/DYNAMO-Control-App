@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Card, CardContent } from '@/components/ui/card';
 import { DecryptedText } from '@/components/ui/decrypted-text';
+import { useSoundPlayer } from '@/components/SoundPlayer';
 
 const presets = [
   { id: 1, name: 'Combat Mode', description: 'Enhanced mobility and defense systems' },
@@ -16,16 +17,20 @@ const presets = [
 export default function Home() {
   const [activePreset, setActivePreset] = useState(1);
   const [macroSequence, setMacroSequence] = useState<number[]>([]);
+  const { playSound } = useSoundPlayer();
 
   const handleKeypadPress = (digit: number) => {
+    playSound('minor');
     setMacroSequence(prev => [...prev, digit]);
   };
 
   const clearSequence = () => {
+    playSound('minor');
     setMacroSequence([]);
   };
 
   const processSequence = () => {
+    playSound('major');
     setMacroSequence([]);
     console.log('Processing macro sequence:', macroSequence);
     // Add your macro processing logic here
@@ -155,7 +160,10 @@ export default function Home() {
                 className={`cursor-pointer transition-colors ${
                   activePreset === preset.id ? 'border-primary' : ''
                 }`}
-                onClick={() => setActivePreset(preset.id)}
+                onClick={() => {
+                  playSound('major');
+                  setActivePreset(preset.id);
+                }}
               >
                 <CardContent className="p-4">
                   <h3 className="font-semibold mb-1">

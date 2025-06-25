@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { HexColorPicker } from 'react-colorful';
 import { useMQTT } from '@/hooks/useMQTT';
 import { DecryptedText } from '@/components/ui/decrypted-text';
+import { useSoundPlayer } from '@/components/SoundPlayer';
 
 const lightEffects = [
   { id: 1, name: 'Solid Color', description: '' },
@@ -21,6 +22,7 @@ const lightEffects = [
 
 export default function LightControl() {
   const mqtt = useMQTT();
+  const { playSound } = useSoundPlayer();
   const [isOn, setIsOn] = useState(true);
   const [color, setColor] = useState("#ff0000");
   const [mainBrightness, setMainBrightness] = useState(75);
@@ -42,6 +44,7 @@ export default function LightControl() {
   }, []);
 
   const handleToggleLeds = async (enabled: boolean) => {
+    playSound('major');
     setIsOn(enabled);
     try {
       await mqtt.toggleLeds(enabled);
@@ -76,6 +79,7 @@ export default function LightControl() {
 
   const handleEffectSelect = async (effectId: number) => {
     if (!isOn) return;
+    playSound('major');
     const newActiveEffect = effectId === activeEffect ? null : effectId;
     setActiveEffect(newActiveEffect);
     if (newActiveEffect !== null) {
@@ -89,6 +93,9 @@ export default function LightControl() {
   };
 
   const handleLEDsBrightnessChange = useCallback((newBrightness: number) => {
+    if (!isBrightnessSliderActive) {
+      playSound('minor');
+    }
     setMainBrightness(newBrightness);
     if (brightnessTimeoutRef.current) {
       clearTimeout(brightnessTimeoutRef.current);
@@ -102,9 +109,12 @@ export default function LightControl() {
         }
       }, 100);
     }
-  }, [mqtt, isBrightnessSliderActive]);
+  }, [mqtt, isBrightnessSliderActive, playSound]);
 
   const handleEyesBrightnessChange = useCallback((newBrightness: number) => {
+    if (!isEyesBrightnessSliderActive) {
+      playSound('minor');
+    }
     setEyesBrightness(newBrightness);
     if (eyesBrightnessTimeoutRef.current) {
       clearTimeout(eyesBrightnessTimeoutRef.current);

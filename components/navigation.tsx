@@ -4,6 +4,7 @@ import { PawPrint, Music2, Mic2, Laugh, Lightbulb, Cookie, Settings } from 'luci
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useSoundPlayer } from './SoundPlayer';
 
 const navigation = [
   { name: 'Sound', href: '/sound', icon: Music2 },
@@ -17,6 +18,7 @@ const navigation = [
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { playSound } = useSoundPlayer();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg">
@@ -30,6 +32,7 @@ export default function Navigation() {
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={() => playSound('minor')}
                 className={cn(
                   "flex flex-col items-center py-2 px-1 text-sm font-medium transition-all duration-200",
                   isActive 

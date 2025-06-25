@@ -10,9 +10,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useMQTT } from '@/hooks/useMQTT';
 import { DecryptedText } from '@/components/ui/decrypted-text';
+import { useSoundPlayer } from '@/components/SoundPlayer';
 
 export default function AIControl() {
   const mqtt = useMQTT();
+  const { playSound } = useSoundPlayer();
   const [hotwordEnabled, setHotwordEnabled] = useState(true);
   const [speechText, setSpeechText] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -25,6 +27,7 @@ export default function AIControl() {
   }, [mqtt.chatLogs]);
 
   const handleHotwordToggle = async (enabled: boolean) => {
+    playSound('major');
     setHotwordEnabled(enabled);
     try {
       await mqtt.toggleHotwordDetection(enabled);
@@ -34,6 +37,7 @@ export default function AIControl() {
   };
 
   const handleTriggerHotword = async () => {
+    playSound('major');
     try {
       await mqtt.triggerHotword();
     } catch (error) {
@@ -43,6 +47,7 @@ export default function AIControl() {
 
   const handleSpeak = async () => {
     if (!speechText.trim()) return;
+    playSound('major');
     try {
       await mqtt.textToSpeech(speechText);
       setSpeechText(''); // Clear the text after speaking

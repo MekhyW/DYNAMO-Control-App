@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { useMQTT } from '@/hooks/useMQTT';
 import { DecryptedText } from '@/components/ui/decrypted-text';
+import { useSoundPlayer } from '@/components/SoundPlayer';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +36,7 @@ const expressionPresets = [
 ];
 
 export default function ExpressionControl() {
+  const { playSound } = useSoundPlayer();
   const mqtt = useMQTT();
   const [isExprTracking, setIsExprTracking] = useState(true);
   const [isEyeTracking, setIsEyeTracking] = useState(true);
@@ -43,6 +45,7 @@ export default function ExpressionControl() {
   const [motorEnabled, setMotorEnabled] = useState(true);
 
   const toggleExprTracking = async () => {
+    playSound('major');
     const newState = !isExprTracking;
     setIsExprTracking(newState);
     if (!newState) {
@@ -56,6 +59,7 @@ export default function ExpressionControl() {
   };
 
   const toggleEyeTracking = async () => {
+    playSound('major');
     const newState = !isEyeTracking;
     setIsEyeTracking(newState);
     try {
@@ -66,6 +70,7 @@ export default function ExpressionControl() {
   };
 
   const handleExpressionSelect = async (expressionId: number) => {
+    playSound('major');
     if (expressionId !== activeExpression) {
       setIsExprTracking(false);
       try {
@@ -88,6 +93,7 @@ export default function ExpressionControl() {
   };
 
   const handleMotorToggle = async () => {
+    playSound('major');
     if (!motorEnabled) {
       setShowMotorDialog(true);
     } else {
@@ -226,6 +232,7 @@ export default function ExpressionControl() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
+                playSound('major');
                 setMotorEnabled(true);
                 setShowMotorDialog(false);
                 try {

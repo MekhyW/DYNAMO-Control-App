@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DecryptedText } from '@/components/ui/decrypted-text';
+import { useSoundPlayer } from '@/components/SoundPlayer';
 import {
   Sheet,
   SheetContent,
@@ -29,6 +30,7 @@ const fallbackSoundPresets = [
 ];
 
 export default function SoundControl() {
+  const { playSound } = useSoundPlayer();
   const [volume, setVolume] = useState(75);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -54,6 +56,9 @@ export default function SoundControl() {
   } = useMQTT();
   const soundPresets = isConnected && soundEffects.length > 0 ? soundEffects : fallbackSoundPresets;
   const handleVolumeChange = useCallback((newVolume: number) => {
+    if (!isVolumeSliderActive) {
+      playSound('minor');
+    }
     setVolume(newVolume);
     if (volumeTimeoutRef.current) {
       clearTimeout(volumeTimeoutRef.current);
@@ -67,7 +72,7 @@ export default function SoundControl() {
         }
       }, 100);
     }
-  }, [isConnected, setOutputVolume, isVolumeSliderActive]);
+  }, [isConnected, setOutputVolume, isVolumeSliderActive, playSound]);
 
   const handleVolumeSliderStart = useCallback(() => {
     setIsVolumeSliderActive(true);
@@ -85,6 +90,7 @@ export default function SoundControl() {
   }, [isConnected, setOutputVolume, volume]);
 
   const handlePlaySoundEffect = async (effectId: number) => {
+    playSound('major');
     if (isConnected) {
       try {
         await playSoundEffect(effectId);
@@ -150,10 +156,11 @@ export default function SoundControl() {
                       </div>
                     </div>
                     <Button
-                      size="icon"
+                      size="sm"
                       variant="ghost"
                       onClick={(e) => {
                         e.stopPropagation();
+                        playSound('major');
                         addToQueue(track);
                       }}
                     >
@@ -188,7 +195,10 @@ export default function SoundControl() {
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={togglePlayback}
+                onClick={() => {
+                  playSound('major');
+                  togglePlayback();
+                }}
               >
                 {isPlaying ? (
                   <Pause className="h-4 w-4" />
@@ -199,7 +209,10 @@ export default function SoundControl() {
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={skipTrack}
+                onClick={() => {
+                  playSound('major');
+                  skipTrack();
+                }}
               >
                 <SkipForward className="h-4 w-4" />
               </Button>
@@ -241,7 +254,10 @@ export default function SoundControl() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => playTrack(track.uri, true)}
+                          onClick={() => {
+                            playSound('major');
+                            playTrack(track.uri, true);
+                          }}
                         >
                           <Play className="h-3 w-3" />
                         </Button>
