@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { Eye, EyeOff, AlertTriangle, ScanFace } from 'lucide-react';
+import { Eye, EyeOff, AlertTriangle, ScanFace, Rainbow } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { useMQTT } from '@/hooks/useMQTT';
@@ -43,6 +43,7 @@ export default function ExpressionControl() {
   const [activeExpression, setActiveExpression] = useState<number | null>(null);
   const [showMotorDialog, setShowMotorDialog] = useState(false);
   const [motorEnabled, setMotorEnabled] = useState(true);
+  const [sillyMode, setSillyMode] = useState(false);
 
   const toggleExprTracking = async () => {
     playSound('major');
@@ -103,6 +104,17 @@ export default function ExpressionControl() {
       } catch (error) {
         console.error('Failed to toggle eyebrows:', error);
       }
+    }
+  };
+
+  const toggleSillyMode = async () => {
+    playSound('major');
+    const newState = !sillyMode;
+    setSillyMode(newState);
+    try {
+      await mqtt.setExpression(newState ? "SillyON" : "SillyOFF");
+    } catch (error) {
+      console.error('Failed to toggle silly mode:', error);
     }
   };
 
@@ -181,6 +193,29 @@ export default function ExpressionControl() {
                 <Switch
                   checked={motorEnabled}
                   onCheckedChange={handleMotorToggle}
+                />
+              </div>
+
+              {/* Silly Mode */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Rainbow className={cn(
+                    "h-5 w-5",
+                    sillyMode ? "text-primary" : "text-muted-foreground"
+                  )} />
+                  <span className="font-medium">
+                    <DecryptedText 
+                      text="Silly!!" 
+                      animateOn="view" 
+                      speed={50} 
+                      maxIterations={7}
+                      className="font-medium"
+                    />
+                  </span>
+                </div>
+                <Switch
+                  checked={sillyMode}
+                  onCheckedChange={toggleSillyMode}
                 />
               </div>
             </div>
