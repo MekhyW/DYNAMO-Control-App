@@ -8,6 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { HexColorPicker } from 'react-colorful';
 import { useMQTT } from '@/hooks/useMQTT';
+import { DecryptedText } from '@/components/ui/decrypted-text';
 
 const lightEffects = [
   { id: 1, name: 'Solid Color', description: '' },
@@ -141,7 +142,17 @@ export default function LightControl() {
                 ) : (
                   <LightbulbOff className="h-5 w-5 text-muted-foreground" />
                 )}
-                <span className="font-medium">Master Light Control</span>
+                <span className="font-medium">
+                  <DecryptedText 
+                    text="Master Light Control"
+                    animateOn="view"
+                    sequential={true}
+                    speed={40}
+                    maxIterations={12}
+                    className="text-ui"
+                    encryptedClassName="text-ui opacity-60"
+                  />
+                </span>
               </div>
               <Switch
                 checked={isOn}
@@ -153,7 +164,17 @@ export default function LightControl() {
             <div className={cn("space-y-6", !isOn && "opacity-50")}>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">LEDs Brightness</label>
+                  <label className="text-sm font-medium">
+                    <DecryptedText 
+                      text="LEDs Brightness"
+                      animateOn="view"
+                      sequential={true}
+                      speed={35}
+                      maxIterations={10}
+                      className="text-ui"
+                      encryptedClassName="text-ui opacity-60"
+                    />
+                  </label>
                   <span className="text-sm text-muted-foreground">{mainBrightness}%</span>
                 </div>
                 <div className="flex items-center gap-4">
@@ -177,7 +198,17 @@ export default function LightControl() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Eyes Brightness</label>
+                  <label className="text-sm font-medium">
+                    <DecryptedText 
+                      text="Eyes Brightness"
+                      animateOn="view"
+                      sequential={true}
+                      speed={35}
+                      maxIterations={10}
+                      className="text-ui"
+                      encryptedClassName="text-ui opacity-60"
+                    />
+                  </label>
                   <span className="text-sm text-muted-foreground">{eyesBrightness}%</span>
                 </div>
                 <div className="flex items-center gap-4">
@@ -206,7 +237,17 @@ export default function LightControl() {
         {/* Color Wheel */}
         <Card className={cn("mb-6", !isOn && "opacity-50 pointer-events-none")}>
           <CardContent className="p-4">
-            <h2 className="text-lg font-medium mb-4">Color Selection</h2>
+            <h2 className="text-lg font-medium mb-4">
+              <DecryptedText 
+                text="Color Selection"
+                animateOn="view"
+                sequential={true}
+                speed={40}
+                maxIterations={12}
+                className="text-heading"
+                encryptedClassName="text-heading opacity-60"
+              />
+            </h2>
             <div className="flex justify-center mb-4">
               <HexColorPicker
                 color={color}
@@ -241,7 +282,17 @@ export default function LightControl() {
             >
               <CardContent className="p-4">
                 <div className="text-center">
-                  <h3 className="font-medium">{effect.name}</h3>
+                  <h3 className="font-medium">
+                    <DecryptedText 
+                      text={effect.name}
+                      animateOn="hover"
+                      sequential={true}
+                      speed={25}
+                      maxIterations={7}
+                      className="text-heading"
+                      encryptedClassName="text-heading opacity-60"
+                    />
+                  </h3>
                   <p className="text-sm text-muted-foreground">{effect.description}</p>
                 </div>
               </CardContent>

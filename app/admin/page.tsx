@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { MQTTStatus } from '@/components/MQTTStatus';
+import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useMQTT } from '@/hooks/useMQTT';
 import { useTelegram } from '@/contexts/TelegramContext';
 
@@ -157,7 +158,15 @@ function AdminPanelContent() {
           {/* AnyDesk Number */}
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">AnyDesk Remote Access</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                <DecryptedText 
+                  text="AnyDesk Remote Access" 
+                  animateOn="view" 
+                  speed={50} 
+                  maxIterations={7}
+                  className="text-sm font-medium"
+                />
+              </CardTitle>
               {!isOwner && <Lock className="h-4 w-4 text-red-500" />}
             </CardHeader>
             <CardContent className="space-y-4">
@@ -172,7 +181,15 @@ function AdminPanelContent() {
               )}
               {isOwner && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">AnyDesk ID</label>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    <DecryptedText 
+                      text="AnyDesk ID" 
+                      animateOn="view" 
+                      speed={40} 
+                      maxIterations={7}
+                      className="text-sm font-medium text-muted-foreground"
+                    />
+                  </label>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 p-3 bg-muted rounded-md font-mono text-lg font-semibold tracking-wider">
                       {anydeskKey}
@@ -207,7 +224,15 @@ function AdminPanelContent() {
           {/* MQTT Connection Status */}
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">MQTT Connection</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                <DecryptedText 
+                  text="MQTT Connection" 
+                  animateOn="view" 
+                  speed={50} 
+                  maxIterations={7}
+                  className="text-sm font-medium"
+                />
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <MQTTStatus showLabel={true} />
@@ -221,7 +246,15 @@ function AdminPanelContent() {
           {user && (
             <Card className="mb-6">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">User Information</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  <DecryptedText 
+                    text="User Information" 
+                    animateOn="view" 
+                    speed={50} 
+                    maxIterations={7}
+                    className="text-sm font-medium"
+                  />
+                </CardTitle>
                 {isOwner && <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">Owner</span>}
               </CardHeader>
               <CardContent className="space-y-2">
@@ -249,7 +282,15 @@ function AdminPanelContent() {
           {isOwner && (
             <Card className="mb-6">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Global App Security</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  <DecryptedText 
+                    text="Global App Security" 
+                    animateOn="view" 
+                    speed={50} 
+                    maxIterations={7}
+                    className="text-sm font-medium"
+                  />
+                </CardTitle>
                 {isAppLocked ? (
                   <Lock className="h-4 w-4 text-red-500" />
                 ) : (
@@ -259,7 +300,15 @@ function AdminPanelContent() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <label className="text-sm font-medium">App Access Control</label>
+                    <label className="text-sm font-medium">
+                      <DecryptedText 
+                        text="App Access Control" 
+                        animateOn="view" 
+                        speed={40} 
+                        maxIterations={7}
+                        className="text-sm font-medium"
+                      />
+                    </label>
                     <p className="text-xs text-muted-foreground">
                       {isAppLocked 
                         ? 'App is locked - only you can access all features' 
@@ -305,7 +354,15 @@ function AdminPanelContent() {
           {/* Spotify Authentication */}
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Spotify Connection</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                <DecryptedText 
+                  text="Spotify Connection" 
+                  animateOn="view" 
+                  speed={50} 
+                  maxIterations={7}
+                  className="text-sm font-medium"
+                />
+              </CardTitle>
               {!isOwner && <Lock className="h-4 w-4 text-red-500" />}
             </CardHeader>
             <CardContent className="space-y-4">
@@ -345,7 +402,15 @@ function AdminPanelContent() {
               <form onSubmit={handleAuthenticate} className="space-y-4">
                 {process.env.NEXT_PUBLIC_ADMIN_PASSWORD_REQUIRED === 'true' && (
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Admin Password</label>
+                    <label className="text-sm font-medium">
+                      <DecryptedText 
+                        text="Admin Password" 
+                        animateOn="view" 
+                        speed={40} 
+                        maxIterations={7}
+                        className="text-sm font-medium"
+                      />
+                    </label>
                     <input
                       type="password"
                       value={password}
@@ -379,7 +444,15 @@ function AdminPanelContent() {
           {/* Audio Device Controls */}
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Audio Device Controls</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                <DecryptedText 
+                  text="Audio Device Controls" 
+                  animateOn="view" 
+                  speed={50} 
+                  maxIterations={7}
+                  className="text-sm font-medium"
+                />
+              </CardTitle>
               {!isOwner && <Lock className="h-4 w-4 text-red-500" />}
             </CardHeader>
             <CardContent className="p-4">
@@ -394,7 +467,15 @@ function AdminPanelContent() {
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Input Device</label>
+                  <label className="text-sm font-medium">
+                    <DecryptedText 
+                      text="Input Device" 
+                      animateOn="view" 
+                      speed={40} 
+                      maxIterations={7}
+                      className="text-sm font-medium"
+                    />
+                  </label>
                   <Select 
                     value={selectedInputDevice} 
                     onValueChange={isOwner ? setSelectedInputDevice : undefined} 
@@ -419,7 +500,15 @@ function AdminPanelContent() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Output Device</label>
+                  <label className="text-sm font-medium">
+                    <DecryptedText 
+                      text="Output Device" 
+                      animateOn="view" 
+                      speed={40} 
+                      maxIterations={7}
+                      className="text-sm font-medium"
+                    />
+                  </label>
                   <Select 
                     value={selectedOutputDevice} 
                     onValueChange={isOwner ? setSelectedOutputDevice : undefined} 
@@ -455,7 +544,12 @@ function AdminPanelContent() {
               onClick={() => setShowPowerDialog(true)}
             >
               <Power className="mr-2 h-4 w-4" />
-              Power Options
+              <DecryptedText 
+                text="Power Options" 
+                animateOn="view" 
+                speed={40} 
+                maxIterations={7}
+              />
               {!isOwner && <Lock className="ml-2 h-3 w-3" />}
             </Button>
           </div>
@@ -464,7 +558,14 @@ function AdminPanelContent() {
           <AlertDialog open={showPowerDialog} onOpenChange={setShowPowerDialog}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Power Options</AlertDialogTitle>
+                <AlertDialogTitle>
+                  <DecryptedText 
+                    text="Power Options" 
+                    animateOn="view" 
+                    speed={50} 
+                    maxIterations={7}
+                  />
+                </AlertDialogTitle>
                 <AlertDialogDescription>
                   Please select a power option:
                 </AlertDialogDescription>
@@ -484,7 +585,12 @@ function AdminPanelContent() {
                   }}
                 >
                   <Power className="mr-2 h-4 w-4" />
-                  Shutdown
+                  <DecryptedText 
+                    text="Shutdown" 
+                    animateOn="view" 
+                    speed={40} 
+                    maxIterations={7}
+                  />
                   {!isOwner && <Lock className="ml-2 h-3 w-3" />}
                 </Button>
                 <Button
@@ -501,7 +607,12 @@ function AdminPanelContent() {
                   }}
                 >
                   <RefreshCcw className="mr-2 h-4 w-4" />
-                  Reboot
+                  <DecryptedText 
+                    text="Reboot" 
+                    animateOn="view" 
+                    speed={40} 
+                    maxIterations={7}
+                  />
                   {!isOwner && <Lock className="ml-2 h-3 w-3" />}
                 </Button>
                 <Button
@@ -518,7 +629,12 @@ function AdminPanelContent() {
                   }}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Kill Software
+                  <DecryptedText 
+                    text="Kill Software" 
+                    animateOn="view" 
+                    speed={40} 
+                    maxIterations={7}
+                  />
                   {!isOwner && <Lock className="ml-2 h-3 w-3" />}
                 </Button>
               </div>

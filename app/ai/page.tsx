@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useMQTT } from '@/hooks/useMQTT';
+import { DecryptedText } from '@/components/ui/decrypted-text';
 
 export default function AIControl() {
   const mqtt = useMQTT();
@@ -59,7 +60,15 @@ export default function AIControl() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Bot className="h-5 w-5 text-primary" />
-                <span className="font-medium">Hotword Detection</span>
+                <span className="font-medium">
+                  <DecryptedText 
+                    text="Hotword Detection" 
+                    animateOn="view" 
+                    speed={50} 
+                    maxIterations={7}
+                    className="font-medium"
+                  />
+                </span>
               </div>
               <Switch
                 checked={hotwordEnabled}
@@ -71,7 +80,12 @@ export default function AIControl() {
               className="w-full text-sm"
               onClick={handleTriggerHotword}
             >
-              Trigger Now
+              <DecryptedText 
+                text="Trigger Now" 
+                animateOn="view" 
+                speed={40} 
+                maxIterations={7}
+              />
             </Button>
           </CardContent>
         </Card>
@@ -115,7 +129,15 @@ export default function AIControl() {
         {/* Text-to-Speech Area */}
         <Card>
           <CardContent className="p-4 py-2">
-            <h3 className="font-medium mb-2">Text-to-Speech</h3>
+            <h3 className="font-medium mb-2">
+              <DecryptedText 
+                text="Text-to-Speech" 
+                animateOn="view" 
+                speed={50} 
+                maxIterations={7}
+                className="font-medium"
+              />
+            </h3>
             <div className="flex gap-2">
               <div className="flex-1">
                 <Textarea
@@ -131,7 +153,12 @@ export default function AIControl() {
                 disabled={!speechText.trim()}
               >
                 <Volume2 className="h-5 w-5 mr-2" />
-                Speak
+                <DecryptedText 
+                  text="Speak" 
+                  animateOn="view" 
+                  speed={40} 
+                  maxIterations={7}
+                />
               </Button>
             </div>
           </CardContent>

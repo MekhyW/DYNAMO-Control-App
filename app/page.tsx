@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Card, CardContent } from '@/components/ui/card';
+import { DecryptedText } from '@/components/ui/decrypted-text';
 
 const presets = [
   { id: 1, name: 'Combat Mode', description: 'Enhanced mobility and defense systems' },
@@ -33,8 +34,29 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 pb-safe pt-6">
       <div className="text-center mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter mb-2">M.E.K.H.Y</h1>
-        <p className="text-sm sm:text-base text-muted-foreground">Mechanism Execution Kernel of Heinous Yapper</p>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter mb-2">
+          <DecryptedText 
+            text="M.E.K.H.Y" 
+            animateOn="view"
+            sequential={true}
+            revealDirection="center"
+            speed={60}
+            maxIterations={15}
+            className="text-brand"
+            encryptedClassName="text-brand opacity-70"
+          />
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          <DecryptedText 
+            text="Mechanism Execution Kernel of Heinous Yapper" 
+            animateOn="view"
+            sequential={true}
+            speed={40}
+            maxIterations={12}
+            className="text-muted-foreground"
+            encryptedClassName="text-muted-foreground opacity-50"
+          />
+        </p>
       </div>
 
       <div className="relative h-[60vh] min-h-[300px] max-h-[500px] mb-8 flex items-center justify-center">
@@ -42,11 +64,31 @@ export default function Home() {
           {/* Macro Input Display */}
           <div className="mb-4">
             <div className="text-center mb-2">
-              <span className="text-xs text-muted-foreground">Macro Sequence</span>
+              <span className="text-xs text-muted-foreground">
+                <DecryptedText 
+                  text="Macro Sequence"
+                  animateOn="view"
+                  sequential={true}
+                  speed={40}
+                  maxIterations={8}
+                  className="text-muted-foreground"
+                  encryptedClassName="text-muted-foreground opacity-40"
+                />
+              </span>
             </div>
             <div className="bg-background rounded p-2 min-h-[40px] border">
               <span className="text-sm font-mono">
-                {macroSequence.length > 0 ? macroSequence.join('') : 'Enter sequence...'}
+                {macroSequence.length > 0 ? macroSequence.join('') : (
+                  <DecryptedText 
+                    text="Enter sequence..."
+                    animateOn="view"
+                    sequential={true}
+                    speed={40}
+                    maxIterations={7}
+                    className="text-terminal"
+                    encryptedClassName="text-terminal opacity-50"
+                  />
+                )}
               </span>
             </div>
           </div>
@@ -77,14 +119,34 @@ export default function Home() {
 
       <Sheet>
         <SheetTrigger asChild>
-          <Button className="w-full mb-4">Select Preset Mode</Button>
+          <Button className="w-full mb-4">
+            <DecryptedText 
+              text="Select Preset Mode"
+              animateOn="view"
+              sequential={true}
+              speed={40}
+              maxIterations={10}
+              className="text-ui"
+              encryptedClassName="text-ui opacity-60"
+            />
+          </Button>
         </SheetTrigger>
         <SheetContent 
           side="bottom" 
           className="h-[50vh] sm:h-[60vh] max-h-[600px] overflow-y-auto"
         >
           <SheetHeader>
-            <SheetTitle>System Presets</SheetTitle>
+            <SheetTitle>
+              <DecryptedText 
+                text="System Presets"
+                animateOn="view"
+                sequential={true}
+                speed={40}
+                maxIterations={10}
+                className="text-heading"
+                encryptedClassName="text-heading opacity-60"
+              />
+            </SheetTitle>
           </SheetHeader>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pb-8 sm:pb-12">
             {presets.map((preset) => (
@@ -96,8 +158,28 @@ export default function Home() {
                 onClick={() => setActivePreset(preset.id)}
               >
                 <CardContent className="p-4">
-                  <h3 className="font-semibold mb-1">{preset.name}</h3>
-                  <p className="text-sm text-muted-foreground">{preset.description}</p>
+                  <h3 className="font-semibold mb-1">
+                    <DecryptedText 
+                      text={preset.name}
+                      animateOn="view"
+                      sequential={true}
+                      speed={40}
+                      maxIterations={8}
+                      className="text-ui"
+                      encryptedClassName="text-ui opacity-60"
+                    />
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    <DecryptedText 
+                      text={preset.description}
+                      animateOn="view"
+                      sequential={true}
+                      speed={40}
+                      maxIterations={7}
+                      className="text-muted-foreground"
+                      encryptedClassName="text-muted-foreground opacity-40"
+                    />
+                  </p>
                 </CardContent>
               </Card>
             ))}

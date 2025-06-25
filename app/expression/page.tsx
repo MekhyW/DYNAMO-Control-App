@@ -5,6 +5,7 @@ import { Eye, EyeOff, AlertTriangle, ScanFace } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { useMQTT } from '@/hooks/useMQTT';
+import { DecryptedText } from '@/components/ui/decrypted-text';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -115,7 +116,15 @@ export default function ExpressionControl() {
                   ) : (
                     <ScanFace className="h-5 w-5 text-muted-foreground" />
                   )}
-                  <span className="font-medium">Face Expression Tracking</span>
+                  <span className="font-medium">
+                    <DecryptedText 
+                      text="Face Expression Tracking" 
+                      animateOn="view" 
+                      speed={50} 
+                      maxIterations={7}
+                      className="font-medium"
+                    />
+                  </span>
                 </div>
                 <Switch
                   checked={isExprTracking}
@@ -130,7 +139,15 @@ export default function ExpressionControl() {
                   ) : (
                     <EyeOff className="h-5 w-5 text-muted-foreground" />
                   )}
-                  <span className="font-medium">Eye Tracking</span>
+                  <span className="font-medium">
+                    <DecryptedText 
+                      text="Eye Tracking" 
+                      animateOn="view" 
+                      speed={50} 
+                      maxIterations={7}
+                      className="font-medium"
+                    />
+                  </span>
                 </div>
                 <Switch
                   checked={isEyeTracking}
@@ -145,7 +162,15 @@ export default function ExpressionControl() {
                     "h-5 w-5",
                     motorEnabled ? "text-primary" : "text-muted-foreground"
                   )} />
-                  <span className="font-medium">Eyebrows (Motor Control)</span>
+                  <span className="font-medium">
+                    <DecryptedText 
+                      text="Eyebrows (Motor Control)" 
+                      animateOn="view" 
+                      speed={50} 
+                      maxIterations={7}
+                      className="font-medium"
+                    />
+                  </span>
                 </div>
                 <Switch
                   checked={motorEnabled}
@@ -184,7 +209,14 @@ export default function ExpressionControl() {
       <AlertDialog open={showMotorDialog} onOpenChange={setShowMotorDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Enable Motor Control?</AlertDialogTitle>
+            <AlertDialogTitle>
+              <DecryptedText 
+                text="Enable Motor Control?" 
+                animateOn="view" 
+                speed={50} 
+                maxIterations={7}
+              />
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Enabling motor control will allow physical movement of expression components.
               Please ensure the area around the device is clear before proceeding.

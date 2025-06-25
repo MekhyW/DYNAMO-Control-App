@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { DecryptedText } from '@/components/ui/decrypted-text';
 import {
   Sheet,
   SheetContent,
@@ -170,7 +171,15 @@ export default function SoundControl() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-medium">Now Playing</h3>
+              <h3 className="font-medium">
+                <DecryptedText 
+                  text="Now Playing" 
+                  animateOn="view" 
+                  speed={50} 
+                  maxIterations={7}
+                  className="font-medium"
+                />
+              </h3>
               <p className="text-sm text-muted-foreground">
                 {currentTrack ? `${currentTrack.name} - ${currentTrack.artists[0].name}` : 'No track playing'}
               </p>
@@ -202,7 +211,14 @@ export default function SoundControl() {
                 </SheetTrigger>
                 <SheetContent>
                   <SheetHeader>
-                    <SheetTitle>Queue</SheetTitle>
+                    <SheetTitle>
+                      <DecryptedText 
+                        text="Queue" 
+                        animateOn="view" 
+                        speed={50} 
+                        maxIterations={7}
+                      />
+                    </SheetTitle>
                   </SheetHeader>
                   <div className="space-y-4 mt-4">
                     {queue.map((track, index) => (

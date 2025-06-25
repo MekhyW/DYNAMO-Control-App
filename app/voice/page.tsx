@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useMQTT } from '@/hooks/useMQTT';
+import { DecryptedText } from '@/components/ui/decrypted-text';
 
 // Fallback mock data when MQTT is not connected
 const fallbackVoiceEffectsModulation = [
@@ -108,14 +109,30 @@ export default function VoiceControl() {
             onClick={() => setActiveTab('modulation')}
             className="flex-1"
           >
-            Modulation Effects
+            <DecryptedText 
+              text="Modulation Effects"
+              animateOn="view"
+              sequential={true}
+              speed={40}
+              maxIterations={7}
+              className="text-ui"
+              encryptedClassName="text-ui opacity-70"
+            />
           </Button>
           <Button
             variant={activeTab === 'gibberish' ? 'default' : 'outline'}
             onClick={() => setActiveTab('gibberish')}
             className="flex-1"
           >
-            Gibberish Effects
+            <DecryptedText 
+              text="Gibberish Effects"
+              animateOn="view"
+              sequential={true}
+              speed={40}
+              maxIterations={7}
+              className="text-ui"
+              encryptedClassName="text-ui opacity-70"
+            />
           </Button>
         </div>
 
@@ -134,7 +151,18 @@ export default function VoiceControl() {
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="font-medium">{effect.name}</h3>
+                    <h3 className="font-medium">
+                      <DecryptedText 
+                        text={effect.name}
+                        animateOn="hover"
+                        sequential={true}
+                        speed={30}
+                        maxIterations={8}
+                        className="text-voice-mod"
+                        encryptedClassName="text-voice-mod opacity-60"
+                        useOriginalCharsOnly={true}
+                      />
+                    </h3>
                   </div>
                   {activeEffect === effect.id && (
                     <AudioWaveform className="h-4 w-4 text-primary" />
@@ -156,9 +184,29 @@ export default function VoiceControl() {
                 onClick={handleMicrophoneToggle}
               >
                 {isMuted ? (
-                  <><MicOff className="h-5 w-5" /> Microphone OFF</>
+                  <><MicOff className="h-5 w-5" /> 
+                    <DecryptedText 
+                      text="Microphone OFF"
+                      animateOn="view"
+                      sequential={true}
+                      speed={40}
+                      maxIterations={10}
+                      className="text-ui"
+                      encryptedClassName="text-ui opacity-60"
+                    />
+                  </>
                 ) : (
-                  <><Mic className="h-5 w-5" /> Microphone ON</>
+                  <><Mic className="h-5 w-5" /> 
+                    <DecryptedText 
+                      text="Microphone ON"
+                      animateOn="view"
+                      sequential={true}
+                      speed={40}
+                      maxIterations={10}
+                      className="text-ui"
+                      encryptedClassName="text-ui opacity-60"
+                    />
+                  </>
                 )}
               </Button>
               
@@ -170,9 +218,29 @@ export default function VoiceControl() {
                 disabled={isMuted}
               >
                 {voiceChangerEnabled ? (
-                  <><AudioWaveform className="h-5 w-5" /> Voice Changer ON</>
+                  <><AudioWaveform className="h-5 w-5" /> 
+                    <DecryptedText 
+                      text="Voice Changer ON"
+                      animateOn="view"
+                      sequential={true}
+                      speed={40}
+                      maxIterations={10}
+                      className="text-ui"
+                      encryptedClassName="text-ui opacity-60"
+                    />
+                  </>
                 ) : (
-                  <><AudioLines className="h-5 w-5" /> Voice Changer OFF</>
+                  <><AudioLines className="h-5 w-5" /> 
+                    <DecryptedText 
+                      text="Voice Changer OFF"
+                      animateOn="view"
+                      sequential={true}
+                      speed={40}
+                      maxIterations={10}
+                      className="text-ui"
+                      encryptedClassName="text-ui opacity-60"
+                    />
+                  </>
                 )}
               </Button>
             </div>
