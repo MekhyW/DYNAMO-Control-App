@@ -34,7 +34,7 @@ export default function Navigation() {
                 href={item.href}
                 onClick={() => playSound('minor')}
                 className={cn(
-                  "flex flex-col items-center py-2 px-1 text-sm font-medium transition-all duration-200",
+                  "flex flex-col items-center py-2 px-1 text-sm font-rajdhani font-medium transition-all duration-200",
                   isActive 
                     ? "text-primary -translate-y-1" 
                     : "text-muted-foreground hover:text-primary"
