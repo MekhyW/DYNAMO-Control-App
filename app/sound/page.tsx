@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import Image from 'next/image';
 
 // Fallback mock data when MQTT is not connected
 const fallbackSoundPresets = [
@@ -293,10 +294,16 @@ export default function SoundControl() {
             onClick={() => handlePlaySoundEffect(preset.id)}
           >
             <CardContent className="p-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-medium">{preset.name}</h3>
-                </div>
+              <div className="flex items-center gap-3">
+                <Image
+                  src={`/sound_icons/${preset.name.toLowerCase()}.png`}
+                  alt={`${preset.name} icon`}
+                  width={32}
+                  height={32}
+                  className="object-cover rounded"
+                  sizes="32px"
+                />
+                <h3 className="font-medium">{preset.name}</h3>
               </div>
             </CardContent>
           </Card>
