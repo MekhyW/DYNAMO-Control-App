@@ -11,13 +11,7 @@ import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 // Fallback mock data when MQTT is not connected
 const fallbackSoundPresets = [
@@ -293,19 +287,16 @@ export default function SoundControl() {
 
       <div className="grid grid-cols-2 gap-4 mb-6">
         {soundPresets.map((preset) => (
-          <Card key={preset.id} className="cursor-pointer hover:bg-accent">
+          <Card 
+            key={preset.id} 
+            className="cursor-pointer hover:bg-accent"
+            onClick={() => handlePlaySoundEffect(preset.id)}
+          >
             <CardContent className="p-4">
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="font-medium">{preset.name}</h3>
                 </div>
-                <Button 
-                  size="icon" 
-                  variant="ghost"
-                  onClick={() => handlePlaySoundEffect(preset.id)}
-                >
-                  <Play className="h-4 w-4" />
-                </Button>
               </div>
             </CardContent>
           </Card>
