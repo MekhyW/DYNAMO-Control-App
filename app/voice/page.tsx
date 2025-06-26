@@ -161,18 +161,18 @@ export default function VoiceControl() {
               onClick={() => toggleEffect(effect.id)}
             >
               <CardContent className="p-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-8 h-8 flex-shrink-0">
-                      <Image
-                        src={`/voice_icons/${effect.name.toLowerCase()}.png`}
-                        alt={`${effect.name} icon`}
-                        fill
-                        className="object-cover rounded"
-                        sizes="32px"
-                      />
-                    </div>
-                    <h3 className="font-medium">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative w-12 h-12 flex-shrink-0">
+                    <Image
+                      src={`/voice_icons/${effect.name.toLowerCase()}.png`}
+                      alt={`${effect.name} icon`}
+                      fill
+                      className="object-cover rounded"
+                      sizes="48px"
+                    />
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <h3 className="font-medium text-center">
                       <DecryptedText 
                         text={effect.name}
                         animateOn="hover"
@@ -184,10 +184,10 @@ export default function VoiceControl() {
                         useOriginalCharsOnly={true}
                       />
                     </h3>
+                    {activeEffect === effect.id && (
+                      <AudioWaveform className="h-4 w-4 text-primary" />
+                    )}
                   </div>
-                  {activeEffect === effect.id && (
-                    <AudioWaveform className="h-4 w-4 text-primary" />
-                  )}
                 </div>
               </CardContent>
             </Card>
