@@ -8,10 +8,7 @@ import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
 
 const presets = [
-  { id: 1, name: 'Combat Mode', description: 'Enhanced mobility and defense systems' },
-  { id: 2, name: 'Stealth Mode', description: 'Minimal emissions and sound signature' },
-  { id: 3, name: 'Power Save', description: 'Optimized for extended operation' },
-  { id: 4, name: 'Custom Mode', description: 'User-defined parameters' },
+  { id: 1, name: 'Coming soon...', description: 'Presets feature is still in development' },
 ];
 
 export default function Home() {
