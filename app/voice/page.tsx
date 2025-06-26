@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useMQTT } from '@/hooks/useMQTT';
 import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
+import Image from 'next/image';
 
 // Fallback mock data when MQTT is not connected
 const fallbackVoiceEffectsModulation = [
@@ -161,7 +162,16 @@ export default function VoiceControl() {
             >
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
-                  <div>
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-8 h-8 flex-shrink-0">
+                      <Image
+                        src={`/voice_icons/${effect.name.toLowerCase()}.png`}
+                        alt={`${effect.name} icon`}
+                        fill
+                        className="object-cover rounded"
+                        sizes="32px"
+                      />
+                    </div>
                     <h3 className="font-medium">
                       <DecryptedText 
                         text={effect.name}
