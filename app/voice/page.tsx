@@ -11,7 +11,7 @@ import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
 
 // Fallback mock data when MQTT is not connected
-const fallbackVoiceEffectsModulation: Array<{id: number; name: string; type: string; bitmap?: string}> = [
+const fallbackVoiceEffectsModulation = [
   {id: 1, name: 'Mekhy', type: 'modulation'},
   {id: 2, name: 'Robot', type: 'modulation'},
   {id: 3, name: 'Ghostface', type: 'modulation'},
@@ -20,7 +20,7 @@ const fallbackVoiceEffectsModulation: Array<{id: number; name: string; type: str
   {id: 6, name: 'Minion', type: 'modulation'},
 ];
 
-const fallbackVoiceEffectsGibberish: Array<{id: number; name: string; type: string; bitmap?: string}> = [
+const fallbackVoiceEffectsGibberish = [
   {id: 7, name: 'Isabelle', type: 'gibberish'},
   {id: 8, name: 'Canine', type: 'gibberish'},
   {id: 9, name: 'Alphys', type: 'gibberish'},
@@ -161,31 +161,19 @@ export default function VoiceControl() {
             >
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    {effect.bitmap && (
-                      <img
-                        src={`data:image/png;base64,${effect.bitmap}`}
-                        alt={effect.name}
-                        className="w-8 h-8 rounded"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
+                  <div>
+                    <h3 className="font-medium">
+                      <DecryptedText 
+                        text={effect.name}
+                        animateOn="hover"
+                        sequential={true}
+                        speed={30}
+                        maxIterations={8}
+                        className="text-voice-mod"
+                        encryptedClassName="text-voice-mod opacity-60"
+                        useOriginalCharsOnly={true}
                       />
-                    )}
-                    <div>
-                      <h3 className="font-medium">
-                        <DecryptedText 
-                          text={effect.name}
-                          animateOn="hover"
-                          sequential={true}
-                          speed={30}
-                          maxIterations={8}
-                          className="text-voice-mod"
-                          encryptedClassName="text-voice-mod opacity-60"
-                          useOriginalCharsOnly={true}
-                        />
-                      </h3>
-                    </div>
+                    </h3>
                   </div>
                   {activeEffect === effect.id && (
                     <AudioWaveform className="h-4 w-4 text-primary" />

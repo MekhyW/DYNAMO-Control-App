@@ -12,14 +12,12 @@ interface SoundEffect {
   id: number;
   name: string;
   filename?: string;
-  bitmap?: string;
 }
 
 interface VoiceEffect {
   id: number;
   name: string;
   type: string;
-  bitmap?: string;
 }
 
 interface DeviceInfo {
