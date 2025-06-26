@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sheet";
 
 // Fallback mock data when MQTT is not connected
-const fallbackSoundPresets = [
+const fallbackSoundPresets: Array<{id: number; name: string; bitmap?: string}> = [
   {id: 1, name: 'Startup Sequence'},
   {id: 2, name: 'System Ready'},
   {id: 3, name: 'Warning Alert'},
@@ -296,8 +296,20 @@ export default function SoundControl() {
           <Card key={preset.id} className="cursor-pointer hover:bg-accent">
             <CardContent className="p-4">
               <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-medium">{preset.name}</h3>
+                <div className="flex items-center gap-3">
+                  {preset.bitmap && (
+                    <img
+                      src={`data:image/png;base64,${preset.bitmap}`}
+                      alt={preset.name}
+                      className="w-8 h-8 rounded"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
+                  <div>
+                    <h3 className="font-medium">{preset.name}</h3>
+                  </div>
                 </div>
                 <Button 
                   size="icon" 
