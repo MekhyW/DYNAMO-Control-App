@@ -20,19 +20,19 @@ import {
 import { cn } from '@/lib/utils';
 
 const expressionPresets = [
-  { id: 3, name: 'Neutral', preview: '😐' },
-  { id: 2, name: 'Happy', preview: '😊' },
-  { id: 4, name: 'Sad', preview: '😢' },
-  { id: 0, name: 'Angry', description: ' ', preview: '😠' },
-  { id: 5, name: 'Surprised', preview: '😲' },  
-  { id: 1, name: 'Disgusted', preview: '😒' },
-  { id: 12, name: 'Mischievous', preview: '😏' },
-  { id: 6, name: 'Hypnotic', preview: '😵‍💫' },
-  { id: 7, name: 'Heart', preview: '❤️' },
-  { id: 8, name: 'Rainbow', preview: '🌈' },
-  { id: 9, name: 'Nightmare', preview: '😈' },
-  { id: 10, name: 'Gear Eyes', preview: '⚙️' },
-  { id: 11, name: 'SANS', preview: '💀' },
+  { id: 3, name: 'Neutral', preview: '/expr-neutral.gif' },
+  { id: 2, name: 'Happy', preview: '/expr-happy.gif' },
+  { id: 4, name: 'Sad', preview: '/expr-sad.gif' },
+  { id: 0, name: 'Angry', preview: '/expr-angry.gif' },
+  { id: 5, name: 'Surprised', preview: '/expr-surprised.gif' },  
+  { id: 1, name: 'Disgusted', preview: '/expr-disgusted.gif' },
+  { id: 12, name: 'Mischievous', preview: '/expr-mischievous.gif' },
+  { id: 6, name: 'Hypnotic', preview: '/expr-hypnotic.gif' },
+  { id: 7, name: 'Heart', preview: '/expr-heart.gif' },
+  { id: 8, name: 'Rainbow', preview: '/expr-rainbow.gif' },
+  { id: 9, name: 'Nightmare', preview: '/expr-nightmare.gif' },
+  { id: 10, name: 'Gear Eyes', preview: '/expr-gear.gif' },
+  { id: 11, name: 'SANS', preview: '/expr-sans.gif' },
 ];
 
 export default function ExpressionControl() {
@@ -236,7 +236,13 @@ export default function ExpressionControl() {
               >
                 <CardContent className="p-4">
                   <div className="flex flex-col items-center text-center gap-2">
-                    <div className="text-4xl mb-2">{expression.preview}</div>
+                    <div className="w-16 h-16 mb-2 flex items-center justify-center">
+                      <img 
+                        src={expression.preview} 
+                        alt={expression.name}
+                        className="w-full h-full object-contain rounded"
+                      />
+                    </div>
                     <h3 className="font-medium">{expression.name}</h3>
                   </div>
                 </CardContent>
