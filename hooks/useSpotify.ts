@@ -69,17 +69,29 @@ export function useSpotify() {
     }
   }, [queue]);
 
+  const fetchQueue = useCallback(async () => {
+    try {
+      const response = await fetch('/api/spotify/queue-state');
+      if (response.ok) {
+        const queueData = await response.json();
+        setQueue(queueData.queue || []); // Update local queue to match Spotify's queue
+      }
+    } catch (error) {
+      console.error('Error fetching queue:', error);
+    }
+  }, []);
+  
   const fetchPlaybackState = useCallback(async () => {
     try {
       const response = await fetch('/api/spotify/playback-state');
       const state: SpotifyPlaybackState = await response.json();
-      
       setIsPlaying(state.is_playing);
       setCurrentTrack(state.item);
+      await fetchQueue(); // Also fetch and sync the queue
     } catch (error) {
       console.error('Error fetching playback state:', error);
     }
-  }, []);
+  }, [fetchQueue]);
 
   useEffect(() => {
     fetchPlaybackState();
