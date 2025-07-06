@@ -24,7 +24,7 @@ interface MQTTState {
 interface MQTTActions {
   connect: (config: MQTTConfig) => Promise<boolean>;
   disconnect: () => void;
-  playSoundEffect: (effectId: number) => Promise<void>;
+  playSoundEffect: (effectId: number | string) => Promise<void>;
   setVoiceEffect: (effectId: number) => Promise<void>;
   setOutputVolume: (volume: number) => Promise<void>;
   toggleMicrophone: (enabled: boolean) => Promise<void>;
@@ -177,7 +177,7 @@ export function useMQTT(): MQTTState & MQTTActions {
     }
   }, []);
 
-  const playSoundEffect = useCallback(async (effectId: number) => {
+  const playSoundEffect = useCallback(async (effectId: number | string) => {
     const service = getMQTTService();
     if (service) {
       await service.playSoundEffect(effectId);

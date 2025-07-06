@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback } from 'react';
-import { Search, Play, Pause, SkipForward, Volume2, ListMusic, WifiOff } from 'lucide-react';
+import { Search, Play, Pause, SkipForward, Volume2, ListMusic, WifiOff, Square } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useSpotify } from '@/hooks/useSpotify';
 import { useMQTT } from '@/hooks/useMQTT';
@@ -94,6 +94,19 @@ export default function SoundControl() {
       }
     } else {
       console.log('Playing sound effect (mock):', effectId);
+    }
+  };
+
+  const handleStopSounds = async () => {
+    playSound('major');
+    if (isConnected) {
+      try {
+        await playSoundEffect("");
+      } catch (error) {
+        console.error('Failed to stop sounds via MQTT:', error);
+      }
+    } else {
+      console.log('Stopping sounds (mock)');
     }
   };
 
@@ -285,6 +298,21 @@ export default function SoundControl() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Stop Sounds Button */}
+      <div className="mb-6">
+        <Card 
+          className="cursor-pointer hover:bg-accent"
+          onClick={handleStopSounds}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-center justify-center gap-3">
+              <Square className="h-6 w-6 text-red-600 dark:text-red-400" />
+              <h3 className="font-medium text-red-600 dark:text-red-400">Stop All Sounds</h3>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid grid-cols-2 gap-4 mb-6">
         {soundPresets.map((preset) => (

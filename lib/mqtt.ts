@@ -248,7 +248,7 @@ class MQTTService {
     };
   }
 
-  async playSoundEffect(effectId: number): Promise<void> {
+  async playSoundEffect(effectId: number | string): Promise<void> {
     const payload = this.addUserDataToPayload({ effectId });
     await this.publish('dynamo/commands/play-sound-effect', payload);
   }
