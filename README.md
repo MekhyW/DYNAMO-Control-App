@@ -6,8 +6,9 @@ Websocket-based control app for the DYNAMO project, which runs as a Telegram min
 
 - [Next.js](https://nextjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](tailwindcss.com)
 - [@telegram-apps SDK](https://docs.telegram-mini-apps.com/packages/telegram-apps-sdk/2-x)
+- [Spotify Web Playback SDK](https://developer.spotify.com/documentation/web-playback-sdk)
+- [HiveMQ Cloud MQTT](https://www.hivemq.com/products/mqtt-cloud-broker/)
 
 ## Install Dependencies
 
@@ -25,9 +26,7 @@ This project contains the following scripts:
 - `dev`. Runs the application in development mode.
 - `build`. Builds the application for production.
 - `start`. Starts the Next.js server in production mode.
-- `lint`. Runs [eslint](https://eslint.org/) to ensure the code quality meets
-  the required
-  standards.
+- `lint`. Runs [eslint](https://eslint.org/) to ensure the code quality meets the required standards.
 
 To run a script, use the `npm run` command:
 

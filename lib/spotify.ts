@@ -23,8 +23,7 @@ export async function refreshAccessToken(tokens: SpotifyTokens): Promise<Spotify
     return {
       ...tokens,
       accessToken: data.body.access_token,
-      // Keep the refresh token if a new one wasn't provided
-      refreshToken: data.body.refresh_token || tokens.refreshToken, 
+      refreshToken: data.body.refresh_token || tokens.refreshToken, // Keep the refresh token if a new one wasn't provided
       accessTokenExpires: Date.now() + data.body.expires_in * 1000,
     };
   } catch (error) {
@@ -35,8 +34,7 @@ export async function refreshAccessToken(tokens: SpotifyTokens): Promise<Spotify
 
 export function isTokenExpired(tokens: SpotifyTokens | null): boolean {
   if (!tokens) return true;
-  // Refresh if less than 5 minutes remaining
-  return Date.now() >= tokens.accessTokenExpires - 5 * 60 * 1000;
+  return Date.now() >= tokens.accessTokenExpires - 5 * 60 * 1000; // Refresh if less than 5 minutes remaining
 }
 
 // Get a client-safe version of tokens (without the refresh token)
