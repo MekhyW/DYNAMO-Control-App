@@ -155,6 +155,28 @@ function AdminPanelContent() {
     }
   };
 
+  const handleInputDeviceChange = async (deviceName: string) => {
+    if (!isOwner) return;
+    setSelectedInputDevice(deviceName);
+    try {
+      await mqtt.setSoundDevice('input', deviceName);
+      playSound('major');
+    } catch (error) {
+      console.error('Failed to set input device:', error);
+    }
+  };
+
+  const handleOutputDeviceChange = async (deviceName: string) => {
+    if (!isOwner) return;
+    setSelectedOutputDevice(deviceName);
+    try {
+      await mqtt.setSoundDevice('output', deviceName);
+      playSound('major');
+    } catch (error) {
+      console.error('Failed to set output device:', error);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 pb-20 pt-6">
       <div className="container mx-auto px-4 pb-20 pt-6">
@@ -483,7 +505,7 @@ function AdminPanelContent() {
                   </label>
                   <Select 
                     value={selectedInputDevice} 
-                    onValueChange={isOwner ? setSelectedInputDevice : undefined} 
+                    onValueChange={isOwner ? handleInputDeviceChange : undefined} 
                     disabled={!isOwner || !isDevicesLoaded}
                   >
                     <SelectTrigger>
@@ -516,7 +538,7 @@ function AdminPanelContent() {
                   </label>
                   <Select 
                     value={selectedOutputDevice} 
-                    onValueChange={isOwner ? setSelectedOutputDevice : undefined} 
+                    onValueChange={isOwner ? handleOutputDeviceChange : undefined} 
                     disabled={!isOwner || !isDevicesLoaded}
                   >
                     <SelectTrigger>

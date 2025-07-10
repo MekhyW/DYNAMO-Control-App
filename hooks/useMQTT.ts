@@ -42,6 +42,7 @@ interface MQTTActions {
   toggleEyeTracking: (enabled: boolean) => Promise<void>;
   toggleEyebrows: (enabled: boolean) => Promise<void>;
   toggleExternalCommands: (locked: boolean) => Promise<void>;
+  setSoundDevice: (deviceType: 'input' | 'output', deviceName: string) => Promise<void>;
   shutdown: () => Promise<void>;
   reboot: () => Promise<void>;
   killSoftware: () => Promise<void>;
@@ -324,6 +325,13 @@ export function useMQTT(): MQTTState & MQTTActions {
     }
   }, []);
 
+  const setSoundDevice = useCallback(async (deviceType: 'input' | 'output', deviceName: string) => {
+    const service = getMQTTService();
+    if (service) {
+      await service.setSoundDevice(deviceType, deviceName);
+    }
+  }, []);
+
   // Auto-connect on mount (only once)
   useEffect(() => {
     let mounted = true;
@@ -402,6 +410,7 @@ export function useMQTT(): MQTTState & MQTTActions {
     toggleEyeTracking,
     toggleEyebrows,
     toggleExternalCommands,
+    setSoundDevice,
     shutdown,
     reboot,
     killSoftware,

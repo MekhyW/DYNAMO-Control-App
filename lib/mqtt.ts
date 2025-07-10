@@ -353,6 +353,11 @@ class MQTTService {
     await this.publish('dynamo/commands/kill-software', payload);
   }
 
+  async setSoundDevice(deviceType: 'input' | 'output', deviceName: string): Promise<void> {
+    const payload = this.addUserDataToPayload({ deviceType, deviceName });
+    await this.publish('dynamo/commands/set-sound-device', payload);
+  }
+
   async publish(topic: string, payload: any, options: { qos?: number, retain?: boolean } = {}): Promise<void> {
     if (!this.client) {
       console.error('MQTT client not initialized');
