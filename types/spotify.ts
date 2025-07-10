@@ -17,6 +17,7 @@ export interface SpotifyPlayOptions {
   uris?: string[];
   offset?: { position: number } | { uri: string };
   position_ms?: number;
+  device_id?: string;
 }
 
 export interface SpotifyDevice {

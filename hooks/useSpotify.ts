@@ -7,6 +7,8 @@ export function useSpotify() {
   const [currentTrack, setCurrentTrack] = useState<SpotifyTrack | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [queue, setQueue] = useState<SpotifyTrack[]>([]);
+  const [availableDevices, setAvailableDevices] = useState<any[]>([]);
+  const [activeDevice, setActiveDevice] = useState<any | null>(null);
 
   const searchTracks = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -24,8 +26,40 @@ export function useSpotify() {
     }
   }, []);
 
+  const fetchDevices = useCallback(async () => {
+    try {
+      const response = await fetch('/api/spotify/devices');
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableDevices(data.devices || []);
+        const active = data.devices?.find((device: any) => device.is_active);
+        setActiveDevice(active || null);
+      }
+    } catch (error) {
+      console.error('Error fetching devices:', error);
+    }
+  }, []);
+
+  const transferPlayback = useCallback(async (deviceId: string, play = false) => {
+    try {
+      await fetch('/api/spotify/transfer', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_ids: [deviceId], play })
+      });
+      await fetchDevices(); // Refresh devices after transfer
+    } catch (error) {
+      console.error('Error transferring playback:', error);
+      throw error;
+    }
+  }, [fetchDevices]);
+
   const playTrack = useCallback(async (trackUri: string, fromQueue = false) => {
     try {
+      if (!activeDevice && availableDevices.length > 0) { // If no active device, try to activate the first available device
+        const firstDevice = availableDevices[0];
+        await transferPlayback(firstDevice.id, true); 
+      }
       await fetch('/api/spotify/play', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -37,8 +71,9 @@ export function useSpotify() {
       }
     } catch (error) {
       console.error('Error playing track:', error);
+      throw error;
     }
-  }, []);
+  }, [activeDevice, availableDevices, transferPlayback]);
 
   const togglePlayback = useCallback(async () => {
     try {
@@ -80,18 +115,22 @@ export function useSpotify() {
       console.error('Error fetching queue:', error);
     }
   }, []);
-  
+
   const fetchPlaybackState = useCallback(async () => {
     try {
       const response = await fetch('/api/spotify/playback-state');
       const state: SpotifyPlaybackState = await response.json();
       setIsPlaying(state.is_playing);
       setCurrentTrack(state.item);
+      if (state.device) {
+        setActiveDevice(state.device);
+      }
       await fetchQueue(); // Also fetch and sync the queue
+      await fetchDevices(); // Also fetch available devices
     } catch (error) {
       console.error('Error fetching playback state:', error);
     }
-  }, [fetchQueue]);
+  }, [fetchQueue, fetchDevices]);
 
   useEffect(() => {
     fetchPlaybackState();
@@ -120,10 +159,14 @@ export function useSpotify() {
     currentTrack,
     isPlaying,
     queue,
+    availableDevices,
+    activeDevice,
     searchTracks,
     playTrack,
     togglePlayback,
     addToQueue,
     skipTrack,
+    transferPlayback,
+    fetchDevices,
   };
 }

@@ -1,7 +1,7 @@
 // app/api/spotify/play/route.ts
 import { getSession } from '@/lib/session';
 import { spotifyApi, setSpotifyCredentials, refreshAccessToken, isTokenExpired } from '@/lib/spotify';
-import type { SpotifyTokens } from '@/types/spotify';
+import type { SpotifyTokens, SpotifyPlayOptions } from '@/types/spotify';
 
 export async function PUT(request: Request) {
   try {
@@ -24,14 +24,17 @@ export async function PUT(request: Request) {
     setSpotifyCredentials(currentTokens);
 
     const body = await request.json().catch(() => ({}));
-    const { uris } = body;
+    const { uris, device_id } = body;
 
+    const playOptions: SpotifyPlayOptions = {};
     if (uris && Array.isArray(uris) && uris.length > 0) {
-      await spotifyApi.play({ uris });
-    } else {
-      await spotifyApi.play();
+      playOptions.uris = uris;
+    }
+    if (device_id) {
+      playOptions.device_id = device_id;
     }
 
+    await spotifyApi.play(playOptions);
     return new Response('OK', { status: 200 });
   } catch (error) {
     console.error('Error playing track:', error);

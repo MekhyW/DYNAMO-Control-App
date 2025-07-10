@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback } from 'react';
-import { Search, Play, Pause, SkipForward, Volume2, ListMusic, WifiOff, Square } from 'lucide-react';
+import { Search, Play, Pause, SkipForward, Volume2, ListMusic, WifiOff, Square, Smartphone, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useSpotify } from '@/hooks/useSpotify';
 import { useMQTT } from '@/hooks/useMQTT';
@@ -36,11 +36,15 @@ export default function SoundControl() {
     currentTrack,
     isPlaying,
     queue,
+    availableDevices,
+    activeDevice,
     searchTracks,
     playTrack,
     togglePlayback,
     addToQueue,
     skipTrack,
+    transferPlayback,
+    fetchDevices,
   } = useSpotify();
 
   const {
@@ -123,7 +127,76 @@ export default function SoundControl() {
         </Alert>
       )}
       
-      <div className="mb-6">
+      {/* Spotify Device Status */}
+      {availableDevices.length === 0 && (
+        <Alert className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            No Spotify devices found. Please open Spotify on a device and start playing music to enable remote control.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {availableDevices.length > 0 && !activeDevice && (
+        <Alert className="mb-4">
+          <Smartphone className="h-4 w-4" />
+          <AlertDescription>
+            Spotify devices available but none are active. Select a device below to start playback.
+          </AlertDescription>
+        </Alert>
+      )}
+       
+       {/* Device Selection */}
+       {availableDevices.length > 0 && (
+         <Card className="mb-6">
+           <CardContent className="p-4">
+             <h3 className="font-medium mb-3">
+               <DecryptedText 
+                 text="Device" 
+                 animateOn="view" 
+                 speed={50} 
+                 maxIterations={7}
+                 className="font-medium"
+               />
+             </h3>
+             <div className="space-y-2">
+               {availableDevices.map((device) => (
+                 <div
+                   key={device.id}
+                   className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
+                     device.is_active 
+                       ? 'bg-primary/10 border-primary' 
+                       : 'hover:bg-accent'
+                   }`}
+                   onClick={() => {
+                     if (!device.is_active) {
+                       playSound('major');
+                       transferPlayback(device.id, false);
+                     }
+                   }}
+                 >
+                   <div className="flex items-center gap-3">
+                     <Smartphone className="h-4 w-4" />
+                     <div>
+                       <p className="font-medium">{device.name}</p>
+                       <p className="text-sm text-muted-foreground">
+                         {device.type} • {device.volume_percent}% volume
+                       </p>
+                     </div>
+                   </div>
+                   {device.is_active && (
+                     <div className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
+                       Active
+                     </div>
+                   )}
+                 </div>
+               ))}
+             </div>
+           </CardContent>
+         </Card>
+       )}
+       
+       <div className="mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
