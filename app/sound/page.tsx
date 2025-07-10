@@ -148,7 +148,7 @@ export default function SoundControl() {
        
        {/* Device Selection */}
        {availableDevices.length > 0 && (
-         <Card className="mb-6">
+         <Card className="mb-3">
            <CardContent className="p-4">
              <h3 className="font-medium mb-3">
                <DecryptedText 
@@ -196,7 +196,7 @@ export default function SoundControl() {
          </Card>
        )}
        
-       <div className="mb-6">
+       <div className="mb-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -255,7 +255,7 @@ export default function SoundControl() {
         </div>
       </div>
 
-      <Card className="mb-6">
+      <Card className="mb-4">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <div>
