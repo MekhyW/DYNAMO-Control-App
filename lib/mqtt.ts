@@ -49,6 +49,8 @@ class MQTTService {
   private isConnecting = false;
   private subscribers: Map<string, (data: any) => void> = new Map();
   private authenticatedUser: TelegramUser | null = null;
+  private commandThrottleMap: Map<string, number> = new Map();
+  private readonly THROTTLE_DELAY_MS = 2000;
   
   private persistentData: {
     soundEffects: SoundEffect[];
@@ -249,113 +251,233 @@ class MQTTService {
   }
 
   async playSoundEffect(effectId: number | string): Promise<void> {
+    const commandKey = `play_sound_effect_${effectId}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ effectId });
     await this.publish('dynamo/commands/play-sound-effect', payload);
   }
 
   async setVoiceEffect(effectId: number): Promise<void> {
+    const commandKey = `set_voice_effect_${effectId}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ effectId });
     await this.publish('dynamo/commands/set-voice-effect', payload);
   }
 
   async setOutputVolume(volume: number): Promise<void> {
+    const commandKey = `set_output_volume_${volume}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ volume });
     await this.publish('dynamo/commands/set-output-volume', payload);
   }
 
   async toggleMicrophone(enabled: boolean): Promise<void> {
+    const commandKey = `toggle_microphone_${enabled}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ enabled });
     await this.publish('dynamo/commands/microphone-toggle', payload);
   }
 
   async toggleVoiceChanger(enabled: boolean): Promise<void> {
+    const commandKey = `toggle_voice_changer_${enabled}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ enabled });
     await this.publish('dynamo/commands/voice-changer-toggle', payload);
   }
 
   async toggleLeds(enabled: boolean): Promise<void> {
+    const commandKey = `toggle_leds_${enabled}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ enabled });
     await this.publish('dynamo/commands/leds-toggle', payload);
   }
 
   async setLedsBrightness(brightness: number): Promise<void> {
+    const commandKey = `set_leds_brightness_${brightness}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ brightness });
     await this.publish('dynamo/commands/leds-brightness', payload);
   }
 
   async setEyesBrightness(brightness: number): Promise<void> {
+    const commandKey = `set_eyes_brightness_${brightness}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ brightness });
     await this.publish('dynamo/commands/eyes-brightness', payload);
   }
 
   async setLedsColor(color: string): Promise<void> {
+    const commandKey = `set_leds_color_${color}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ color });
     await this.publish('dynamo/commands/leds-color', payload);
   }
 
   async setLedsEffect(effect: string): Promise<void> {
+    const commandKey = `set_leds_effect_${effect}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ effect });
     await this.publish('dynamo/commands/leds-effect', payload);
   }
 
   async toggleHotwordDetection(enabled: boolean): Promise<void> {
+    const commandKey = `toggle_hotword_detection_${enabled}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ enabled });
     await this.publish('dynamo/commands/hotword-detection-toggle', payload);
   }
 
   async triggerHotword(): Promise<void> {
+    const commandKey = 'trigger_hotword';
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({});
     await this.publish('dynamo/commands/hotword-trigger', payload);
   }
 
   async textToSpeech(text: string): Promise<void> {
+    const commandKey = `text_to_speech_${text.substring(0, 20)}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ text });
     await this.publish('dynamo/commands/text-to-speech', payload);
   }
 
   async setExpression(expression: string): Promise<void> {
+    const commandKey = `set_expression_${expression}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ expression });
     await this.publish('dynamo/commands/set-expression', payload);
   }
 
   async toggleFaceExpressionTracking(enabled: boolean): Promise<void> {
+    const commandKey = `toggle_face_expression_tracking_${enabled}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ enabled });
     await this.publish('dynamo/commands/face-expression-tracking-toggle', payload);
   }
 
   async toggleEyeTracking(enabled: boolean): Promise<void> {
+    const commandKey = `toggle_eye_tracking_${enabled}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ enabled });
     await this.publish('dynamo/commands/eye-tracking-toggle', payload);
   }
 
   async toggleEyebrows(enabled: boolean): Promise<void> {
+    const commandKey = `toggle_eyebrows_${enabled}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ enabled });
     await this.publish('dynamo/commands/eyebrows-toggle', payload);
   }
 
   async toggleExternalCommands(locked: boolean): Promise<void> {
+    const commandKey = `toggle_external_commands_${locked}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ locked });
     await this.publish('dynamo/commands/external-commands-lock', payload);
   }
 
   async shutdown(): Promise<void> {
+    const commandKey = 'shutdown';
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({});
     await this.publish('dynamo/commands/shutdown', payload);
   }
 
   async reboot(): Promise<void> {
+    const commandKey = 'reboot';
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({});
     await this.publish('dynamo/commands/reboot', payload);
   }
 
   async killSoftware(): Promise<void> {
+    const commandKey = 'kill_software';
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({});
     await this.publish('dynamo/commands/kill-software', payload);
   }
 
   async setSoundDevice(deviceType: 'input' | 'output', deviceName: string): Promise<void> {
+    const commandKey = `set_sound_device_${deviceType}_${deviceName}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
     const payload = this.addUserDataToPayload({ deviceType, deviceName });
     await this.publish('dynamo/commands/set-sound-device', payload);
+  }
+
+  private isCommandThrottled(commandKey: string): boolean {
+    const now = Date.now();
+    const lastExecuted = this.commandThrottleMap.get(commandKey);
+    if (lastExecuted && (now - lastExecuted) < this.THROTTLE_DELAY_MS) {
+      return true;
+    }
+    this.commandThrottleMap.set(commandKey, now);
+    return false;
   }
 
   async publish(topic: string, payload: any, options: { qos?: number, retain?: boolean } = {}): Promise<void> {
