@@ -137,10 +137,16 @@ export function useMQTT(): MQTTState & MQTTActions {
 
       service.subscribe('dynamo/data/chat_logs', (data: ChatLogMessage) => {
         console.log('Received chat log data:', data);
-        setState(prev => ({ 
-          ...prev, 
-          chatLogs: [...prev.chatLogs, data]
-        }));
+        setState(prev => {
+          const messageExists = prev.chatLogs.some(msg => msg.id === data.id);
+          if (messageExists) {
+            return prev;
+          }
+          return {
+            ...prev, 
+            chatLogs: [...prev.chatLogs, data]
+          };
+        });
       });
       
       setIsConnecting(true);
