@@ -68,7 +68,7 @@ export function useMQTT(): MQTTState & MQTTActions {
         soundDevices: currentData.soundDevices,
         anydeskId: currentData.anydeskId,
         bitmap: currentData.bitmap,
-        chatLogs: currentData.chatLogs,
+        chatLogs: [],
       };
     }
     return {
