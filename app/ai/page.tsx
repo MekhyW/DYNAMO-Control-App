@@ -117,7 +117,7 @@ export default function AIControl() {
                       )}
                     >
                       <span className="text-xs font-medium mb-1 block">
-                        {message.type === 'prompt' ? 'Prompt' : 'Response'}
+                        {message.type === 'prompt' ? 'Mortal' : 'Cookiebot'}
                       </span>
                       <p>{message.content}</p>
                       <span className="text-xs opacity-70">
