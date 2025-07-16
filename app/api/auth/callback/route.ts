@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 import { spotifyApi } from '@/lib/spotify';
+import { updateSharedTokens } from '@/lib/shared-spotify';
 
 const sessionOptions = {
   password: process.env.SESSION_PASSWORD as string,
@@ -29,12 +30,16 @@ export async function GET(request: NextRequest) {
     const data = await spotifyApi.authorizationCodeGrant(code as string);
 
     // Store tokens in the session
-    (session as any).spotifyTokens = {
+    const tokens = {
       accessToken: data.body.access_token,
       refreshToken: data.body.refresh_token,
       accessTokenExpires: Date.now() + data.body.expires_in * 1000,
     };
+    (session as any).spotifyTokens = tokens;
     await session.save();
+    
+    // Update shared tokens for all users to use
+    updateSharedTokens(tokens);
 
     return NextResponse.redirect(new URL('/admin?status=success', request.url));
   } catch (error) {

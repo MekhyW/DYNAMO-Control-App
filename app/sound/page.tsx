@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Search, Play, Pause, SkipForward, Volume2, ListMusic, WifiOff, Square, Smartphone, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useSpotify } from '@/hooks/useSpotify';
+import { useSharedSpotify } from '@/hooks/useSharedSpotify';
 import { useMQTT } from '@/hooks/useMQTT';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -38,6 +38,7 @@ export default function SoundControl() {
     queue,
     availableDevices,
     activeDevice,
+    isSpotifyAvailable,
     searchTracks,
     playTrack,
     togglePlayback,
@@ -45,7 +46,7 @@ export default function SoundControl() {
     skipTrack,
     transferPlayback,
     fetchDevices,
-  } = useSpotify();
+  } = useSharedSpotify();
 
   const {
     isConnected,
@@ -127,8 +128,18 @@ export default function SoundControl() {
         </Alert>
       )}
       
+      {/* Spotify Availability Status */}
+      {!isSpotifyAvailable && (
+        <Alert className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Spotify is not available. The owner needs to authenticate with Spotify first in the Admin panel.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       {/* Spotify Device Status */}
-      {availableDevices.length === 0 && (
+      {isSpotifyAvailable && availableDevices.length === 0 && (
         <Alert className="mb-4">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
@@ -137,7 +148,7 @@ export default function SoundControl() {
         </Alert>
       )}
       
-      {availableDevices.length > 0 && !activeDevice && (
+      {isSpotifyAvailable && availableDevices.length > 0 && !activeDevice && (
         <Alert className="mb-4">
           <Smartphone className="h-4 w-4" />
           <AlertDescription>
@@ -147,7 +158,7 @@ export default function SoundControl() {
       )}
        
        {/* Device Selection */}
-       {availableDevices.length > 0 && (
+       {isSpotifyAvailable && availableDevices.length > 0 && (
          <Card className="mb-3">
            <CardContent className="p-4">
              <h3 className="font-medium mb-3">
@@ -196,19 +207,21 @@ export default function SoundControl() {
          </Card>
        )}
        
-       <div className="mb-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            className="pl-10"
-            placeholder="Search music..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              searchTracks(e.target.value);
-              setShowSearchResults(true);
-            }}
-          />
+       {/* Music Search */}
+       {isSpotifyAvailable && (
+         <div className="mb-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              className="pl-10"
+              placeholder="Search music..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                searchTracks(e.target.value);
+                setShowSearchResults(true);
+              }}
+            />
           {showSearchResults && searchResults.length > 0 && (
             <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto">
               <CardContent className="p-2">
@@ -252,10 +265,13 @@ export default function SoundControl() {
               </CardContent>
             </Card>
           )}
+          </div>
         </div>
-      </div>
+       )}
 
-      <Card className="mb-4">
+      {/* Spotify Playback Controls */}
+      {isSpotifyAvailable && (
+        <Card className="mb-4">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -371,6 +387,7 @@ export default function SoundControl() {
           </div>
         </CardContent>
       </Card>
+       )}
 
       {/* Stop Sounds Button */}
       <div className="mb-6">
