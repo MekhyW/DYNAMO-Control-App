@@ -11,7 +11,6 @@ import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Image from 'next/image';
 
 // Fallback mock data when MQTT is not connected
@@ -230,7 +229,8 @@ export default function SoundControl() {
                     key={track.id}
                     className="flex justify-between items-center p-2 hover:bg-accent cursor-pointer"
                     onClick={() => {
-                      addToQueue(track);
+                      playTrack(track.uri);
+                      playSound('major');
                       setShowSearchResults(false);
                     }}
                   >
@@ -249,17 +249,6 @@ export default function SoundControl() {
                         </p>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        playSound('major');
-                        addToQueue(track);
-                      }}
-                    >
-                      <ListMusic className="h-4 w-4" />
-                    </Button>
                   </div>
                 ))}
               </CardContent>
@@ -303,66 +292,6 @@ export default function SoundControl() {
                   <Play className="h-4 w-4" />
                 )}
               </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => {
-                  playSound('major');
-                  skipTrack();
-                }}
-              >
-                <SkipForward className="h-4 w-4" />
-              </Button>
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button size="icon" variant="ghost">
-                    <ListMusic className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>
-                      <DecryptedText 
-                        text="Queue" 
-                        animateOn="view" 
-                        speed={50} 
-                        maxIterations={7}
-                      />
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="space-y-4 mt-4">
-                    {queue.map((track, index) => (
-                      <div key={track.id} className="flex justify-between items-center py-2 border-b">
-                        <div className="flex items-center gap-2">
-                          {track.album.images[0] && (
-                            <img
-                              src={track.album.images[0].url}
-                              alt={track.album.name}
-                              className="w-8 h-8 rounded"
-                            />
-                          )}
-                          <div>
-                            <p className="font-medium">{track.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {track.artists.map(a => a.name).join(', ')}
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            playSound('major');
-                            playTrack(track.uri, true);
-                          }}
-                        >
-                          <Play className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </SheetContent>
-              </Sheet>
             </div>
           </div>
           <div className="space-y-4">
