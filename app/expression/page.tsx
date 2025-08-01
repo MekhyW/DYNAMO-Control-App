@@ -173,7 +173,7 @@ export default function ExpressionControl() {
                 />
               </div>
 
-              {/* Motor Control */}
+              {/* Motor Control 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <AlertTriangle className={cn(
@@ -195,6 +195,7 @@ export default function ExpressionControl() {
                   onCheckedChange={handleMotorToggle}
                 />
               </div>
+              */}
 
               {/* Silly Mode */}
               <div className="flex items-center justify-between">
