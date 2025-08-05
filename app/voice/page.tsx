@@ -108,7 +108,7 @@ export default function VoiceControl() {
       )}
       
       <div className="mb-6">
-        {/* Tab Buttons */}
+        {/* Tab Buttons 
         <div className="flex gap-4 mb-6">
           <Button
             variant={activeTab === 'modulation' ? 'default' : 'outline'}
@@ -147,6 +147,7 @@ export default function VoiceControl() {
             />
           </Button>
         </div>
+        */}
 
         {/* Voice Effects Grid */}
         <div className="grid grid-cols-2 gap-4 mb-24">
