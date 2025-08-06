@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Search, Play, Pause, SkipForward, Volume2, ListMusic, WifiOff, Square, Smartphone, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useSharedSpotify } from '@/hooks/useSharedSpotify';
@@ -13,15 +13,24 @@ import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
 import Image from 'next/image';
 
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 // Fallback mock data when MQTT is not connected
-const fallbackSoundPresets = [
+const fallbackSoundPresets = shuffleArray([
   {id: 1, name: 'Startup Sequence'},
   {id: 2, name: 'System Ready'},
   {id: 3, name: 'Warning Alert'},
   {id: 4, name: 'Power Down'},
   {id: 5, name: 'Shield Active'},
   {id: 6, name: 'Weapon Lock' },
-];
+]);
 
 export default function SoundControl() {
   const { playSound } = useSoundPlayer();
@@ -30,6 +39,8 @@ export default function SoundControl() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const volumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isVolumeSliderActive, setIsVolumeSliderActive] = useState(false);
+  const [fetchedSoundEffects, setFetchedSoundEffects] = useState<any[]>([]);
+  const [shuffledSoundEffects, setShuffledSoundEffects] = useState<any[]>([]);
   const {
     searchResults,
     currentTrack,
@@ -53,7 +64,21 @@ export default function SoundControl() {
     playSoundEffect,
     setOutputVolume,
   } = useMQTT();
-  const soundPresets = isConnected && soundEffects.length > 0 ? soundEffects : fallbackSoundPresets;
+
+  useEffect(() => {
+    if (soundEffects.length > 0) {
+      setFetchedSoundEffects(soundEffects);
+      setShuffledSoundEffects(shuffleArray(soundEffects));
+    }
+  }, [soundEffects]);
+
+  useEffect(() => {
+    if (soundEffects.length === 0 && shuffledSoundEffects.length === 0) {
+      setShuffledSoundEffects(fallbackSoundPresets);
+    }
+  }, [soundEffects.length, shuffledSoundEffects.length]);
+
+  const soundPresets = shuffledSoundEffects.length > 0 ? shuffledSoundEffects : fallbackSoundPresets;
   const handleVolumeChange = useCallback((newVolume: number) => {
     if (!isVolumeSliderActive) {
       playSound('minor');
@@ -333,7 +358,7 @@ export default function SoundControl() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-1 mb-6">
         {soundPresets.map((preset) => (
           <Card 
             key={preset.id} 

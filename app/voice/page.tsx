@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mic, MicOff, AudioWaveform, AudioLines, WifiOff } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -11,22 +11,31 @@ import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
 import Image from 'next/image';
 
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 // Fallback mock data when MQTT is not connected
-const fallbackVoiceEffectsModulation = [
+const fallbackVoiceEffectsModulation = shuffleArray([
   {id: 1, name: 'Mekhy', type: 'modulation'},
   {id: 2, name: 'Robot', type: 'modulation'},
   {id: 3, name: 'Ghostface', type: 'modulation'},
   {id: 4, name: 'Autotune', type: 'modulation'},
   {id: 5, name: 'Alastor', type: 'modulation'},
   {id: 6, name: 'Minion', type: 'modulation'},
-];
+]);
 
-const fallbackVoiceEffectsGibberish = [
+const fallbackVoiceEffectsGibberish = shuffleArray([
   {id: 7, name: 'Isabelle', type: 'gibberish'},
   {id: 8, name: 'Canine', type: 'gibberish'},
   {id: 9, name: 'Alphys', type: 'gibberish'},
   {id: 10, name: 'Censored', type: 'gibberish'},
-];
+]);
 
 export default function VoiceControl() {
   const { playSound } = useSoundPlayer();
@@ -34,6 +43,8 @@ export default function VoiceControl() {
   const [voiceChangerEnabled, setVoiceChangerEnabled] = useState(true);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'modulation' | 'gibberish'>('modulation');
+  const [fetchedVoiceEffects, setFetchedVoiceEffects] = useState<any[]>([]);
+  const [shuffledEffects, setShuffledEffects] = useState<any[]>([]);
 
   const {
     isConnected,
@@ -43,14 +54,22 @@ export default function VoiceControl() {
     toggleVoiceChanger,
   } = useMQTT();
 
-  // Use MQTT voice effects if connected, otherwise fallback to mock data
-  const voiceEffectsModulation = isConnected && voiceEffects.length > 0 
-    ? voiceEffects.filter(effect => effect.type === 'modulation')
-    : fallbackVoiceEffectsModulation;
-    
-  const voiceEffectsGibberish = isConnected && voiceEffects.length > 0
-    ? voiceEffects.filter(effect => effect.type === 'gibberish')
-    : fallbackVoiceEffectsGibberish;
+  useEffect(() => {
+    if (voiceEffects.length > 0) {
+      setFetchedVoiceEffects(voiceEffects);
+      setShuffledEffects(shuffleArray(voiceEffects));
+    }
+  }, [voiceEffects]);
+
+  useEffect(() => {
+    if (voiceEffects.length === 0 && shuffledEffects.length === 0) {
+      setShuffledEffects([...fallbackVoiceEffectsModulation, ...fallbackVoiceEffectsGibberish]);
+    }
+  }, [voiceEffects.length, shuffledEffects.length]);
+
+  const effectsToUse = shuffledEffects.length > 0 ? shuffledEffects : [...fallbackVoiceEffectsModulation, ...fallbackVoiceEffectsGibberish];
+  const voiceEffectsModulation = effectsToUse.filter(effect => effect.type === 'modulation');
+  const voiceEffectsGibberish = effectsToUse.filter(effect => effect.type === 'gibberish');
 
   const toggleEffect = async (effectId: number) => {
     playSound('major');
@@ -150,7 +169,7 @@ export default function VoiceControl() {
         */}
 
         {/* Voice Effects Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-24">
+        <div className="grid grid-cols-3 gap-1 mb-24">
           {(activeTab === 'modulation' ? voiceEffectsModulation : voiceEffectsGibberish).map((effect) => (
             <Card 
               key={effect.id} 
