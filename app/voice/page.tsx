@@ -20,23 +20,6 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
-// Fallback mock data when MQTT is not connected
-const fallbackVoiceEffectsModulation = shuffleArray([
-  {id: 1, name: 'Mekhy', type: 'modulation'},
-  {id: 2, name: 'Robot', type: 'modulation'},
-  {id: 3, name: 'Ghostface', type: 'modulation'},
-  {id: 4, name: 'Autotune', type: 'modulation'},
-  {id: 5, name: 'Alastor', type: 'modulation'},
-  {id: 6, name: 'Minion', type: 'modulation'},
-]);
-
-const fallbackVoiceEffectsGibberish = shuffleArray([
-  {id: 7, name: 'Isabelle', type: 'gibberish'},
-  {id: 8, name: 'Canine', type: 'gibberish'},
-  {id: 9, name: 'Alphys', type: 'gibberish'},
-  {id: 10, name: 'Censored', type: 'gibberish'},
-]);
-
 export default function VoiceControl() {
   const { playSound } = useSoundPlayer();
   const [isMuted, setIsMuted] = useState(false);
@@ -63,11 +46,11 @@ export default function VoiceControl() {
 
   useEffect(() => {
     if (voiceEffects.length === 0 && shuffledEffects.length === 0) {
-      setShuffledEffects([...fallbackVoiceEffectsModulation, ...fallbackVoiceEffectsGibberish]);
+      setShuffledEffects([]);
     }
   }, [voiceEffects.length, shuffledEffects.length]);
 
-  const effectsToUse = shuffledEffects.length > 0 ? shuffledEffects : [...fallbackVoiceEffectsModulation, ...fallbackVoiceEffectsGibberish];
+  const effectsToUse = shuffledEffects.length > 0 ? shuffledEffects : [];
   const voiceEffectsModulation = effectsToUse.filter(effect => effect.type === 'modulation');
   const voiceEffectsGibberish = effectsToUse.filter(effect => effect.type === 'gibberish');
 

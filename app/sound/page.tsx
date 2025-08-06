@@ -22,16 +22,6 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
-// Fallback mock data when MQTT is not connected
-const fallbackSoundPresets = shuffleArray([
-  {id: 1, name: 'Startup Sequence'},
-  {id: 2, name: 'System Ready'},
-  {id: 3, name: 'Warning Alert'},
-  {id: 4, name: 'Power Down'},
-  {id: 5, name: 'Shield Active'},
-  {id: 6, name: 'Weapon Lock' },
-]);
-
 export default function SoundControl() {
   const { playSound } = useSoundPlayer();
   const [volume, setVolume] = useState(75);
@@ -74,11 +64,11 @@ export default function SoundControl() {
 
   useEffect(() => {
     if (soundEffects.length === 0 && shuffledSoundEffects.length === 0) {
-      setShuffledSoundEffects(fallbackSoundPresets);
+      setShuffledSoundEffects([]);
     }
   }, [soundEffects.length, shuffledSoundEffects.length]);
 
-  const soundPresets = shuffledSoundEffects.length > 0 ? shuffledSoundEffects : fallbackSoundPresets;
+  const soundPresets = shuffledSoundEffects.length > 0 ? shuffledSoundEffects : [];
   const handleVolumeChange = useCallback((newVolume: number) => {
     if (!isVolumeSliderActive) {
       playSound('minor');
