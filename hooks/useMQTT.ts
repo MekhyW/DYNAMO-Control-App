@@ -29,6 +29,7 @@ interface MQTTActions {
   setOutputVolume: (volume: number) => Promise<void>;
   toggleMicrophone: (enabled: boolean) => Promise<void>;
   toggleVoiceChanger: (enabled: boolean) => Promise<void>;
+  toggleBackgroundSound: (enabled: boolean) => Promise<void>;
   toggleLeds: (enabled: boolean) => Promise<void>;
   setLedsBrightness: (brightness: number) => Promise<void>;
   setEyesBrightness: (brightness: number) => Promise<void>;
@@ -219,6 +220,13 @@ export function useMQTT(): MQTTState & MQTTActions {
     }
   }, []);
 
+  const toggleBackgroundSound = useCallback(async (enabled: boolean) => {
+    const service = getMQTTService();
+    if (service) {
+      await service.toggleBackgroundSound(enabled);
+    }
+  }, []);
+
   const toggleLeds = useCallback(async (enabled: boolean) => {
     const service = getMQTTService();
     if (service) {
@@ -403,6 +411,7 @@ export function useMQTT(): MQTTState & MQTTActions {
     setOutputVolume,
     toggleMicrophone,
     toggleVoiceChanger,
+    toggleBackgroundSound,
     toggleLeds,
     setLedsBrightness,
     setEyesBrightness,

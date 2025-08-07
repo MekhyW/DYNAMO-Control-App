@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { Mic, MicOff, AudioWaveform, AudioLines, WifiOff } from 'lucide-react';
+import { Mic, MicOff, AudioWaveform, AudioLines, WifiOff, Music, Music3 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
@@ -24,6 +24,7 @@ export default function VoiceControl() {
   const { playSound } = useSoundPlayer();
   const [isMuted, setIsMuted] = useState(false);
   const [voiceChangerEnabled, setVoiceChangerEnabled] = useState(true);
+  const [backgroundSoundEnabled, setBackgroundSoundEnabled] = useState(true);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'modulation' | 'gibberish'>('modulation');
   const [fetchedVoiceEffects, setFetchedVoiceEffects] = useState<any[]>([]);
@@ -35,6 +36,7 @@ export default function VoiceControl() {
     setVoiceEffect,
     toggleMicrophone,
     toggleVoiceChanger,
+    toggleBackgroundSound,
   } = useMQTT();
 
   useEffect(() => {
@@ -58,7 +60,6 @@ export default function VoiceControl() {
     playSound('major');
     const newActiveEffect = activeEffect === effectId ? null : effectId;
     setActiveEffect(newActiveEffect);
-    
     if (isConnected && newActiveEffect !== null) {
       try {
         await setVoiceEffect(newActiveEffect);
@@ -72,7 +73,6 @@ export default function VoiceControl() {
     playSound('major');
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
-    
     if (isConnected) {
       try {
         await toggleMicrophone(!newMutedState);
@@ -86,12 +86,24 @@ export default function VoiceControl() {
     playSound('major');
     const newState = !voiceChangerEnabled;
     setVoiceChangerEnabled(newState);
-    
     if (isConnected) {
       try {
         await toggleVoiceChanger(newState);
       } catch (error) {
         console.error('Failed to toggle voice changer via MQTT:', error);
+      }
+    }
+  };
+
+  const handleBackgroundSoundToggle = async () => {
+    playSound('major');
+    const newState = !backgroundSoundEnabled;
+    setBackgroundSoundEnabled(newState);
+    if (isConnected) {
+      try {
+        await toggleBackgroundSound(newState);
+      } catch (error) {
+        console.error('Failed to toggle background sound via MQTT:', error);
       }
     }
   };
@@ -198,11 +210,11 @@ export default function VoiceControl() {
         </div>
 
         {/* Main Controls */}
-        <Card className="fixed bottom-4 left-4 right-4 p-4 bg-background border-t max-w-screen-lg mx-auto mb-8">
+        <Card className="fixed bottom-2 left-4 right-4 p-4 bg-background border-t max-w-screen-lg mx-auto mb-8">
           <CardContent className="flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 w-full">
               <Button
-                size="lg"
+                size="sm"
                 variant={isMuted ? "outline" : "default"}
                 className="w-full sm:w-48 flex items-center justify-center gap-2"
                 onClick={handleMicrophoneToggle}
@@ -235,7 +247,7 @@ export default function VoiceControl() {
               </Button>
               
               <Button
-                size="lg"
+                size="sm"
                 variant={voiceChangerEnabled ? "default" : "outline"}
                 className="w-full sm:w-48 flex items-center justify-center gap-2"
                 onClick={handleVoiceChangerToggle}
@@ -257,6 +269,40 @@ export default function VoiceControl() {
                   <><AudioLines className="h-5 w-5" /> 
                     <DecryptedText 
                       text="Voice Changer OFF"
+                      animateOn="view"
+                      sequential={true}
+                      speed={40}
+                      maxIterations={10}
+                      className="text-ui"
+                      encryptedClassName="text-ui opacity-60"
+                    />
+                  </>
+                )}
+              </Button>
+
+              <Button
+                size="sm"
+                variant={backgroundSoundEnabled ? "default" : "outline"}
+                className="w-full sm:w-48 flex items-center justify-center gap-2"
+                onClick={handleBackgroundSoundToggle}
+                disabled={isMuted}
+              >
+                {backgroundSoundEnabled ? (
+                  <><Music className="h-5 w-5" /> 
+                    <DecryptedText 
+                      text="Background Sound ON"
+                      animateOn="view"
+                      sequential={true}
+                      speed={40}
+                      maxIterations={10}
+                      className="text-ui"
+                      encryptedClassName="text-ui opacity-60"
+                    />
+                  </>
+                ) : (
+                  <><Music3 className="h-5 w-5" /> 
+                    <DecryptedText 
+                      text="Background Sound OFF"
                       animateOn="view"
                       sequential={true}
                       speed={40}

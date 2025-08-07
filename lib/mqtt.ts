@@ -299,6 +299,16 @@ class MQTTService {
     await this.publish('dynamo/commands/voice-changer-toggle', payload);
   }
 
+  async toggleBackgroundSound(enabled: boolean): Promise<void> {
+    const commandKey = `toggle_background_sound_${enabled}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
+    const payload = this.addUserDataToPayload({ enabled });
+    await this.publish('dynamo/commands/background-sound-toggle', payload);
+  }
+
   async toggleLeds(enabled: boolean): Promise<void> {
     const commandKey = `toggle_leds_${enabled}`;
     if (this.isCommandThrottled(commandKey)) {
