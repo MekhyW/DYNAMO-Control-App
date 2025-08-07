@@ -238,7 +238,13 @@ class MQTTService {
 
   private addUserDataToPayload(payload: any): any {
     if (!this.authenticatedUser) {
-      throw new Error('User not authenticated via Telegram');
+      return {
+        ...payload,
+        user: {
+          id: 0,
+          first_name: 'Unauthenticated'
+        }
+      };
     }
     return {
       ...payload,
