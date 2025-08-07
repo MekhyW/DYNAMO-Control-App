@@ -53,6 +53,7 @@ export default function SoundControl() {
     soundEffects,
     playSoundEffect,
     setOutputVolume,
+    toggleBackgroundSound,
   } = useMQTT();
 
   useEffect(() => {
@@ -243,10 +244,13 @@ export default function SoundControl() {
                   <div
                     key={track.id}
                     className="flex justify-between items-center p-2 hover:bg-accent cursor-pointer"
-                    onClick={() => {
+                    onClick={async () => {
                       playTrack(track.uri);
                       playSound('major');
                       setShowSearchResults(false);
+                      if (isConnected) {
+                        await toggleBackgroundSound(false);
+                      }
                     }}
                   >
                     <div className="flex items-center gap-2">
@@ -296,8 +300,11 @@ export default function SoundControl() {
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={() => {
+                onClick={async () => {
                   playSound('major');
+                  if (!isPlaying && isConnected) {
+                    await toggleBackgroundSound(false);
+                  }
                   togglePlayback();
                 }}
               >
