@@ -221,27 +221,11 @@ export default function VoiceControl() {
               >
                 {isMuted ? (
                   <><MicOff className="h-5 w-5" /> 
-                    <DecryptedText 
-                      text="Microphone OFF"
-                      animateOn="view"
-                      sequential={true}
-                      speed={40}
-                      maxIterations={10}
-                      className="text-ui"
-                      encryptedClassName="text-ui opacity-60"
-                    />
+                    Microphone OFF
                   </>
                 ) : (
                   <><Mic className="h-5 w-5" /> 
-                    <DecryptedText 
-                      text="Microphone ON"
-                      animateOn="view"
-                      sequential={true}
-                      speed={40}
-                      maxIterations={10}
-                      className="text-ui"
-                      encryptedClassName="text-ui opacity-60"
-                    />
+                    Microphone ON
                   </>
                 )}
               </Button>
@@ -255,27 +239,11 @@ export default function VoiceControl() {
               >
                 {voiceChangerEnabled ? (
                   <><AudioWaveform className="h-5 w-5" /> 
-                    <DecryptedText 
-                      text="Voice Changer ON"
-                      animateOn="view"
-                      sequential={true}
-                      speed={40}
-                      maxIterations={10}
-                      className="text-ui"
-                      encryptedClassName="text-ui opacity-60"
-                    />
+                    Voice Changer ON
                   </>
                 ) : (
                   <><AudioLines className="h-5 w-5" /> 
-                    <DecryptedText 
-                      text="Voice Changer OFF"
-                      animateOn="view"
-                      sequential={true}
-                      speed={40}
-                      maxIterations={10}
-                      className="text-ui"
-                      encryptedClassName="text-ui opacity-60"
-                    />
+                    Voice Changer OFF
                   </>
                 )}
               </Button>
@@ -289,27 +257,11 @@ export default function VoiceControl() {
               >
                 {backgroundSoundEnabled ? (
                   <><Music className="h-5 w-5" /> 
-                    <DecryptedText 
-                      text="Background Sound ON"
-                      animateOn="view"
-                      sequential={true}
-                      speed={40}
-                      maxIterations={10}
-                      className="text-ui"
-                      encryptedClassName="text-ui opacity-60"
-                    />
+                    Background Sound ON
                   </>
                 ) : (
                   <><Music3 className="h-5 w-5" /> 
-                    <DecryptedText 
-                      text="Background Sound OFF"
-                      animateOn="view"
-                      sequential={true}
-                      speed={40}
-                      maxIterations={10}
-                      className="text-ui"
-                      encryptedClassName="text-ui opacity-60"
-                    />
+                    Background Sound OFF
                   </>
                 )}
               </Button>
