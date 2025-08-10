@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,26 +12,32 @@ const presets = [
   { id: 1, name: 'Coming soon...', description: 'Presets feature is still in development' },
 ];
 
+const navigationItems = [
+  { id: 'sound', name: 'Sound and Music', path: '/sound' },
+  { id: 'voice', name: 'Voice Effects', path: '/voice' },
+  { id: 'expression', name: 'Expressions', path: '/expression' },
+  { id: 'light', name: 'Lights Control', path: '/light' },
+  { id: 'ai', name: 'Assistant and TTS', path: '/ai' },
+];
+
+const socialItems = [
+  { id: 'instagram', name: '[TOP SECRET PHOTOS]', url: 'https://instagram.com/mekhy_w' },
+  { id: 'tiktok', name: '[TOP SECRET VIDEOS]', url: 'https://tiktok.com/@mekhy_w' },
+];
+
 export default function Home() {
   const [activePreset, setActivePreset] = useState(1);
-  const [macroSequence, setMacroSequence] = useState<number[]>([]);
+  const router = useRouter();
   const { playSound } = useSoundPlayer();
 
-  const handleKeypadPress = (digit: number) => {
-    playSound('minor');
-    setMacroSequence(prev => [...prev, digit]);
-  };
-
-  const clearSequence = () => {
-    playSound('minor');
-    setMacroSequence([]);
-  };
-
-  const processSequence = () => {
+  const handleNavigation = (path: string) => {
     playSound('major');
-    setMacroSequence([]);
-    console.log('Processing macro sequence:', macroSequence);
-    // Add your macro processing logic here
+    router.push(path);
+  };
+
+  const handleSocialLink = (url: string) => {
+    playSound('major');
+    window.open(url, '_blank');
   };
 
   return (
@@ -59,64 +66,6 @@ export default function Home() {
             encryptedClassName="text-muted-foreground opacity-50"
           />
         </p>
-      </div>
-
-      <div className="relative h-[60vh] min-h-[400px] max-h-[600px] mb-8 flex items-center justify-center">
-        <div className="w-full max-w-[320px] h-full bg-muted rounded-lg relative p-6 flex flex-col">
-          {/* Macro Input Display */}
-          <div className="mb-6 flex-shrink-0">
-            <div className="text-center mb-3">
-              <span className="text-sm text-muted-foreground">
-                <DecryptedText 
-                  text="Macro Sequence"
-                  animateOn="view"
-                  sequential={true}
-                  speed={40}
-                  maxIterations={8}
-                  className="text-muted-foreground"
-                  encryptedClassName="text-muted-foreground opacity-40"
-                />
-              </span>
-            </div>
-            <div className="bg-background rounded p-3 min-h-[48px] border flex items-center justify-center">
-              <span className="text-base font-mono">
-                {macroSequence.length > 0 ? macroSequence.join('') : (
-                  <DecryptedText 
-                    text="Enter sequence..."
-                    animateOn="view"
-                    sequential={true}
-                    speed={40}
-                    maxIterations={7}
-                    className="text-terminal"
-                    encryptedClassName="text-terminal opacity-50"
-                  />
-                )}
-              </span>
-            </div>
-          </div>
-
-          {/* Numerical Keypad */}
-          <div className="grid grid-cols-3 gap-3 mb-4 flex-1">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
-              <Button key={digit} variant="outline" className="aspect-square text-lg font-semibold h-full min-h-[60px]" onClick={() => handleKeypadPress(digit)}>
-                {digit}
-              </Button>
-            ))}
-          </div>
-
-          {/* Zero and Action Buttons */}
-          <div className="grid grid-cols-3 gap-3 flex-shrink-0">
-            <Button variant="outline" className="text-sm h-[60px]" onClick={clearSequence}>
-              Clear
-            </Button>
-            <Button variant="outline" className="aspect-square text-lg font-semibold h-[60px]" onClick={() => handleKeypadPress(0)}>
-              0
-            </Button>
-            <Button variant="default" className="text-sm h-[60px]" onClick={processSequence} disabled={macroSequence.length === 0}>
-              Run
-            </Button>
-          </div>
-        </div>
       </div>
 
       <Sheet>
@@ -191,6 +140,54 @@ export default function Home() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Navigation Menu */}
+      <div className="mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0.5 mb-8">
+          {navigationItems.map((item) => (
+            <Card 
+              key={item.id}
+              className="cursor-pointer transition-all hover:border-primary hover:shadow-md"
+              onClick={() => handleNavigation(item.path)}
+            >
+              <CardContent className="p-2">
+                <h3 className="font-semibold mb-1 text-center">
+                  <DecryptedText 
+                    text={item.name}
+                    animateOn="view"
+                    sequential={true}
+                    speed={40}
+                    maxIterations={8}
+                    className="text-ui"
+                    encryptedClassName="text-ui opacity-60"
+                  />
+                </h3>
+              </CardContent>
+            </Card>
+          ))}
+          {socialItems.map((item) => (
+            <Card 
+              key={item.id}
+              className="cursor-pointer transition-all hover:border-primary hover:shadow-md"
+              onClick={() => handleSocialLink(item.url)}
+            >
+              <CardContent className="p-2">
+                <h3 className="font-semibold mb-1 text-center">
+                  <DecryptedText 
+                    text={item.name}
+                    animateOn="view"
+                    sequential={true}
+                    speed={40}
+                    maxIterations={8}
+                    className="text-ui"
+                    encryptedClassName="text-ui opacity-60"
+                  />
+                </h3>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
