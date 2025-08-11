@@ -19,7 +19,9 @@ const navigation = [
 export default function Navigation() {
   const pathname = usePathname();
   const { playSound } = useSoundPlayer();
-
+  if (pathname === '/') {
+    return null;
+  }
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg">
       <div className="max-w-screen-xl mx-auto px-2">
