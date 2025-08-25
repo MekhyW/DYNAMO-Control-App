@@ -26,6 +26,7 @@ export default function SoundControl() {
   const { playSound } = useSoundPlayer();
   const [volume, setVolume] = useState(75);
   const [searchQuery, setSearchQuery] = useState('');
+  const [soundSearchQuery, setSoundSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const volumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isVolumeSliderActive, setIsVolumeSliderActive] = useState(false);
@@ -70,6 +71,11 @@ export default function SoundControl() {
   }, [soundEffects.length, shuffledSoundEffects.length]);
 
   const soundPresets = shuffledSoundEffects.length > 0 ? shuffledSoundEffects : [];
+  
+  // Filter sound effects based on search query
+  const filteredSoundEffects = soundPresets.filter(preset => 
+    preset.name.toLowerCase().includes(soundSearchQuery.toLowerCase())
+  );
   const handleVolumeChange = useCallback((newVolume: number) => {
     if (!isVolumeSliderActive) {
       playSound('minor');
@@ -355,8 +361,23 @@ export default function SoundControl() {
         </Card>
       </div>
 
+      {/* Sound Effects Search Bar */}
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search sound effects..."
+            value={soundSearchQuery}
+            onChange={(e) => setSoundSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
+      {/* Sound Effects Grid */}
       <div className="grid grid-cols-2 gap-1 mb-6">
-        {soundPresets.map((preset) => (
+        {filteredSoundEffects.map((preset) => (
           <Card 
             key={preset.id} 
             className="cursor-pointer hover:bg-accent"
@@ -378,6 +399,13 @@ export default function SoundControl() {
           </Card>
         ))}
       </div>
+
+      {/* Show message when no sound effects match search */}
+      {soundSearchQuery && filteredSoundEffects.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>No sound effects found matching "{soundSearchQuery}"</p>
+        </div>
+      )}
     </div>
   );
 }

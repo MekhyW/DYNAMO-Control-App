@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { Mic, MicOff, AudioWaveform, AudioLines, WifiOff, Music, Music3 } from 'lucide-react';
+import { Mic, MicOff, AudioWaveform, AudioLines, WifiOff, Music, Music3, Search } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useMQTT } from '@/hooks/useMQTT';
 import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
@@ -29,6 +30,7 @@ export default function VoiceControl() {
   const [activeTab, setActiveTab] = useState<'modulation' | 'gibberish'>('modulation');
   const [fetchedVoiceEffects, setFetchedVoiceEffects] = useState<any[]>([]);
   const [shuffledEffects, setShuffledEffects] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const {
     isConnected,
@@ -53,8 +55,14 @@ export default function VoiceControl() {
   }, [voiceEffects.length, shuffledEffects.length]);
 
   const effectsToUse = shuffledEffects.length > 0 ? shuffledEffects : [];
-  const voiceEffectsModulation = effectsToUse.filter(effect => effect.type === 'modulation');
-  const voiceEffectsGibberish = effectsToUse.filter(effect => effect.type === 'gibberish');
+  
+  // Filter effects based on search query
+  const filteredEffects = effectsToUse.filter(effect => 
+    effect.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  const voiceEffectsModulation = filteredEffects.filter(effect => effect.type === 'modulation');
+  const voiceEffectsGibberish = filteredEffects.filter(effect => effect.type === 'gibberish');
 
   const toggleEffect = async (effectId: number) => {
     playSound('major');
@@ -122,6 +130,18 @@ export default function VoiceControl() {
       )}
       
       <div className="mb-6">
+        {/* Search Bar */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search voice effects..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
         {/* Tab Buttons 
         <div className="flex gap-4 mb-6">
           <Button
@@ -208,6 +228,13 @@ export default function VoiceControl() {
             </Card>
           ))}
         </div>
+
+        {/* Show message when no effects match search */}
+        {searchQuery && (activeTab === 'modulation' ? voiceEffectsModulation : voiceEffectsGibberish).length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <p>No voice effects found matching "{searchQuery}"</p>
+          </div>
+        )}
 
         {/* Main Controls */}
         <Card className="fixed bottom-2 left-4 right-4 p-4 bg-background border-t max-w-screen-lg mx-auto mb-8">
