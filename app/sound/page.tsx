@@ -71,11 +71,8 @@ export default function SoundControl() {
   }, [soundEffects.length, shuffledSoundEffects.length]);
 
   const soundPresets = shuffledSoundEffects.length > 0 ? shuffledSoundEffects : [];
-  
-  // Filter sound effects based on search query
-  const filteredSoundEffects = soundPresets.filter(preset => 
-    preset.name.toLowerCase().includes(soundSearchQuery.toLowerCase())
-  );
+  const filteredSoundEffects = soundPresets.filter(preset => preset.name.toLowerCase().includes(soundSearchQuery.toLowerCase()));
+
   const handleVolumeChange = useCallback((newVolume: number) => {
     if (!isVolumeSliderActive) {
       playSound('minor');

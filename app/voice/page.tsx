@@ -55,11 +55,7 @@ export default function VoiceControl() {
   }, [voiceEffects.length, shuffledEffects.length]);
 
   const effectsToUse = shuffledEffects.length > 0 ? shuffledEffects : [];
-  
-  // Filter effects based on search query
-  const filteredEffects = effectsToUse.filter(effect => 
-    effect.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredEffects = effectsToUse.filter(effect => effect.name.toLowerCase().includes(searchQuery.toLowerCase()));
   
   const voiceEffectsModulation = filteredEffects.filter(effect => effect.type === 'modulation');
   const voiceEffectsGibberish = filteredEffects.filter(effect => effect.type === 'gibberish');
