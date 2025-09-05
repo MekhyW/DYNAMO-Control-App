@@ -25,7 +25,7 @@ export default function LightControl() {
   const { playSound } = useSoundPlayer();
   const [isOn, setIsOn] = useState(true);
   const [color, setColor] = useState("#ff0000");
-  const [mainBrightness, setMainBrightness] = useState(75);
+  const [mainBrightness, setMainBrightness] = useState(100);
   const [eyesBrightness, setEyesBrightness] = useState(100);
   const [activeEffect, setActiveEffect] = useState<number | null>(null);
   const colorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
