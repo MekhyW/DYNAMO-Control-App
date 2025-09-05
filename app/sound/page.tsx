@@ -281,7 +281,6 @@ export default function SoundControl() {
        )}
 
       {/* Spotify Playback Controls */}
-      {isSpotifyAvailable && (
         <Card className="mb-4">
         <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
@@ -341,7 +340,6 @@ export default function SoundControl() {
           </div>
         </CardContent>
       </Card>
-       )}
 
       {/* Stop Sounds Button */}
       <div className="mb-6">
