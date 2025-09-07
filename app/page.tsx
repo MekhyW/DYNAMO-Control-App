@@ -9,10 +9,6 @@ import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
 import { Music2, Mic2, Laugh, Lightbulb, Cookie, Settings, Images, Cctv } from 'lucide-react';
 
-const presets = [
-  { id: 1, name: 'Coming soon...', description: 'Presets feature is still in development' },
-];
-
 const navigationItems = [
   { id: 'sound', name: 'Sound and Music', path: '/sound' },
   { id: 'voice', name: 'Voice Effects', path: '/voice' },
@@ -28,7 +24,6 @@ const socialItems = [
 ];
 
 export default function Home() {
-  const [activePreset, setActivePreset] = useState(1);
   const router = useRouter();
   const { playSound } = useSoundPlayer();
 
@@ -125,79 +120,6 @@ export default function Home() {
           ))}
         </div>
       </div>
-
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button className="w-full mb-4">
-            <DecryptedText 
-              text="Select Preset Mode"
-              animateOn="view"
-              sequential={true}
-              speed={40}
-              maxIterations={10}
-              className="text-ui"
-              encryptedClassName="text-ui opacity-60"
-            />
-          </Button>
-        </SheetTrigger>
-        <SheetContent 
-          side="bottom" 
-          className="h-[50vh] sm:h-[60vh] max-h-[600px] overflow-y-auto"
-        >
-          <SheetHeader>
-            <SheetTitle>
-              <DecryptedText 
-                text="System Presets"
-                animateOn="view"
-                sequential={true}
-                speed={40}
-                maxIterations={10}
-                className="text-heading"
-                encryptedClassName="text-heading opacity-60"
-              />
-            </SheetTitle>
-          </SheetHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pb-8 sm:pb-12">
-            {presets.map((preset) => (
-              <Card 
-                key={preset.id}
-                className={`cursor-pointer transition-colors ${
-                  activePreset === preset.id ? 'border-primary' : ''
-                }`}
-                onClick={() => {
-                  playSound('major');
-                  setActivePreset(preset.id);
-                }}
-              >
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-1">
-                    <DecryptedText 
-                      text={preset.name}
-                      animateOn="view"
-                      sequential={true}
-                      speed={40}
-                      maxIterations={8}
-                      className="text-ui"
-                      encryptedClassName="text-ui opacity-60"
-                    />
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    <DecryptedText 
-                      text={preset.description}
-                      animateOn="view"
-                      sequential={true}
-                      speed={40}
-                      maxIterations={7}
-                      className="text-muted-foreground"
-                      encryptedClassName="text-muted-foreground opacity-40"
-                    />
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }
