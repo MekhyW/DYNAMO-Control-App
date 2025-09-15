@@ -205,6 +205,7 @@ class MQTTService {
           this.persistentData.bitmap = data.bitmap;
           break;
         case 'dynamo/data/chat_logs':
+          this.persistentData.chatLogs = data;
           break;
       }
       const callback = this.subscribers.get(topic);
