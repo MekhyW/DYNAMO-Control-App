@@ -12,6 +12,7 @@ The DYNAMO Control App now supports MQTT connectivity to communicate with your D
 - Bitmap data
 - AnyDesk ID
 - Sound device list
+- Spotify control commands
 
 ### Publish Commands (Send to DYNAMO):
 - Play sound effects
@@ -23,6 +24,7 @@ The DYNAMO Control App now supports MQTT connectivity to communicate with your D
 - Hotword detection control
 - Text-to-speech commands
 - System commands (shutdown, reboot, etc.)
+- Spotify music control (search, play, pause)
 
 ## HiveMQ Cloud Setup
 
@@ -63,6 +65,7 @@ The app uses the following topic structure:
 - `dynamo/data/bitmap` - Bitmap data
 - `dynamo/data/anydesk-id` - AnyDesk ID for remote access
 - `dynamo/data/sound-devices` - Available sound devices
+- `dynamo/spotify` - Spotify control commands (search, play, pause)
 
 ### Command Topics (Publish)
 - `dynamo/commands/play-sound-effect` - Play a sound effect
@@ -115,6 +118,21 @@ All messages are sent as JSON. Here are some examples:
 ### Toggle Commands (Sent)
 ```json
 {"enabled": true}
+```
+
+### Spotify Commands (Received)
+```json
+// Search and play a song
+{"action": "search_and_play", "query": "Bohemian Rhapsody Queen", "device_id": "optional_device_id"}
+
+// Play specific tracks by URI
+{"action": "play", "uris": ["spotify:track:4uLU6hMCjMI75M1A2tKUQC"], "device_id": "optional_device_id"}
+
+// Resume playback
+{"action": "play"}
+
+// Pause playback
+{"action": "pause"}
 ```
 
 ## DYNAMO System Integration

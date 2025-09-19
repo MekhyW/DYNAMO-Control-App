@@ -171,7 +171,8 @@ class MQTTService {
       'dynamo/data/anydesk_id',
       'dynamo/data/sound_devices',
       'dynamo/data/chat_logs',
-      'mekhy/app/lock'
+      'mekhy/app/lock',
+      'dynamo/spotify'
     ];
 
     dataTopics.forEach(topic => {
@@ -206,6 +207,9 @@ class MQTTService {
           break;
         case 'dynamo/data/chat_logs':
           this.persistentData.chatLogs = data;
+          break;
+        case 'dynamo/spotify':
+          this.handleSpotifyCommand(data);
           break;
       }
       const callback = this.subscribers.get(topic);
@@ -501,17 +505,14 @@ class MQTTService {
       console.error('MQTT client not initialized');
       throw new Error('MQTT client not initialized');
     }
-    
     if (!this.client.connected) {
       console.error('MQTT client not connected');
       throw new Error('MQTT client not connected');
     }
-
     const publishOptions = {
       qos: options.qos !== undefined ? options.qos : 1,
       retain: options.retain !== undefined ? options.retain : false
     };
-
     return new Promise((resolve, reject) => {
       const payloadStr = typeof payload === 'string' ? payload : JSON.stringify(payload);
       this.client!.publish(topic, payloadStr, { qos: publishOptions.qos as 0 | 1 | 2, retain: publishOptions.retain }, (err) => {
@@ -524,6 +525,80 @@ class MQTTService {
         }
       });
     });
+  }
+
+  private async handleSpotifyCommand(data: any) {
+    try {
+      const { action, query, uris, device_id } = data;
+      switch (action) {
+        case 'search_and_play':
+          if (query) {
+            await this.searchAndPlaySpotify(query, device_id);
+          }
+          break;
+        case 'play':
+          await this.playSpotify(uris, device_id);
+          break;
+        case 'pause':
+          await this.pauseSpotify();
+          break;
+        default:
+          console.warn(`Unknown Spotify action: ${action}`);
+      }
+    } catch (error) {
+      console.error('Error handling Spotify command:', error);
+    }
+  }
+
+  private async searchAndPlaySpotify(query: string, deviceId?: string) {
+    try {
+      const searchResponse = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`); // Search for tracks
+      if (!searchResponse.ok) { throw new Error(`Search failed: ${searchResponse.statusText}`); }
+      const searchData = await searchResponse.json();
+      if (searchData.tracks && searchData.tracks.items && searchData.tracks.items.length > 0) {
+        const firstTrack = searchData.tracks.items[0]; // Play the first track found
+        const playPayload: any = { uris: [firstTrack.uri] };
+        if (deviceId) { playPayload.device_id = deviceId; }
+        const playResponse = await fetch('/api/spotify/play', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(playPayload)
+        });
+        if (!playResponse.ok) { throw new Error(`Play failed: ${playResponse.statusText}`); }
+        console.log(`Successfully played track: ${firstTrack.name} by ${firstTrack.artists[0].name}`);
+      } else {
+        console.warn(`No tracks found for query: ${query}`);
+      }
+    } catch (error) {
+      console.error('Error in searchAndPlaySpotify:', error);
+    }
+  }
+
+  private async playSpotify(uris?: string[], deviceId?: string) {
+    try {
+      const playPayload: any = {};
+      if (uris && uris.length > 0) { playPayload.uris = uris; }
+      if (deviceId) { playPayload.device_id = deviceId; }
+      const response = await fetch('/api/spotify/play', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(playPayload)
+      });
+      if (!response.ok) { throw new Error(`Play failed: ${response.statusText}`); }
+      console.log('Successfully resumed/started Spotify playback');
+    } catch (error) {
+      console.error('Error in playSpotify:', error);
+    }
+  }
+
+  private async pauseSpotify() {
+    try {
+      const response = await fetch('/api/spotify/pause', {method: 'PUT'});
+      if (!response.ok) { throw new Error(`Pause failed: ${response.statusText}`); }
+      console.log('Successfully paused Spotify playback');
+    } catch (error) {
+      console.error('Error in pauseSpotify:', error);
+    }
   }
 
   disconnect() {
