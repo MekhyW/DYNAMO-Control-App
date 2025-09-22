@@ -53,11 +53,20 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      const maxSizeInBytes = 10 * 1024 * 1024;
+      if (file.size > maxSizeInBytes) {
+        setUploadStatus(`File size exceeds 10MB limit. Selected file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`);
+        setSelectedFile(null);
+        event.target.value = '';
+        return;
+      }
       if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
         setSelectedFile(file);
         setUploadStatus('');
       } else {
         setUploadStatus('Please select an image or video file.');
+        setSelectedFile(null);
+        event.target.value = '';
       }
     }
   };
