@@ -72,13 +72,13 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
         canvas.height = img.height;
         ctx?.drawImage(img, 0, 0);
         const stream = canvas.captureStream(1); // 1 FPS for static image
-        const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+        const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
         const chunks: Blob[] = [];
         mediaRecorder.ondataavailable = (event) => {
           if (event.data.size > 0) { chunks.push(event.data); }
         };
         mediaRecorder.onstop = () => {
-          const videoBlob = new Blob(chunks, { type: 'video/webm' });
+          const videoBlob = new Blob(chunks, { type: 'video/mp4' });
           resolve(videoBlob);
         };
         mediaRecorder.start();
@@ -90,13 +90,18 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
   };
 
   const generatePublicUrl = async (file: Blob, filename: string): Promise<string> => {
-    // Create a temporary URL for the file
-    // In a real implementation, you would upload to a cloud service
-    const url = URL.createObjectURL(file);
-    
-    // For demo purposes, we'll use the blob URL
-    // In production, you'd upload to AWS S3, Cloudinary, etc.
-    return url;
+    const formData = new FormData();
+    formData.append('file', file, filename);
+    const response = await fetch('/api/upload', {method: 'POST', body: formData});
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.statusText}`);
+    }
+    const result = await response.json();
+    if (result.success && result.url) {
+      return result.url;
+    } else {
+      throw new Error(result.error || 'Upload failed');
+    }
   };
 
   const handleUpload = async () => {
@@ -110,7 +115,7 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
       if (selectedFile.type.startsWith('image/')) {
         setUploadStatus('Converting image to video...');
         videoFile = await convertImageToVideo(selectedFile);
-        filename = `${selectedFile.name.split('.')[0]}_video.webm`;
+        filename = `${selectedFile.name.split('.')[0]}_video.mp4`;
       } else {
         videoFile = selectedFile;
         filename = selectedFile.name;
@@ -206,7 +211,7 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {selectedFile.type.startsWith('image/') ? 
-                      'Image will be converted to a 5-second video' : 
+                      'Image will be converted to video' : 
                       'Video ready for upload'
                     }
                   </p>
