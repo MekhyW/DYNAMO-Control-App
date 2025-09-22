@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from 'react';
-import { Eye, EyeOff, AlertTriangle, ScanFace, Rainbow } from 'lucide-react';
+import { Eye, EyeOff, AlertTriangle, ScanFace, Rainbow, Play, ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { useMQTT } from '@/hooks/useMQTT';
 import { DecryptedText } from '@/components/ui/decrypted-text';
-import { useSoundPlayer } from '@/components/SoundPlayer';
+import { useSoundPlayer, SoundType } from '@/components/SoundPlayer';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +18,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
 const expressionPresets = [
@@ -35,6 +38,214 @@ const expressionPresets = [
   { id: 11, name: 'SANS', preview: '/expr-sans.gif' },
 ];
 
+interface MediaUploadPageProps {
+  onBack: () => void;
+  mqtt: any;
+  playSound: (type: SoundType) => void;
+}
+
+function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string>('');
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+        setSelectedFile(file);
+        setUploadStatus('');
+      } else {
+        setUploadStatus('Please select an image or video file.');
+      }
+    }
+  };
+
+  const convertImageToVideo = async (imageFile: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx?.drawImage(img, 0, 0);
+        const stream = canvas.captureStream(1); // 1 FPS for static image
+        const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+        const chunks: Blob[] = [];
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) { chunks.push(event.data); }
+        };
+        mediaRecorder.onstop = () => {
+          const videoBlob = new Blob(chunks, { type: 'video/webm' });
+          resolve(videoBlob);
+        };
+        mediaRecorder.start();
+        setTimeout(() => {mediaRecorder.stop();}, 5000); // Stop recording after 5 seconds
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = URL.createObjectURL(imageFile);
+    });
+  };
+
+  const generatePublicUrl = async (file: Blob, filename: string): Promise<string> => {
+    // Create a temporary URL for the file
+    // In a real implementation, you would upload to a cloud service
+    const url = URL.createObjectURL(file);
+    
+    // For demo purposes, we'll use the blob URL
+    // In production, you'd upload to AWS S3, Cloudinary, etc.
+    return url;
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+    setIsUploading(true);
+    setUploadStatus('Processing file...');
+    playSound('major');
+    try {
+      let videoFile: Blob;
+      let filename: string;
+      if (selectedFile.type.startsWith('image/')) {
+        setUploadStatus('Converting image to video...');
+        videoFile = await convertImageToVideo(selectedFile);
+        filename = `${selectedFile.name.split('.')[0]}_video.webm`;
+      } else {
+        videoFile = selectedFile;
+        filename = selectedFile.name;
+      }
+      setUploadStatus('Generating public URL...');
+      const publicUrl = await generatePublicUrl(videoFile, filename);
+      setUploadStatus('Sending to device...');
+      await mqtt.sendEyesVideo(publicUrl);
+      setUploadStatus('Video sent successfully!');
+      setIsPlaying(true);
+      playSound('major');
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setUploadStatus('Upload failed. Please try again.');
+      playSound('minor');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleStopPlayback = async () => {
+    try {
+      await mqtt.sendEyesVideo('stop');
+      setIsPlaying(false);
+      setUploadStatus('Playback stopped.');
+      playSound('major');
+    } catch (error) {
+      console.error('Failed to stop playback:', error);
+      setUploadStatus('Failed to stop playback.');
+      playSound('minor');
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-5 h-screen flex flex-col">
+      <div className="flex flex-col h-full">
+        {/* Header with Back Button */}
+        <Card className="mb-6 flex-shrink-0">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => {
+                  playSound('minor');
+                  onBack();
+                }}
+                variant="outline"
+                size="sm"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+              <h1 className="text-xl font-semibold">
+                <DecryptedText 
+                  text="Play Image/Video" 
+                  animateOn="view" 
+                  speed={50} 
+                  maxIterations={7}
+                  className="text-xl font-semibold"
+                />
+              </h1>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Upload Section */}
+        <Card className="mb-6 flex-shrink-0">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="media-upload" className="text-base font-medium">
+                  <DecryptedText 
+                    text="Upload Image or Video" 
+                    animateOn="view" 
+                    speed={50} 
+                    maxIterations={7}
+                    className="text-base font-medium"
+                  />
+                </Label>
+                <Input
+                  id="media-upload"
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={handleFileSelect}
+                  className="mt-2"
+                  disabled={isUploading}
+                />
+              </div>
+              
+              {selectedFile && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm">
+                    <strong>Selected:</strong> {selectedFile.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedFile.type.startsWith('image/') ? 
+                      'Image will be converted to a 5-second video' : 
+                      'Video ready for upload'
+                    }
+                  </p>
+                </div>
+              )}
+              
+              {uploadStatus && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm">{uploadStatus}</p>
+                </div>
+              )}
+              
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleUpload}
+                  disabled={!selectedFile || isUploading}
+                  className="flex-1"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  {isUploading ? 'Processing...' : 'Upload & Play'}
+                </Button>
+                
+                <Button
+                  onClick={handleStopPlayback}
+                  disabled={!isPlaying}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  Stop Playback
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 export default function ExpressionControl() {
   const { playSound } = useSoundPlayer();
   const mqtt = useMQTT();
@@ -44,6 +255,7 @@ export default function ExpressionControl() {
   const [showMotorDialog, setShowMotorDialog] = useState(false);
   const [motorEnabled, setMotorEnabled] = useState(true);
   const [sillyMode, setSillyMode] = useState(false);
+  const [showMediaUpload, setShowMediaUpload] = useState(false);
 
   const toggleExprTracking = async () => {
     playSound('major');
@@ -117,6 +329,10 @@ export default function ExpressionControl() {
       console.error('Failed to toggle silly mode:', error);
     }
   };
+
+  if (showMediaUpload) {
+    return <MediaUploadPage onBack={() => setShowMediaUpload(false)} mqtt={mqtt} playSound={playSound} />;
+  }
 
   return (
     <div className="container mx-auto px-4 py-5 h-screen flex flex-col">
@@ -220,6 +436,29 @@ export default function ExpressionControl() {
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Play Image/Video Button */}
+        <Card className="mb-6 flex-shrink-0">
+          <CardContent className="p-4">
+            <Button
+              onClick={() => {
+                playSound('minor');
+                setShowMediaUpload(true);
+              }}
+              className="w-full h-12 text-lg font-medium"
+              variant="outline"
+            >
+              <Play className="h-5 w-5 mr-2" />
+              <DecryptedText 
+                text="Play Image/Video" 
+                animateOn="view" 
+                speed={50} 
+                maxIterations={7}
+                className="font-medium"
+              />
+            </Button>
           </CardContent>
         </Card>
 

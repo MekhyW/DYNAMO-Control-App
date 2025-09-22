@@ -44,6 +44,7 @@ interface MQTTActions {
   toggleEyebrows: (enabled: boolean) => Promise<void>;
   toggleExternalCommands: (locked: boolean) => Promise<void>;
   setSoundDevice: (deviceType: 'input' | 'output', deviceName: string) => Promise<void>;
+  sendEyesVideo: (videoUrl: string) => Promise<void>;
   shutdown: () => Promise<void>;
   reboot: () => Promise<void>;
   killSoftware: () => Promise<void>;
@@ -346,6 +347,13 @@ export function useMQTT(): MQTTState & MQTTActions {
     }
   }, []);
 
+  const sendEyesVideo = useCallback(async (videoUrl: string) => {
+    const service = getMQTTService();
+    if (service) {
+      await service.sendEyesVideo(videoUrl);
+    }
+  }, []);
+
   // Auto-connect on mount (only once)
   useEffect(() => {
     let mounted = true;
@@ -426,6 +434,7 @@ export function useMQTT(): MQTTState & MQTTActions {
     toggleEyebrows,
     toggleExternalCommands,
     setSoundDevice,
+    sendEyesVideo,
     shutdown,
     reboot,
     killSoftware,

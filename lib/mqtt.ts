@@ -450,6 +450,16 @@ class MQTTService {
     await this.publish('dynamo/commands/external-commands-lock', payload);
   }
 
+  async sendEyesVideo(videoUrl: string): Promise<void> {
+    const commandKey = `send_eyes_video_${videoUrl}`;
+    if (this.isCommandThrottled(commandKey)) {
+      console.log(`Command throttled: ${commandKey}`);
+      return;
+    }
+    const payload = this.addUserDataToPayload({ url: videoUrl });
+    await this.publish('dynamo/eyes-video', payload);
+  }
+
   async shutdown(): Promise<void> {
     const commandKey = 'shutdown';
     if (this.isCommandThrottled(commandKey)) {
