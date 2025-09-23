@@ -129,11 +129,11 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
         videoFile = selectedFile;
         filename = selectedFile.name;
       }
-      setUploadStatus('Generating public URL...');
+      setUploadStatus('Processing video...');
       const publicUrl = await generatePublicUrl(videoFile, filename);
-      setUploadStatus('Sending to device...');
+      setUploadStatus('Sending to fursuit...');
       await mqtt.sendEyesVideo(publicUrl);
-      setUploadStatus('Video sent successfully!');
+      setUploadStatus('Video sent to fursuit!');
       setIsPlaying(true);
       playSound('major');
     } catch (error) {
