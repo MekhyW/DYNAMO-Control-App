@@ -245,7 +245,6 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
                 
                 <Button
                   onClick={handleStopPlayback}
-                  disabled={!isPlaying}
                   variant="destructive"
                   className="flex-1"
                 >
