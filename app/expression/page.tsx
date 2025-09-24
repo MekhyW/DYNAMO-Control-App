@@ -52,9 +52,9 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const maxSizeInBytes = 50 * 1024 * 1024;
+      const maxSizeInBytes = 20 * 1024 * 1024;
       if (file.size > maxSizeInBytes) {
-        setUploadStatus(`File size exceeds 50MB limit. Selected file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`);
+        setUploadStatus(`File size exceeds 20MB limit. Selected file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`);
         setSelectedFile(null);
         event.target.value = '';
         playSound('minor');
@@ -116,17 +116,17 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
   };
 
   const generatePublicUrl = async (file: Blob, filename: string): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file, filename);
-    const response = await fetch('/api/upload', {method: 'POST', body: formData});
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`);
-    }
-    const result = await response.json();
-    if (result.success && result.url) {
-      return result.url;
-    } else {
-      throw new Error(result.error || 'Upload failed');
+    const { upload } = await import('@vercel/blob/client');
+    try {
+      const blob = await upload(filename, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+        clientPayload: JSON.stringify({fileName: filename, fileSize: file.size, fileType: file.type,}),
+      });
+      return blob.url;
+    } catch (error) {
+      console.error('Client-side upload failed:', error);
+      throw new Error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
