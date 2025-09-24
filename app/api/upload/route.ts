@@ -15,7 +15,7 @@ async function cleanupOldBlobs(): Promise<void> {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  await cleanupOldBlobs();
+  //await cleanupOldBlobs();
   const body = (await request.json()) as HandleUploadBody;
   try {
     const jsonResponse = await handleUpload({
