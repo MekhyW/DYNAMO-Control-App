@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
+import { put, list, del } from '@vercel/blob';
 
 function isVideoFile(filename: string): boolean {
   const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v', '.3gp', '.ogv'];
   const extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
   return videoExtensions.includes(extension);
+}
+
+async function cleanupOldBlobs(): Promise<void> {
+  try {
+    const { blobs } = await list();
+    for (const blob of blobs) { await del(blob.url); }
+  } catch (error) {
+    console.warn('Cleanup failed (non-critical):', error instanceof Error ? error.message : 'Unknown error');
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -16,6 +25,7 @@ export async function POST(request: NextRequest) {
     const maxFileSize = 50 * 1024 * 1024; // 50MB
     if (file.size > maxFileSize) { return NextResponse.json({ error: 'File too large', details: `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds maximum allowed size (50MB)` }, { status: 413 }); }
     console.log(`Uploading file: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+    await cleanupOldBlobs();
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
     const fileExtension = file.name.substring(file.name.lastIndexOf('.'));
