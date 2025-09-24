@@ -41,12 +41,14 @@ export async function POST(request: Request): Promise<NextResponse> {
       onBeforeGenerateToken: async (pathname, clientPayload) => {
         const timestamp = Date.now();
         const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const additionalRandom = Math.random().toString(36).substring(2, 6);
         const extension = pathname.split('.').pop();
-        const uniqueFilename = `${timestamp}-${randomSuffix}.${extension}`;
+        const uniqueFilename = `${timestamp}-${randomSuffix}-${additionalRandom}.${extension}`;
         currentUploadSession.add(uniqueFilename);
         return {
           allowedContentTypes: ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'],
           addRandomSuffix: false,
+          allowOverwrite: true,
           maximumSizeInBytes: 20 * 1024 * 1024, // 20MB
           tokenPayload: JSON.stringify({fileName: pathname, uniqueFileName: uniqueFilename, uploadedAt: new Date().toISOString()})
         };
