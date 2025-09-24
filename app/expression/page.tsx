@@ -49,25 +49,42 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>('');
   const [isPlaying, setIsPlaying] = useState(false);
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const maxSizeInBytes = 10 * 1024 * 1024;
+      const maxSizeInBytes = 50 * 1024 * 1024;
       if (file.size > maxSizeInBytes) {
-        setUploadStatus(`File size exceeds 10MB limit. Selected file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`);
+        setUploadStatus(`File size exceeds 50MB limit. Selected file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`);
         setSelectedFile(null);
         event.target.value = '';
+        playSound('minor');
         return;
       }
-      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-        setSelectedFile(file);
-        setUploadStatus('');
-      } else {
-        setUploadStatus('Please select an image or video file.');
+      const supportedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+      const supportedVideoTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/flv', 'video/webm', 'video/mkv', 'video/m4v', 'video/3gp', 'video/ogv'];
+      const isValidImage = supportedImageTypes.includes(file.type);
+      const isValidVideo = supportedVideoTypes.includes(file.type);
+      if (!isValidImage && !isValidVideo) {
+        setUploadStatus(`Unsupported file type: ${file.type}. Please select a supported image or video file.`);
         setSelectedFile(null);
         event.target.value = '';
+        playSound('minor');
+        return;
       }
+      if (isValidVideo) {
+        const fileName = file.name.toLowerCase();
+        const hasValidExtension = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v', '.3gp', '.ogv'].some(ext => fileName.endsWith(ext));
+        if (!hasValidExtension) {
+          setUploadStatus('Video file must have a valid extension (.mp4, .avi, .mov, etc.)');
+          setSelectedFile(null);
+          event.target.value = '';
+          playSound('minor');
+          return;
+        }
+      }
+      setSelectedFile(file);
+      setUploadStatus('');
+      playSound('major');
     }
   };
 
