@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
+import { NextResponse } from 'next/server';
 import { list, del } from '@vercel/blob';
 
 async function cleanupOldBlobs(): Promise<void> {
@@ -14,7 +14,7 @@ async function cleanupOldBlobs(): Promise<void> {
   }
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: Request): Promise<NextResponse> {
   await cleanupOldBlobs();
   const body = (await request.json()) as HandleUploadBody;
   try {
