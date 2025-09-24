@@ -5,7 +5,10 @@ import { list, del } from '@vercel/blob';
 async function cleanupOldBlobs(): Promise<void> {
   try {
     const { blobs } = await list();
-    for (const blob of blobs) { await del(blob.url); }
+    for (const blob of blobs) { 
+      await del(blob.url); 
+      console.log('Deleted blob:', blob.url);
+    }
   } catch (error) {
     console.warn('Cleanup failed (non-critical):', error instanceof Error ? error.message : 'Unknown error');
   }
@@ -41,9 +44,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(jsonResponse);
   } catch (error) {
     console.error('Upload error:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Upload failed' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Upload failed' }, { status: 400 });
   }
 }
