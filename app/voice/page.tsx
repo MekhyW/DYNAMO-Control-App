@@ -31,6 +31,8 @@ export default function VoiceControl() {
   const [fetchedVoiceEffects, setFetchedVoiceEffects] = useState<any[]>([]);
   const [shuffledEffects, setShuffledEffects] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [iconAvailableIds, setIconAvailableIds] = useState<Set<number>>(new Set());
+  const [isCheckingIcons, setIsCheckingIcons] = useState(false);
 
   const {
     isConnected,
@@ -49,6 +51,29 @@ export default function VoiceControl() {
   }, [voiceEffects]);
 
   useEffect(() => {
+    let cancelled = false;
+    setIsCheckingIcons(true);
+    const checkIcons = async () => {
+      const ids = new Set<number>();
+      const list = shuffledEffects.length > 0 ? shuffledEffects : [];
+      await Promise.all(
+        list.map(async (effect) => {
+          try {
+            const res = await fetch(`/voice_icons/${effect.name.toLowerCase()}.png`, { method: 'HEAD' });
+            if (res.ok) { ids.add(effect.id); }
+          } catch {} // ignore network errors
+        })
+      );
+      if (!cancelled) {
+        setIconAvailableIds(ids);
+        setIsCheckingIcons(false);
+      }
+    };
+    checkIcons();
+    return () => { cancelled = true; };
+  }, [shuffledEffects]);
+
+  useEffect(() => {
     if (voiceEffects.length === 0 && shuffledEffects.length === 0) {
       setShuffledEffects([]);
     }
@@ -56,9 +81,9 @@ export default function VoiceControl() {
 
   const effectsToUse = shuffledEffects.length > 0 ? shuffledEffects : [];
   const filteredEffects = effectsToUse.filter(effect => effect.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  
-  const voiceEffectsModulation = filteredEffects.filter(effect => effect.type === 'modulation');
-  const voiceEffectsGibberish = filteredEffects.filter(effect => effect.type === 'gibberish');
+  const filteredEffectsWithIcons = filteredEffects.filter(effect => iconAvailableIds.has(effect.id));
+  const voiceEffectsModulation = filteredEffectsWithIcons.filter(effect => effect.type === 'modulation');
+  const voiceEffectsGibberish = filteredEffectsWithIcons.filter(effect => effect.type === 'gibberish');
 
   const toggleEffect = async (effectId: number) => {
     playSound('major');
@@ -138,49 +163,13 @@ export default function VoiceControl() {
           />
         </div>
 
-        {/* Tab Buttons 
-        <div className="flex gap-4 mb-6">
-          <Button
-            variant={activeTab === 'modulation' ? 'default' : 'outline'}
-            onClick={() => {
-              playSound('minor');
-              setActiveTab('modulation');
-            }}
-            className="flex-1"
-          >
-            <DecryptedText 
-              text="Modulation Effects"
-              animateOn="view"
-              sequential={true}
-              speed={40}
-              maxIterations={7}
-              className="text-ui"
-              encryptedClassName="text-ui opacity-70"
-            />
-          </Button>
-          <Button
-            variant={activeTab === 'gibberish' ? 'default' : 'outline'}
-            onClick={() => {
-              playSound('minor');
-              setActiveTab('gibberish');
-            }}
-            className="flex-1"
-          >
-            <DecryptedText 
-              text="Gibberish Effects"
-              animateOn="view"
-              sequential={true}
-              speed={40}
-              maxIterations={7}
-              className="text-ui"
-              encryptedClassName="text-ui opacity-70"
-            />
-          </Button>
-        </div>
-        */}
-
         {/* Voice Effects Grid */}
-        <div className="grid grid-cols-3 gap-1 mb-24">
+        {isCheckingIcons ? (
+          <div className="text-center py-8 text-muted-foreground mb-24">
+            <p>Loading voice effects...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-1 mb-24">
           {(activeTab === 'modulation' ? voiceEffectsModulation : voiceEffectsGibberish).map((effect) => (
             <Card 
               key={effect.id} 
@@ -224,9 +213,10 @@ export default function VoiceControl() {
             </Card>
           ))}
         </div>
+        )}
 
         {/* Show message when no effects match search */}
-        {searchQuery && (activeTab === 'modulation' ? voiceEffectsModulation : voiceEffectsGibberish).length === 0 && (
+        {searchQuery && !isCheckingIcons && (activeTab === 'modulation' ? voiceEffectsModulation : voiceEffectsGibberish).length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <p>No voice effects found matching "{searchQuery}"</p>
           </div>
