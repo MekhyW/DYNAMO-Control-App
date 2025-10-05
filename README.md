@@ -9,6 +9,7 @@ Websocket-based control app for the DYNAMO project, which runs as a Telegram min
 - [@telegram-apps SDK](https://docs.telegram-mini-apps.com/packages/telegram-apps-sdk/2-x)
 - [Spotify Web Playback SDK](https://developer.spotify.com/documentation/web-playback-sdk)
 - [HiveMQ Cloud MQTT](https://www.hivemq.com/products/mqtt-cloud-broker/)
+- [Vercel Blob Storage](https://vercel.com/storage/blob)
 
 ## Install Dependencies
 
