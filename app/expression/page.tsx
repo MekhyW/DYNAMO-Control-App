@@ -52,9 +52,9 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const maxSizeInBytes = 20 * 1024 * 1024;
+      const maxSizeInBytes = 30 * 1024 * 1024;
       if (file.size > maxSizeInBytes) {
-        setUploadStatus(`File size exceeds 20MB limit. Selected file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`);
+        setUploadStatus(`File size exceeds 30MB limit. Selected file is ${(file.size / (1024 * 1024)).toFixed(2)}MB.`);
         setSelectedFile(null);
         event.target.value = '';
         playSound('minor');

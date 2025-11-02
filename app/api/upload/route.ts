@@ -49,7 +49,7 @@ export async function POST(request: Request): Promise<NextResponse> {
           allowedContentTypes: ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'],
           addRandomSuffix: false,
           allowOverwrite: true,
-          maximumSizeInBytes: 20 * 1024 * 1024, // 20MB
+          maximumSizeInBytes: 30 * 1024 * 1024, // 30MB
           tokenPayload: JSON.stringify({fileName: pathname, uniqueFileName: uniqueFilename, uploadedAt: new Date().toISOString()})
         };
       },
