@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { Eye, EyeOff, AlertTriangle, ScanFace, Rainbow, Play, ArrowLeft } from 'lucide-react';
+import { ScanFace, Sparkles, Play, ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -297,18 +297,7 @@ export default function ExpressionControl() {
     try {
       await mqtt.toggleFaceExpressionTracking(newState);
     } catch (error) {
-      console.error('Failed to toggle face expression tracking:', error);
-    }
-  };
-
-  const toggleEyeTracking = async () => {
-    playSound('major');
-    const newState = !isEyeTracking;
-    setIsEyeTracking(newState);
-    try {
-      await mqtt.toggleEyeTracking(newState);
-    } catch (error) {
-      console.error('Failed to toggle eye tracking:', error);
+      console.error('Failed to toggle automatic face expression:', error);
     }
   };
 
@@ -319,7 +308,7 @@ export default function ExpressionControl() {
       try {
         await mqtt.toggleFaceExpressionTracking(false);
       } catch (error) {
-        console.error('Failed to disable face expression tracking:', error);
+        console.error('Failed to disable automatic face expression:', error);
       }
     }
     
@@ -342,9 +331,9 @@ export default function ExpressionControl() {
     } else {
       setMotorEnabled(false);
       try {
-        await mqtt.toggleEyebrows(false);
+        await mqtt.toggleMotors(false);
       } catch (error) {
-        console.error('Failed to toggle eyebrows:', error);
+        console.error('Failed to toggle motors:', error);
       }
     }
   };
@@ -382,7 +371,7 @@ export default function ExpressionControl() {
                   )}
                   <span className="font-medium">
                     <DecryptedText 
-                      text="Face Expression Tracking" 
+                      text="Automatic Face Expression" 
                       animateOn="view" 
                       speed={50} 
                       maxIterations={7}
@@ -393,29 +382,6 @@ export default function ExpressionControl() {
                 <Switch
                   checked={isExprTracking}
                   onCheckedChange={toggleExprTracking}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  {isEyeTracking ? (
-                    <Eye className="h-5 w-5 text-primary" />
-                  ) : (
-                    <EyeOff className="h-5 w-5 text-muted-foreground" />
-                  )}
-                  <span className="font-medium">
-                    <DecryptedText 
-                      text="Eye Tracking" 
-                      animateOn="view" 
-                      speed={50} 
-                      maxIterations={7}
-                      className="font-medium"
-                    />
-                  </span>
-                </div>
-                <Switch
-                  checked={isEyeTracking}
-                  onCheckedChange={toggleEyeTracking}
                 />
               </div>
 
@@ -446,7 +412,7 @@ export default function ExpressionControl() {
               {/* Silly Mode */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <Rainbow className={cn(
+                  <Sparkles className={cn(
                     "h-5 w-5",
                     sillyMode ? "text-primary" : "text-muted-foreground"
                   )} />
@@ -547,7 +513,7 @@ export default function ExpressionControl() {
                 setMotorEnabled(true);
                 setShowMotorDialog(false);
                 try {
-                  await mqtt.toggleEyebrows(true);
+                  await mqtt.toggleMotors(true);
                 } catch (error) {
                   console.error('Failed to enable eyebrows:', error);
                 }
