@@ -430,14 +430,14 @@ class MQTTService {
     await this.publish('dynamo/commands/eye-tracking-toggle', payload);
   }
 
-  async toggleEyebrows(enabled: boolean): Promise<void> {
-    const commandKey = `toggle_eyebrows_${enabled}`;
+  async toggleMotors(enabled: boolean): Promise<void> {
+    const commandKey = `toggle_motors_${enabled}`;
     if (this.isCommandThrottled(commandKey)) {
       console.log(`Command throttled: ${commandKey}`);
       return;
     }
     const payload = this.addUserDataToPayload({ enabled });
-    await this.publish('dynamo/commands/eyebrows-toggle', payload);
+    await this.publish('dynamo/commands/motors-toggle', payload);
   }
 
   async toggleExternalCommands(locked: boolean): Promise<void> {

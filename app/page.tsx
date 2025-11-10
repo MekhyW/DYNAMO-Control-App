@@ -9,7 +9,7 @@ import { Music2, Mic2, Laugh, Lightbulb, Cookie, Settings, Images, Cctv } from '
 const navigationItems = [
   { id: 'sound', name: 'Sound and Music', path: '/sound' },
   { id: 'voice', name: 'Voice Effects', path: '/voice' },
-  { id: 'expression', name: 'Expressions', path: '/expression' },
+  { id: 'expression', name: 'Expressions and Eyes', path: '/expression' },
   { id: 'light', name: 'Lights Control', path: '/light' },
   { id: 'ai', name: 'Assistant and TTS', path: '/ai' },
   { id: 'admin', name: 'Administrator Tools', path: '/admin' },
