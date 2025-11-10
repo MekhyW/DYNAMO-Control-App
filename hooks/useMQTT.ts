@@ -40,7 +40,8 @@ interface MQTTActions {
   textToSpeech: (text: string) => Promise<void>;
   setExpression: (expression: string) => Promise<void>;
   toggleFaceExpressionTracking: (enabled: boolean) => Promise<void>;
-  toggleMotors: (enabled: boolean) => Promise<void>;
+  toggleEyeTracking: (enabled: boolean) => Promise<void>;
+  toggleEyebrows: (enabled: boolean) => Promise<void>;
   toggleExternalCommands: (locked: boolean) => Promise<void>;
   setSoundDevice: (deviceType: 'input' | 'output', deviceName: string) => Promise<void>;
   sendEyesVideo: (videoUrl: string) => Promise<void>;
@@ -297,10 +298,17 @@ export function useMQTT(): MQTTState & MQTTActions {
     }
   }, []);
 
-  const toggleMotors = useCallback(async (enabled: boolean) => {
+  const toggleEyeTracking = useCallback(async (enabled: boolean) => {
     const service = getMQTTService();
     if (service) {
-      await service.toggleMotors(enabled);
+      await service.toggleEyeTracking(enabled);
+    }
+  }, []);
+
+  const toggleEyebrows = useCallback(async (enabled: boolean) => {
+    const service = getMQTTService();
+    if (service) {
+      await service.toggleEyebrows(enabled);
     }
   }, []);
 
@@ -422,7 +430,8 @@ export function useMQTT(): MQTTState & MQTTActions {
     textToSpeech,
     setExpression,
     toggleFaceExpressionTracking,
-    toggleMotors,
+    toggleEyeTracking,
+    toggleEyebrows,
     toggleExternalCommands,
     setSoundDevice,
     sendEyesVideo,
