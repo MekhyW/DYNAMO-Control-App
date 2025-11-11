@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useSoundPlayer } from '@/components/SoundPlayer';
-import { Music2, Mic2, Laugh, Lightbulb, Cookie, Settings, Images, Cctv } from 'lucide-react';
+import { Volume2, Mic2, Laugh, Lightbulb, Cookie, Settings, History, Instagram, Music2 } from 'lucide-react';
 
 const navigationItems = [
   { id: 'sound', name: 'Sound and Music', path: '/sound' },
@@ -13,11 +13,12 @@ const navigationItems = [
   { id: 'light', name: 'Lights Control', path: '/light' },
   { id: 'ai', name: 'Assistant and TTS', path: '/ai' },
   { id: 'admin', name: 'Administrator Tools', path: '/admin' },
+  { id: 'changelog', name: 'Changelog', path: '/changelog' },
 ];
 
 const socialItems = [
-  { id: 'instagram', name: '[TOP SECRET PHOTOS]', url: 'https://instagram.com/mekhy_w' },
-  { id: 'tiktok', name: '[TOP SECRET VIDEOS]', url: 'https://tiktok.com/@mekhy_w' },
+  { id: 'instagram', name: '[TOP SECRET INSTAGRAM]', url: 'https://instagram.com/mekhy_w' },
+  { id: 'tiktok', name: '[TOP SECRET TIKTOK]', url: 'https://tiktok.com/@mekhy_w' },
 ];
 
 export default function Home() {
@@ -39,7 +40,7 @@ export default function Home() {
       <div className="text-center mb-8">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter mb-2">
           <DecryptedText 
-            text="M.E.K.H.Y v1.1" 
+            text="M.E.K.H.Y v1.2" 
             animateOn="view"
             sequential={true}
             revealDirection="center"
@@ -77,8 +78,9 @@ export default function Home() {
                   {item.id === 'ai' && (<Cookie className="w-6 h-6 mb-2 inline-block" />)}
                   {item.id === 'admin' && (<Settings className="w-6 h-6 mb-2 inline-block" />)}
                   {item.id === 'expression' && (<Laugh className="w-6 h-6 mb-2 inline-block" />)}
-                  {item.id === 'sound' && (<Music2 className="w-6 h-6 mb-2 inline-block" />)}
+                  {item.id === 'sound' && (<Volume2 className="w-6 h-6 mb-2 inline-block" />)}
                   {item.id === 'voice' && (<Mic2 className="w-6 h-6 mb-2 inline-block" />)}
+                  {item.id === 'changelog' && (<History className="w-6 h-6 mb-2 inline-block" />)}
                   <DecryptedText 
                     text={" " + item.name}
                     animateOn="view"
@@ -100,8 +102,8 @@ export default function Home() {
             >
               <CardContent className="p-2">
                 <h3 className="font-semibold mb-1 text-justify">
-                  {item.id === 'instagram' && (<Images className="w-6 h-6 mb-2 inline-block" />)}
-                  {item.id === 'tiktok' && (<Cctv className="w-6 h-6 mb-2 inline-block" />)}
+                  {item.id === 'instagram' && (<Instagram className="w-6 h-6 mb-2 inline-block" />)}
+                  {item.id === 'tiktok' && (<Music2 className="w-6 h-6 mb-2 inline-block" />)}
                   <DecryptedText 
                     text={" " + item.name}
                     animateOn="view"
