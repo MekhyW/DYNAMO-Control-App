@@ -79,6 +79,8 @@ export default function ChangelogPage() {
         <ul className="mt-4 list-disc space-y-2 pl-6">
           <li>⚙️ Any image or video can now be uploaded from the app and instantly played on the eyes, with sound</li>
           <li>⚙️ Eyes are now displayed in 60 frames per second (was 30)</li>
+          <li>⚙️ Real-time expression classification from speech, using my EmoTiny package</li>
+          <li>⚙️ More reliable eyes control and expression switching, using macro commands</li>
           <li>⚙️ New voice assistant. It is now faster and interruptible, has a better voice, can search the internet and can call functions to control the suit autonomously</li>
           <li>⚙️ QR code now goes straight to the app, no need to open the bot first</li>
           <li>⚙️ Fixed faulty HDMI cable</li>
