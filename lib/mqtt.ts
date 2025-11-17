@@ -186,19 +186,44 @@ class MQTTService {
     });
   }
 
-  private handleMessage(topic: string, message: Buffer) {
+  private async handleMessage(topic: string, message: Buffer) {
     try {
       const data = JSON.parse(message.toString());
+      let effectiveData = data;
       switch (topic) {
-        case 'dynamo/data/sound_effects':
-          this.persistentData.soundEffects = data;
+        case 'dynamo/data/sound_effects': {
+          if (Array.isArray(data) && data.length > 0) {
+            this.persistentData.soundEffects = data;
+            await this.saveListToDB('soundEffects', data);
+          } else {
+            const persisted = await this.fetchListFromDB('soundEffects');
+            this.persistentData.soundEffects = persisted;
+            effectiveData = persisted;
+          }
           break;
-        case 'dynamo/data/voice_effects':
-          this.persistentData.voiceEffects = data;
+        }
+        case 'dynamo/data/voice_effects': {
+          if (Array.isArray(data) && data.length > 0) {
+            this.persistentData.voiceEffects = data;
+            await this.saveListToDB('voiceEffects', data);
+          } else {
+            const persisted = await this.fetchListFromDB('voiceEffects');
+            this.persistentData.voiceEffects = persisted;
+            effectiveData = persisted;
+          }
           break;
-        case 'dynamo/data/sound_devices':
-          this.persistentData.soundDevices = data;
+        }
+        case 'dynamo/data/sound_devices': {
+          if (Array.isArray(data) && data.length > 0) {
+            this.persistentData.soundDevices = data;
+            await this.saveListToDB('soundDevices', data);
+          } else {
+            const persisted = await this.fetchListFromDB('soundDevices');
+            this.persistentData.soundDevices = persisted;
+            effectiveData = persisted;
+          }
           break;
+        }
         case 'dynamo/data/anydesk_id':
           this.persistentData.anydeskId = data.id;
           break;
@@ -214,7 +239,7 @@ class MQTTService {
       }
       const callback = this.subscribers.get(topic);
       if (callback) {
-        callback(data);
+        callback(effectiveData);
       }
     } catch (error) {
       console.error(`Error parsing message from ${topic}:`, error);
@@ -235,6 +260,36 @@ class MQTTService {
 
   setAuthenticatedUser(user: TelegramUser | null) {
     this.authenticatedUser = user;
+  }
+
+  private async saveListToDB(key: 'soundEffects' | 'voiceEffects' | 'soundDevices', value: any[]) {
+    try {
+      await fetch('/api/persistent', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value })
+      });
+    } catch (e) {
+      console.error('Failed to save persistent list:', e);
+    }
+  }
+
+  private async fetchListFromDB(key: 'soundEffects' | 'voiceEffects' | 'soundDevices'): Promise<any[]> {
+    try {
+      const res = await fetch(`/api/persistent?keys=${encodeURIComponent(key)}`);
+      if (!res.ok) {
+        return [];
+      }
+      const json = await res.json();
+      const value = json[key];
+      if (Array.isArray(value)) {
+        return value;
+      }
+      return [];
+    } catch (e) {
+      console.error('Failed to fetch persistent list:', e);
+      return [];
+    }
   }
 
   getAuthenticatedUser(): TelegramUser | null {
