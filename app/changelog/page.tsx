@@ -65,7 +65,7 @@ export default function ChangelogPage() {
           <li>⚙️ Reworked main app menu</li>
           <li>⚙️ Voices and sounds effects can now be searched by name</li>
           <li>⚙️ Voicemod V2 upgraded to V3</li>
-          <li>⚙️ New acrylic box cover</li>
+          <li>⚙️ New acrylic cover for component box</li>
           <li>⚙️ New emergency giroflex light</li>
           <li>⚙️ Location tracker (similar to Apple AirTag but Android compatible)</li>
         </ul>
@@ -86,7 +86,8 @@ export default function ChangelogPage() {
           <li>⚙️ Fixed faulty HDMI cable</li>
         </ul>
         <ul className="mt-4 list-disc space-y-2 pl-6">
-          <li>🐾 Better jaw hinges made of PETG (more resistant to vibration/shear) and multi-springs</li>
+          <li>🐾 Better jaw hinges made of PETG (more resistant to vibration/shear) and metal pin</li>
+          <li>🐾 Secondary belt for better fixation of component box</li>
         </ul>
         <div className="mt-4">
           <a href="#top" className="text-sm text-blue-600 hover:underline">Back to top</a>
