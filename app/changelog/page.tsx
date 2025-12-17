@@ -19,6 +19,9 @@ export default function ChangelogPage() {
           <li>
             <a href="#v1-2" className="rounded bg-blue-600 text-white px-2 py-1 hover:bg-black">V1.2</a>
           </li>
+          <li>
+            <a href="#v1-3" className="rounded bg-blue-600 text-white px-2 py-1 hover:bg-black">V1.3</a>
+          </li>
         </ul>
       </nav>
 
@@ -86,8 +89,23 @@ export default function ChangelogPage() {
           <li>⚙️ Fixed faulty HDMI cable</li>
         </ul>
         <ul className="mt-4 list-disc space-y-2 pl-6">
-          <li>🐾 Better jaw hinges made of PETG (more resistant to vibration/shear) and metal pin</li>
+          <li>🐾 Sturdier jaw hinges made of PETG (more resistant to vibration/shear) and metal pin</li>
           <li>🐾 Secondary belt for better fixation of component box</li>
+        </ul>
+        <div className="mt-4">
+          <a href="#top" className="text-sm text-blue-600 hover:underline">Back to top</a>
+        </div>
+      </section>
+
+      <section id="v1-3" className="mb-10">
+        <p className="text-2xl font-semibold">V1.3 - FURCAMP Legacy of the Corsairs</p>
+        <ul className="mt-4 list-disc space-y-2 pl-6">
+          <li>⚙️ New, more resistant PVC-based component box</li>
+          <li>⚙️ Internal debug display</li>
+          <li>⚙️ Bug fixes</li>
+        </ul>
+        <ul className="mt-4 list-disc space-y-2 pl-6">
+          <li>🐾 Better moving jaw with stronger springs</li>
         </ul>
         <div className="mt-4">
           <a href="#top" className="text-sm text-blue-600 hover:underline">Back to top</a>
