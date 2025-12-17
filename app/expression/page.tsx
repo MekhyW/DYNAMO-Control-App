@@ -27,7 +27,7 @@ const expressionPresets = [
   { id: 2, name: 'Happy', preview: '/expr-happy.gif' },
   { id: 4, name: 'Sad', preview: '/expr-sad.gif' },
   { id: 0, name: 'Angry', preview: '/expr-angry.gif' },
-  { id: 5, name: 'Surprised', preview: '/expr-surprised.gif' },  
+  { id: 5, name: 'Surprised', preview: '/expr-surprised.gif' },
   { id: 1, name: 'Disgusted', preview: '/expr-disgusted.gif' },
   { id: 12, name: 'Mischievous', preview: '/expr-mischievous.gif' },
   { id: 6, name: 'Hypnotic', preview: '/expr-hypnotic.gif' },
@@ -108,7 +108,7 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
           resolve(videoBlob);
         };
         mediaRecorder.start();
-        setTimeout(() => {mediaRecorder.stop();}, 5000); // Stop recording after 5 seconds
+        setTimeout(() => { mediaRecorder.stop(); }, 5000); // Stop recording after 5 seconds
       };
       img.onerror = () => reject(new Error('Failed to load image'));
       img.src = URL.createObjectURL(imageFile);
@@ -121,7 +121,7 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
       const blob = await upload(filename, file, {
         access: 'public',
         handleUploadUrl: '/api/upload',
-        clientPayload: JSON.stringify({fileName: filename, fileSize: file.size, fileType: file.type,}),
+        clientPayload: JSON.stringify({ fileName: filename, fileSize: file.size, fileType: file.type, }),
       });
       return blob.url;
     } catch (error) {
@@ -194,10 +194,10 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
                 Back
               </Button>
               <h1 className="text-xl font-semibold">
-                <DecryptedText 
-                  text="Play Image/Video" 
-                  animateOn="view" 
-                  speed={50} 
+                <DecryptedText
+                  text="Play Image/Video"
+                  animateOn="view"
+                  speed={50}
                   maxIterations={7}
                   className="text-xl font-semibold"
                 />
@@ -212,10 +212,10 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="media-upload" className="text-base font-medium">
-                  <DecryptedText 
-                    text="Upload Image or Video" 
-                    animateOn="view" 
-                    speed={50} 
+                  <DecryptedText
+                    text="Upload Image or Video"
+                    animateOn="view"
+                    speed={50}
                     maxIterations={7}
                     className="text-base font-medium"
                   />
@@ -229,27 +229,27 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
                   disabled={isUploading}
                 />
               </div>
-              
+
               {selectedFile && (
                 <div className="p-3 bg-muted rounded-lg">
                   <p className="text-sm">
                     <strong>Selected:</strong> {selectedFile.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {selectedFile.type.startsWith('image/') ? 
-                      'Image will be converted to video' : 
+                    {selectedFile.type.startsWith('image/') ?
+                      'Image will be converted to video' :
                       'Video ready for upload'
                     }
                   </p>
                 </div>
               )}
-              
+
               {uploadStatus && (
                 <div className="p-3 bg-muted rounded-lg">
                   <p className="text-sm">{uploadStatus}</p>
                 </div>
               )}
-              
+
               <div className="flex gap-3">
                 <Button
                   onClick={handleUpload}
@@ -259,7 +259,7 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
                   <Play className="h-4 w-4 mr-2" />
                   {isUploading ? 'Processing...' : 'Upload & Play'}
                 </Button>
-                
+
                 <Button
                   onClick={handleStopPlayback}
                   variant="destructive"
@@ -322,10 +322,10 @@ export default function ExpressionControl() {
         console.error('Failed to disable automatic face expression:', error);
       }
     }
-    
+
     const newActiveExpression = expressionId === activeExpression ? null : expressionId;
     setActiveExpression(newActiveExpression);
-    
+
     if (newActiveExpression !== null) {
       try {
         await mqtt.setExpression(expressionId.toString());
@@ -381,10 +381,10 @@ export default function ExpressionControl() {
                     <ScanFace className="h-5 w-5 text-muted-foreground" />
                   )}
                   <span className="font-medium">
-                    <DecryptedText 
-                      text="Automatic Face Expression" 
-                      animateOn="view" 
-                      speed={50} 
+                    <DecryptedText
+                      text="Automatic Face Expression"
+                      animateOn="view"
+                      speed={50}
                       maxIterations={7}
                       className="font-medium"
                     />
@@ -404,10 +404,10 @@ export default function ExpressionControl() {
                     <EyeOff className="h-5 w-5 text-muted-foreground" />
                   )}
                   <span className="font-medium">
-                    <DecryptedText 
-                      text="Automatic Eye Movement" 
-                      animateOn="view" 
-                      speed={50} 
+                    <DecryptedText
+                      text="Automatic Eye Movement"
+                      animateOn="view"
+                      speed={50}
                       maxIterations={7}
                       className="font-medium"
                     />
@@ -444,17 +444,17 @@ export default function ExpressionControl() {
               */}
 
               {/* Silly Mode */}
-              <div className="flex items-center justify-between">
+              <div className={cn("flex items-center justify-between", isEyeTracking && "opacity-50")}>
                 <div className="flex items-center gap-4">
                   <Sparkles className={cn(
                     "h-5 w-5",
                     sillyMode ? "text-primary" : "text-muted-foreground"
                   )} />
                   <span className="font-medium">
-                    <DecryptedText 
-                      text="Silly!!" 
-                      animateOn="view" 
-                      speed={50} 
+                    <DecryptedText
+                      text="Silly!!"
+                      animateOn="view"
+                      speed={50}
                       maxIterations={7}
                       className="font-medium"
                     />
@@ -463,6 +463,7 @@ export default function ExpressionControl() {
                 <Switch
                   checked={sillyMode}
                   onCheckedChange={toggleSillyMode}
+                  disabled={isEyeTracking}
                 />
               </div>
             </div>
@@ -481,10 +482,10 @@ export default function ExpressionControl() {
               variant="outline"
             >
               <Play className="h-5 w-5 mr-2" />
-              <DecryptedText 
-                text="Play Image/Video" 
-                animateOn="view" 
-                speed={50} 
+              <DecryptedText
+                text="Play Image/Video"
+                animateOn="view"
+                speed={50}
                 maxIterations={7}
                 className="font-medium"
               />
@@ -496,7 +497,7 @@ export default function ExpressionControl() {
         <div className="overflow-y-auto flex-1 pb-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {expressionPresets.map((expression) => (
-              <Card 
+              <Card
                 key={expression.id}
                 className={cn(
                   "cursor-pointer transition-all",
@@ -507,8 +508,8 @@ export default function ExpressionControl() {
                 <CardContent className="p-4">
                   <div className="flex flex-col items-center text-center gap-2">
                     <div className="w-16 h-16 mb-2 flex items-center justify-center">
-                      <img 
-                        src={expression.preview} 
+                      <img
+                        src={expression.preview}
                         alt={expression.name}
                         className="w-full h-full object-contain rounded"
                       />
@@ -527,10 +528,10 @@ export default function ExpressionControl() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              <DecryptedText 
-                text="Enable Motor Control?" 
-                animateOn="view" 
-                speed={50} 
+              <DecryptedText
+                text="Enable Motor Control?"
+                animateOn="view"
+                speed={50}
                 maxIterations={7}
               />
             </AlertDialogTitle>
