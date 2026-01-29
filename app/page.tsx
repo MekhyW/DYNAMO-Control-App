@@ -40,7 +40,7 @@ export default function Home() {
       <div className="text-center mb-8">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter mb-2">
           <DecryptedText 
-            text="M.E.K.H.Y v1.2" 
+            text="M.E.K.H.Y v1.3" 
             animateOn="view"
             sequential={true}
             revealDirection="center"

@@ -101,11 +101,12 @@ export default function ChangelogPage() {
         <p className="text-2xl font-semibold">V1.3 - FURCAMP Legacy of the Corsairs</p>
         <ul className="mt-4 list-disc space-y-2 pl-6">
           <li>⚙️ New, more resistant PVC-based component box</li>
-          <li>⚙️ Internal debug display</li>
+          <li>⚙️ Timer-based auto switch from manual to automatic expression</li>
           <li>⚙️ Bug fixes</li>
         </ul>
         <ul className="mt-4 list-disc space-y-2 pl-6">
-          <li>🐾 Better moving jaw with stronger springs</li>
+          <li>🐾 Better moving jaw sensitivity with stronger springs</li>
+          <li>🐾 Better mustache magnetic attachment</li>
         </ul>
         <div className="mt-4">
           <a href="#top" className="text-sm text-blue-600 hover:underline">Back to top</a>
