@@ -69,7 +69,7 @@ export default function ChangelogPage() {
           <li>⚙️ Voices and sounds effects can now be searched by name</li>
           <li>⚙️ Voicemod V2 upgraded to V3</li>
           <li>⚙️ New acrylic cover for component box</li>
-          <li>⚙️ New emergency giroflex light</li>
+          <li>⚙️ New emergency giroflex light accessory</li>
           <li>⚙️ Location tracker (similar to Apple AirTag but Android compatible)</li>
         </ul>
         <div className="mt-4">
@@ -102,6 +102,7 @@ export default function ChangelogPage() {
         <ul className="mt-4 list-disc space-y-2 pl-6">
           <li>⚙️ New, more resistant PVC-based component box</li>
           <li>⚙️ Timer-based auto switch from manual to automatic expression</li>
+          <li>⚙️ New sound effects, and shortened ones that were too long</li>
           <li>⚙️ Bug fixes</li>
         </ul>
         <ul className="mt-4 list-disc space-y-2 pl-6">
