@@ -107,7 +107,6 @@ export default function ChangelogPage() {
         </ul>
         <ul className="mt-4 list-disc space-y-2 pl-6">
           <li>🐾 Better moving jaw sensitivity with stronger springs</li>
-          <li>🐾 Better mustache magnetic attachment</li>
         </ul>
         <div className="mt-4">
           <a href="#top" className="text-sm text-blue-600 hover:underline">Back to top</a>
