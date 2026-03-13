@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getIronSession(cookies(), sessionOptions);
+    const session = await getIronSession(await cookies(), sessionOptions);
     const tokens = (session as any).spotifyTokens as SpotifyTokens | undefined;
 
     if (!tokens) {
