@@ -23,5 +23,5 @@ declare module 'iron-session' {
 }
 
 export async function getSession() {
-  return getIronSession(cookies(), sessionOptions);
+  return getIronSession(await cookies(), sessionOptions);
 }

@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const state = searchParams.get('state');
     const error = searchParams.get('error');
 
-    const session = await getIronSession(cookies(), sessionOptions);
+    const session = await getIronSession(await cookies(), sessionOptions);
 
     if (error || !state) {
       return NextResponse.redirect(new URL('/admin?error=state_mismatch', request.url));
