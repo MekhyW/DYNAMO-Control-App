@@ -86,7 +86,6 @@ export default function ChangelogPage() {
           <li>⚙️ More reliable eyes control and expression switching, using macro commands</li>
           <li>⚙️ New voice assistant. It is now faster and interruptible, has a better voice, can search the internet and can call functions to control the suit autonomously</li>
           <li>⚙️ QR code now goes straight to the app, no need to open the bot first</li>
-          <li>⚙️ Fixed faulty HDMI cable</li>
         </ul>
         <ul className="mt-4 list-disc space-y-2 pl-6">
           <li>🐾 Sturdier jaw hinges made of PETG (more resistant to vibration/shear) and metal pin</li>
