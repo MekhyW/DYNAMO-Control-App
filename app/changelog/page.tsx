@@ -22,6 +22,9 @@ export default function ChangelogPage() {
           <li>
             <a href="#v1-3" className="rounded bg-blue-600 text-white px-2 py-1 hover:bg-black">V1.3</a>
           </li>
+          <li>
+            <a href="#v1-4" className="rounded bg-blue-600 text-white px-2 py-1 hover:bg-black">V1.4</a>
+          </li>
         </ul>
       </nav>
 
@@ -106,6 +109,19 @@ export default function ChangelogPage() {
         </ul>
         <ul className="mt-4 list-disc space-y-2 pl-6">
           <li>🐾 Better moving jaw sensitivity with stronger springs</li>
+        </ul>
+        <div className="mt-4">
+          <a href="#top" className="text-sm text-blue-600 hover:underline">Back to top</a>
+        </div>
+      </section>
+
+      <section id="v1-4" className="mb-10">
+        <p className="text-2xl font-semibold">V1.4 - BFF Ain't No Time, Bro!</p>
+        <ul className="mt-4 list-disc space-y-2 pl-6">
+          <li>⚙️ Changed rechargeable P2 speaker to USB soundbar</li>
+        </ul>
+        <ul className="mt-4 list-disc space-y-2 pl-6">
+          <li>🐾 Beginning of V2 project</li>
         </ul>
         <div className="mt-4">
           <a href="#top" className="text-sm text-blue-600 hover:underline">Back to top</a>
