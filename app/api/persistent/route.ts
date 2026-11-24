@@ -1,48 +1,45 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@libsql/client'
+import { authorize } from '@/lib/server/authorize'
+import { isPersistentListKey, readList, writeList } from '@/lib/server/persistent-store'
 
-const client = createClient({
-  url: process.env.TURSO_DATABASE_URL || '',
-  authToken: process.env.TURSO_AUTH_TOKEN || ''
-})
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
-async function ensureSchema() {
-  await client.execute('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)')
-}
+// Device lists are now persisted by the server-side MQTT relay (/api/mqtt/stream).
+// This route remains for manual inspection/repair and is restricted to known keys.
 
 export async function GET(request: Request): Promise<NextResponse> {
+  const authz = await authorize(request)
+  if (!authz.ok) return authz.response
+
   const url = new URL(request.url)
   const keysParam = url.searchParams.get('keys')
-  const keys = keysParam ? keysParam.split(',').map(k => k.trim()).filter(Boolean) : []
-  await ensureSchema()
-  const result: Record<string, any> = {}
-  for (const key of keys) {
-    const res = await client.execute({ sql: 'SELECT value FROM settings WHERE key = ?', args: [key] })
-    const row = res.rows?.[0] as any
-    if (row && row.value != null) {
-      const v = typeof row.value === 'string' ? row.value : String(row.value)
-      try {
-        result[key] = JSON.parse(v)
-      } catch {
-        result[key] = v
-      }
-    } else {
-      result[key] = []
+  const keys = keysParam ? keysParam.split(',').map(k => k.trim()).filter(isPersistentListKey) : []
+  const result: Record<string, unknown> = {}
+  try {
+    for (const key of keys) {
+      result[key] = await readList(key)
     }
+  } catch (error) {
+    console.error('Persistent read failed:', error)
+    return NextResponse.json({ error: 'Storage unavailable' }, { status: 503 })
   }
   return NextResponse.json(result)
 }
 
 export async function PUT(request: Request): Promise<NextResponse> {
-  const body = await request.json() as { key: string, value: any }
-  if (!body || !body.key) {
+  const authz = await authorize(request, { ownerOnly: true })
+  if (!authz.ok) return authz.response
+
+  const body = await request.json().catch(() => null) as { key?: unknown, value?: unknown } | null
+  if (!body || !isPersistentListKey(body.key) || !Array.isArray(body.value)) {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
-  await ensureSchema()
-  const valueStr = JSON.stringify(body.value ?? null)
-  await client.execute({
-    sql: 'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
-    args: [body.key, valueStr]
-  })
+  try {
+    await writeList(body.key, body.value)
+  } catch (error) {
+    console.error('Persistent write failed:', error)
+    return NextResponse.json({ error: 'Storage unavailable' }, { status: 503 })
+  }
   return NextResponse.json({ ok: true })
 }

@@ -23,5 +23,14 @@ declare module 'iron-session' {
 }
 
 export async function getSession() {
-  return getIronSession(await cookies(), sessionOptions);
+  return getIronSession<SessionData>(await cookies(), sessionOptions);
+}
+export interface SessionData {
+  spotifyTokens?: {
+    accessToken: string;
+    refreshToken: string;
+    accessTokenExpires: number;
+  };
+  /** Single-use OAuth state for the Spotify login flow. */
+  state?: string;
 }

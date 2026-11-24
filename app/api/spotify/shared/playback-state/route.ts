@@ -1,10 +1,13 @@
 // app/api/spotify/shared/playback-state/route.ts
 import { setupSharedSpotifyApi } from '@/lib/shared-spotify';
+import { authorize } from '@/lib/server/authorize';
 import { spotifyApi } from '@/lib/spotify';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const authz = await authorize(request);
+  if (!authz.ok) return authz.response;
   try {
     // Set up Spotify API with shared tokens
     const hasAccess = await setupSharedSpotifyApi();

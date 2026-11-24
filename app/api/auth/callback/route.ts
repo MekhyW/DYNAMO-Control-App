@@ -1,19 +1,19 @@
 // app/api/auth/callback/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { getIronSession } from 'iron-session';
+import { timingSafeEqual } from 'crypto';
 import { spotifyApi } from '@/lib/spotify';
+import { getSession } from '@/lib/session';
 import { updateSharedTokens } from '@/lib/shared-spotify';
 
-const sessionOptions = {
-  password: process.env.SESSION_PASSWORD as string,
-  cookieName: 'spotify_owner_session',
-  cookieOptions: {
-    secure: process.env.NODE_ENV === 'production',
-  },
-};
-
 export const dynamic = 'force-dynamic';
+
+function statesMatch(expected: string | undefined, actual: string | null): boolean {
+  if (!expected || !actual) return false;
+  const a = Buffer.from(expected);
+  const b = Buffer.from(actual);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -21,15 +21,16 @@ export async function GET(request: NextRequest) {
     const state = searchParams.get('state');
     const error = searchParams.get('error');
 
-    const session = await getIronSession(await cookies(), sessionOptions);
+    const session = await getSession();
+    const expectedState = session.state;
+    session.state = undefined; // The state is single-use.
 
-    if (error || !state) {
+    if (error || !code || !statesMatch(expectedState, state)) {
+      await session.save();
       return NextResponse.redirect(new URL('/admin?error=state_mismatch', request.url));
     }
 
-    const data = await spotifyApi.authorizationCodeGrant(code as string);
-
-    // Store tokens in the session
+    const data = await spotifyApi.authorizationCodeGrant(code);
     const tokens = {
       accessToken: data.body.access_token,
       refreshToken: data.body.refresh_token,
@@ -37,16 +38,12 @@ export async function GET(request: NextRequest) {
     };
     (session as any).spotifyTokens = tokens;
     await session.save();
-    
-    // Update shared tokens for all users to use
-    updateSharedTokens(tokens);
+
+    updateSharedTokens(tokens); // Update shared tokens for all users to use
 
     return NextResponse.redirect(new URL('/admin?status=success', request.url));
   } catch (error) {
     console.error('Error during authentication:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.redirect(
-      new URL(`/admin?error=${encodeURIComponent(errorMessage)}`, request.url)
-    );
+    return NextResponse.redirect(new URL('/admin?error=authentication_failed', request.url));
   }
 }

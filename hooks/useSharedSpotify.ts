@@ -1,6 +1,7 @@
 // hooks/useSharedSpotify.ts
 import { useState, useEffect, useCallback } from 'react';
 import { SpotifyTrack, SpotifyPlaybackState } from '@/types/spotify';
+import { telegramAuthHeaders } from '@/lib/telegram-client';
 
 export function useSharedSpotify() {
   const [searchResults, setSearchResults] = useState<SpotifyTrack[]>([]);
@@ -18,8 +19,8 @@ export function useSharedSpotify() {
     }
 
     try {
-      const response = await fetch(`/api/spotify/shared/search?q=${encodeURIComponent(query)}`);
-      if (response.status === 503) {
+      const response = await fetch(`/api/spotify/shared/search?q=${encodeURIComponent(query)}`, { headers: telegramAuthHeaders() });
+      if (response.status === 503 || response.status === 401) {
         setIsSpotifyAvailable(false);
         setSearchResults([]);
         return;
@@ -36,7 +37,7 @@ export function useSharedSpotify() {
 
   const fetchDevices = useCallback(async () => {
     try {
-      const response = await fetch('/api/spotify/shared/devices');
+      const response = await fetch('/api/spotify/shared/devices', { headers: telegramAuthHeaders() });
       if (response.status === 503) {
         setIsSpotifyAvailable(false);
         setAvailableDevices([]);
@@ -60,7 +61,7 @@ export function useSharedSpotify() {
     try {
       const response = await fetch('/api/spotify/shared/transfer', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...telegramAuthHeaders() },
         body: JSON.stringify({ device_ids: [deviceId], play })
       });
       if (response.status === 503) {
@@ -83,7 +84,7 @@ export function useSharedSpotify() {
       }
       const response = await fetch('/api/spotify/shared/play', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...telegramAuthHeaders() },
         body: JSON.stringify({ uris: [trackUri] })
       });
       if (response.status === 503) {
@@ -106,7 +107,7 @@ export function useSharedSpotify() {
       const endpoint = isPlaying ? '/api/spotify/shared/pause' : '/api/spotify/shared/play';
       const response = await fetch(endpoint, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...telegramAuthHeaders() },
         body: JSON.stringify({})
       });
       if (response.status === 503) {
@@ -127,7 +128,7 @@ export function useSharedSpotify() {
       }
       const response = await fetch('/api/spotify/shared/queue', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...telegramAuthHeaders() },
         body: JSON.stringify({ uri: track.uri })
       });
       if (response.status === 503) {
@@ -143,8 +144,8 @@ export function useSharedSpotify() {
 
   const fetchPlaybackState = useCallback(async () => {
     try {
-      const response = await fetch('/api/spotify/shared/playback-state');
-      if (response.status === 503) {
+      const response = await fetch('/api/spotify/shared/playback-state', { headers: telegramAuthHeaders() });
+      if (response.status === 503 || response.status === 401) {
         setIsSpotifyAvailable(false);
         setIsPlaying(false);
         setCurrentTrack(null);
@@ -179,7 +180,7 @@ export function useSharedSpotify() {
       } else {
         const response = await fetch('/api/spotify/shared/next', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json', ...telegramAuthHeaders() }
         });
         if (response.status === 503) {
           setIsSpotifyAvailable(false);

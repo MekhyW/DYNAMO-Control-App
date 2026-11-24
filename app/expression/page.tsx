@@ -117,10 +117,12 @@ function MediaUploadPage({ onBack, mqtt, playSound }: MediaUploadPageProps) {
 
   const generatePublicUrl = async (file: Blob, filename: string): Promise<string> => {
     const { upload } = await import('@vercel/blob/client');
+    const { telegramAuthHeaders } = await import('@/lib/telegram-client');
     try {
       const blob = await upload(filename, file, {
         access: 'public',
         handleUploadUrl: '/api/upload',
+        headers: telegramAuthHeaders(),
         clientPayload: JSON.stringify({ fileName: filename, fileSize: file.size, fileType: file.type, }),
       });
       return blob.url;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { RefreshCcw, Power, LogOut, Lock, Unlock, Copy, CheckCheck } from 'lucide-react';
+import { RefreshCcw, Power, LogOut, Lock, Unlock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -11,6 +11,7 @@ import { DecryptedText } from '@/components/ui/decrypted-text';
 import { useMQTT } from '@/hooks/useMQTT';
 import { useTelegram } from '@/contexts/TelegramContext';
 import { useSoundPlayer } from '@/components/SoundPlayer';
+import { telegramAuthHeaders } from '@/lib/telegram-client';
 
 type SpotifyConnectionStatus = 'loading' | 'connected' | 'disconnected' | 'error';
 import {
@@ -41,8 +42,6 @@ function AdminPanelContent() {
   const [status, setSpotifyStatus] = useState<string>('');
   const [error, setSpotifyError] = useState<string>('');
   const [SpotifyConnectionStatus, setSpotifyConnectionStatus] = useState<SpotifyConnectionStatus>('loading');
-  const [anydeskKey] = useState('591283563');
-  const [keyCopied, setKeyCopied] = useState(false);
   const isDevicesLoaded = mqtt.isConnected && mqtt.soundDevices.length > 0;
   
   const searchParams = useSearchParams();
@@ -103,7 +102,7 @@ function AdminPanelContent() {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...telegramAuthHeaders() },
         body: JSON.stringify({ password }),
       });
       
@@ -139,22 +138,6 @@ function AdminPanelContent() {
     }
   };
 
-  const handleCopyAnydeskKey = async () => {
-    if (!isOwner) {
-      console.error('Only the owner can copy the AnyDesk key');
-      return;
-    }
-    
-    playSound('major');
-    try {
-      await navigator.clipboard.writeText(anydeskKey);
-      setKeyCopied(true);
-      setTimeout(() => setKeyCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy AnyDesk key:', err);
-    }
-  };
-
   const handleInputDeviceChange = async (deviceName: string) => {
     if (!isOwner) return;
     setSelectedInputDevice(deviceName);
@@ -181,72 +164,6 @@ function AdminPanelContent() {
     <div className="container mx-auto px-4 pb-20 pt-6">
       <div className="container mx-auto px-4 pb-20 pt-6">
         <div className="mb-6">
-
-          {/* AnyDesk Number */}
-          <Card className="mb-6">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                <DecryptedText 
-                  text="AnyDesk Remote Access" 
-                  animateOn="view" 
-                  speed={50} 
-                  maxIterations={7}
-                  className="text-sm font-medium"
-                />
-              </CardTitle>
-              {!isOwner && <Lock className="h-4 w-4 text-red-500" />}
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {!isOwner && (
-                <div className="p-3 rounded-md bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Lock className="h-4 w-4" />
-                    <span className="font-medium">Owner Access Required:</span>
-                    Only the owner can access remote connection details
-                  </div>
-                </div>
-              )}
-              {isOwner && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    <DecryptedText 
-                      text="AnyDesk ID" 
-                      animateOn="view" 
-                      speed={40} 
-                      maxIterations={7}
-                      className="text-sm font-medium text-muted-foreground"
-                    />
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 p-3 bg-muted rounded-md font-mono text-lg font-semibold tracking-wider">
-                      {anydeskKey}
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCopyAnydeskKey}
-                      className="flex items-center gap-2"
-                    >
-                      {keyCopied ? (
-                        <>
-                          <CheckCheck className="h-4 w-4" />
-                          Copied
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4" />
-                          Copy
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Use this ID to connect remotely via AnyDesk
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
           {/* MQTT Connection Status */}
           <Card className="mb-6">

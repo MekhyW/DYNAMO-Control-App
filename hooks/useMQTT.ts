@@ -16,7 +16,6 @@ interface MQTTState {
   soundEffects: SoundEffect[];
   voiceEffects: VoiceEffect[];
   soundDevices: string[];
-  anydeskId: string | null;
   bitmap: string | null;
   chatLogs: ChatLogMessage[];
 }
@@ -68,7 +67,6 @@ export function useMQTT(): MQTTState & MQTTActions {
         soundEffects: currentData.soundEffects,
         voiceEffects: currentData.voiceEffects,
         soundDevices: currentData.soundDevices,
-        anydeskId: currentData.anydeskId,
         bitmap: currentData.bitmap,
         chatLogs: [],
       };
@@ -78,7 +76,6 @@ export function useMQTT(): MQTTState & MQTTActions {
       soundEffects: [],
       voiceEffects: [],
       soundDevices: [],
-      anydeskId: null,
       bitmap: null,
       chatLogs: [],
     };
@@ -125,11 +122,6 @@ export function useMQTT(): MQTTState & MQTTActions {
       service.subscribe('dynamo/data/sound_devices', (data: string[]) => {
         console.log('Received sound devices data:', data);
         setState(prev => ({ ...prev, soundDevices: data }));
-      });
-
-      service.subscribe('dynamo/data/anydesk_id', (data: { id: string }) => {
-        console.log('Received anydesk ID data:', data);
-        setState(prev => ({ ...prev, anydeskId: data.id }));
       });
 
       service.subscribe('dynamo/data/bitmap', (data: { bitmap: string }) => {
@@ -354,19 +346,13 @@ export function useMQTT(): MQTTState & MQTTActions {
     }
   }, []);
 
-  // Auto-connect on mount (only once)
+  // Auto-connect on mount (only once). The service keeps the device stream
+  // alive and reconnects with backoff by itself, so this must not re-run on
+  // every isConnecting change (that caused a tight retry loop on failures).
   useEffect(() => {
-    let mounted = true;
-    const attemptConnection = async () => {
-      if (mounted && !isConnecting) {
-        await connect();
-      }
-    };
-    attemptConnection();
-    return () => {
-      mounted = false;
-    };
-  }, [connect, isConnecting]);
+    connect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Monitor connection status with debouncing
   useEffect(() => {
@@ -403,7 +389,6 @@ export function useMQTT(): MQTTState & MQTTActions {
         service.unsubscribe('dynamo/data/sound_effects');
         service.unsubscribe('dynamo/data/voice_effects');
         service.unsubscribe('dynamo/data/sound_devices');
-        service.unsubscribe('dynamo/data/anydesk_id');
         service.unsubscribe('dynamo/data/bitmap');
         service.unsubscribe('dynamo/data/chat_logs');
       }

@@ -1,8 +1,11 @@
 // app/api/spotify/shared/next/route.ts
 import { setupSharedSpotifyApi } from '@/lib/shared-spotify';
+import { authorize } from '@/lib/server/authorize';
 import { spotifyApi } from '@/lib/spotify';
 
-export async function POST() {
+export async function POST(request: Request) {
+  const authz = await authorize(request, { respectAppLock: true });
+  if (!authz.ok) return authz.response;
   try {
     // Set up Spotify API with shared tokens
     const hasAccess = await setupSharedSpotifyApi();

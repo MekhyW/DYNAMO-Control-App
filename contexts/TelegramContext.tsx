@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { retrieveLaunchParams } from '@telegram-apps/sdk';
 import { useMQTT } from '@/hooks/useMQTT';
+import { getInitDataRaw } from '@/lib/telegram-client';
 
 export interface TelegramUser {
   id: number;
@@ -47,8 +48,7 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
           }
           
           const launchParams = retrieveLaunchParams();
-          const { initDataRaw: rawData } = launchParams;
-          setInitDataRaw(rawData as string | null);
+          setInitDataRaw(getInitDataRaw());
           const initData = (launchParams as any)?.tgWebAppData;
           if (initData?.user) {
             const telegramUser = initData.user;
@@ -100,7 +100,7 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
     if (isOwner && isConnected && isInitialized) {
       const mqttService = require('@/lib/mqtt').getMQTTService();
       if (mqttService) {
-        mqttService.publish('mekhy/app/lock', JSON.stringify({ locked }), { qos: 0, retain: true })
+        mqttService.setAppLock(locked)
           .then(() => {
             console.log('Published app lock state to MQTT:', locked);
           })
